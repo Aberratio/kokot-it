@@ -104,7 +104,7 @@ for (const table of document.querySelectorAll<HTMLTableElement>('[data-contrast]
 
 // Spacing scale.
 const spaces = document.querySelector('[data-spaces]');
-for (let i = 1; i <= 9; i++) {
+for (let i = 1; i <= 10; i++) {
   const token = `--space-${String(i)}`;
   const row = el('div', 'bp-space');
   const bar = el('span', 'bp-space-bar');
