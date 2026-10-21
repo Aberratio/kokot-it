@@ -30,6 +30,8 @@ try {
   const page = await browser.newPage();
   for (const target of targets) {
     await page.goto(pathToFileURL(target.source).href, { waitUntil: 'networkidle' });
+    // Brand fonts load per unicode-range subset (latin-ext only when Polish text needs it).
+    await page.evaluate(() => document.fonts.ready);
     const path = join(outDir, target.output);
     await page.pdf({ path, format: 'A4', printBackground: true, preferCSSPageSize: true });
     console.log(`PDF: ${path}`);

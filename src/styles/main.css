@@ -1,11 +1,4 @@
-:root {
-  color-scheme: dark;
-  --bg: #07080b;
-  --fg: #e8eaf0;
-  --muted: #8a90a0;
-  --accent: #7cf3ff;
-  font-family: system-ui, sans-serif;
-}
+@import url('./tokens.css');
 
 *,
 *::before,
@@ -13,25 +6,91 @@
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-sans);
+  font-size: 100%;
+  line-height: var(--leading-normal);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-selection);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 var(--space-4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-heading);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+h2 {
+  font-size: var(--text-2xl);
+}
+
+h3 {
+  font-size: var(--text-xl);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  max-width: var(--measure);
 }
 
 a {
-  color: var(--accent);
+  color: var(--color-accent-2);
+  text-underline-offset: 0.2em;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--color-text);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
 }
 
 .skip-link {
   position: absolute;
   left: -9999px;
+  z-index: var(--z-overlay);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-sm);
 }
 
 .skip-link:focus {
-  left: 1rem;
-  top: 1rem;
+  left: var(--space-4);
+  top: var(--space-4);
 }
 
 .scene {
@@ -39,17 +98,34 @@ a {
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
+  z-index: var(--z-scene);
 }
 
 .site-header,
 main {
-  padding: 1.5rem;
-  max-width: 72rem;
+  padding: var(--space-5) var(--gutter);
+  max-width: var(--container);
   margin: 0 auto;
 }
 
 .site-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.site-logo {
+  display: inline-flex;
+}
+
+.site-logo img {
+  display: block;
+  height: 1.5rem;
+  width: auto;
+}
+
+@media print {
+  .scene {
+    display: none;
+  }
 }
