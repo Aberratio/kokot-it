@@ -378,7 +378,7 @@ export function fillShell(shell: string, route: Route): string {
   }
   const page = renderPage(route);
   return shell
-    .replace(/<html lang="[^"]*">/, `<html lang="${page.lang}">`)
+    .replace(/<html(?:\s[^>]*)?>/, `<html lang="${page.lang}">`)
     .replace(HEAD_MARKER, () => page.head)
     .replace(BODY_MARKER, () => page.body);
 }
