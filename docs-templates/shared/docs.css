@@ -1,25 +1,53 @@
-/* Shared print styles for documents rendered to PDF (A4). */
+/*
+ * Shared print styles for documents rendered to PDF (A4). Same tokens as the site
+ * (src/styles/tokens.css); the templates set <html data-theme="paper">, the light print
+ * theme: ink-friendly, readable on office printers and in greyscale. See brand.md.
+ */
+@import url('../../src/styles/tokens.css');
+
 @page {
   size: A4;
   margin: 18mm 16mm;
 }
 
-:root {
-  --fg: #0d0f14;
-  --muted: #5b6170;
-  --accent: #0a8fa0;
-  font-family: system-ui, sans-serif;
+html {
+  font-family: var(--font-sans);
   font-size: 10.5pt;
   line-height: 1.45;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 body {
   margin: 0;
-  color: var(--fg);
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .doc h1 {
   margin: 0 0 0.5em;
   font-size: 20pt;
-  color: var(--accent);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-snug);
+  color: var(--color-text);
+}
+
+.doc h2 {
+  margin: 1.4em 0 0.4em;
+  font-size: 13pt;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.doc a {
+  color: var(--color-accent-2);
+}
+
+.doc .label {
+  font-family: var(--font-mono);
+  font-size: 7.5pt;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-accent);
 }
