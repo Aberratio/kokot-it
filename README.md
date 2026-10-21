@@ -39,8 +39,8 @@ en/projects/<slug>/index.html  case study EN (/en/projects/<slug>/)
 src/main.ts                 wspólny punkt wejścia wszystkich stron
 src/content/                treść strony PL/EN (słowniki) i renderer do statycznego HTML
 src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
-src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback tekstowy)
-src/i18n/                   teksty interfejsu PL/EN i mapowanie ścieżek między językami
+src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback; katalog dodają T-10/11/13)
+src/i18n/                   teksty interfejsu PL/EN, ścieżki stron per język
 src/scene/                  scena Three.js (na razie zaślepka) i graf „Relay” (relay-graph.ts)
 src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
 src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
@@ -57,7 +57,7 @@ public/                     pliki statyczne kopiowane bez zmian (logo: public/br
 Strony to cienkie szkielety `index.html` ze znacznikami `<!-- kokot:head -->` i `<!-- kokot:body -->`;
 treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest czytelny bez JavaScriptu.
 Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
-oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test pilnuje kompletu).
+oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test sprawdza, że każda trasa ma szkielet; typy pilnują kompletu treści PL/EN).
 
 ## CI
 

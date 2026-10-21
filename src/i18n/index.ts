@@ -23,7 +23,7 @@ export function messages(locale: Locale): Messages {
 }
 
 /** Section segment for case studies per locale: `/projekty/<slug>/`, `/en/projects/<slug>/`. */
-const PROJECTS_SEGMENT: Record<Locale, string> = { pl: 'projekty', en: 'projects' };
+export const PROJECTS_SEGMENT: Record<Locale, string> = { pl: 'projekty', en: 'projects' };
 
 function localePrefix(locale: Locale): string {
   return locale === DEFAULT_LOCALE ? '' : `/${locale}`;
