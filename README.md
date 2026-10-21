@@ -37,10 +37,14 @@ en/index.html               strona EN (/en/)
 projekty/<slug>/index.html  case study PL (/projekty/<slug>/)
 en/projects/<slug>/index.html  case study EN (/en/projects/<slug>/)
 src/main.ts                 wspólny punkt wejścia wszystkich stron
-src/i18n/                   słowniki PL/EN i mapowanie ścieżek między językami
+src/content/                treść strony PL/EN (słowniki) i renderer do statycznego HTML
+src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
+src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback tekstowy)
+src/i18n/                   teksty interfejsu PL/EN i mapowanie ścieżek między językami
 src/scene/                  scena Three.js (na razie zaślepka) i graf „Relay” (relay-graph.ts)
 src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
 src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
+src/styles/content.css      układ sekcji treści, wyłącznie na tokenach z tokens.css
 src/assets/fonts/           fonty marki woff2 (OFL) + licencje
 brand/index.html            podgląd systemu marki (/brand/, noindex)
 brand.md                    zasady marki; docs/concept.md — koncept sceny 3D
@@ -50,7 +54,10 @@ scripts/pdf.ts              HTML → PDF (Playwright Chromium)
 public/                     pliki statyczne kopiowane bez zmian (logo: public/brand/)
 ```
 
-Nowa podstrona = nowy `index.html` w odpowiednim folderze; konfiguracja Vite jej nie wymienia.
+Strony to cienkie szkielety `index.html` ze znacznikami `<!-- kokot:head -->` i `<!-- kokot:body -->`;
+treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest czytelny bez JavaScriptu.
+Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
+oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test pilnuje kompletu).
 
 ## CI
 
