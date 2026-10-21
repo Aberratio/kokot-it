@@ -53,7 +53,13 @@ describe('checkDist', () => {
     ]);
   });
 
-  it('holds other pages to the contact rules only (type specimens show digits)', () => {
+  it('holds any unlisted page to the full content rules', () => {
+    buildAll();
+    write('/landing/', '<html><body><p>0123456789</p></body></html>');
+    expect(checkDist(dist).failures).toEqual(['landing/index.html: phone number or tax id']);
+  });
+
+  it('holds listed standalone pages to the contact rules only (type specimens show digits)', () => {
     buildAll();
     write('/brand/', '<html><body><p>0123456789 · zł</p></body></html>');
     expect(checkDist(dist).failures).toEqual([]);
