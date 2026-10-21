@@ -381,7 +381,7 @@ export function fillShell(shell: string, route: Route): string {
   return shell
     .replace(/<html(\s[^>]*)?>/, (_tag, attrs: string | undefined) => {
       // Set lang from the route; keep any other attribute the shell carries.
-      const rest = (attrs ?? '').replace(/\s+lang="[^"]*"/, '');
+      const rest = (attrs ?? '').replace(/\s+lang\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/i, '');
       return `<html lang="${page.lang}"${rest}>`;
     })
     .replace(HEAD_MARKER, () => page.head)

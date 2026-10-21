@@ -120,6 +120,8 @@ describe('routes and page shells', () => {
     const en = { locale: 'en', page: 'home' } as const;
     expect(fillShell(shell('<html lang="pl">'), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(fillShell(shell('<html>'), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
+    expect(fillShell(shell("<html lang='pl'>"), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
+    expect(fillShell(shell('<html lang=pl>'), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(fillShell(shell('<html lang="pl" class="x">'), en)).toMatch(
       /^<!doctype html>\n<html lang="en" class="x">/,
     );
@@ -186,11 +188,17 @@ describe('rendered pages', () => {
     for (const { route, html } of pages) {
       if (route.page !== 'project') continue;
       const repo = REPOS[route.slug];
+      const labels = content(route.locale).caseStudy;
       if (repo.public) {
         expect(html).toContain(`href="https://github.com/${repo.name}"`);
+        expect(html).toContain(`(${escapeHtml(labels.repoPublic)})`);
         expect(html).not.toContain('data-placeholder');
       } else {
-        expect(html).toContain('data-placeholder="repo-link"');
+        expect(html).toMatch(
+          new RegExp(
+            `<p class="repo repo--pending" data-placeholder="repo-link"><span class="repo__name">github\\.com/${repo.name}</span> \\(${labels.repoPending}\\)</p>`,
+          ),
+        );
         expect(html).not.toContain(`href="https://github.com/${repo.name}"`);
       }
     }
@@ -252,6 +260,14 @@ describe('required sections', () => {
       expect(caption).toContain(escapeHtml(c.caseStudy.demoNote));
     },
   );
+});
+
+describe('repository labels', () => {
+  // The agreed, deliberately marked placeholder (D-024): the repos are private until reviewed.
+  it('say the repositories will be made public', () => {
+    expect(pl.caseStudy.repoPending).toBe('repo zostanie upublicznione po przeglądzie');
+    expect(en.caseStudy.repoPending).toBe('the repository will be made public after review');
+  });
 });
 
 describe('grant wording', () => {
