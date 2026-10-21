@@ -13,6 +13,7 @@ import {
   routePath,
   type Route,
 } from './render.ts';
+import { contentViolations } from './guards.ts';
 import { CONTACT_EMAIL, PROJECT_SLUGS, REPOS } from './types.ts';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
@@ -131,7 +132,9 @@ describe('rendered pages', () => {
   it('puts the copy into static HTML, without needing JavaScript', () => {
     const home = pages.find((p) => p.route.page === 'home' && p.route.locale === 'pl');
     expect(home?.html).toContain(escapeHtml(pl.hero.title));
-    expect(home?.html).toContain('id="scene-root"');
+    expect(home?.html).toContain(
+      '<div id="scene-root" class="hero__scene" aria-hidden="true"></div>',
+    );
     for (const slug of PROJECT_SLUGS) expect(home?.html).toContain(`href="/projekty/${slug}/"`);
     const enHome = pages.find((p) => p.route.page === 'home' && p.route.locale === 'en');
     for (const slug of PROJECT_SLUGS)
@@ -163,28 +166,38 @@ describe('rendered pages', () => {
 });
 
 describe('content guards', () => {
-  const all = pages.map((p) => p.html).join('\n');
-  const text = all.replace(/<[^>]+>/g, ' ');
-
-  it('has no phone numbers, tax ids or company registry data', () => {
-    expect(all).not.toMatch(/tel:/i);
-    expect(text).not.toMatch(/(?:\+\d{2}[\s-]?)?\b\d{3}[\s-]?\d{3}[\s-]?\d{3}\b/);
-    expect(text).not.toMatch(/\b(?:NIP|REGON|KRS|VAT ID)\b/i);
-    expect(text).not.toMatch(/\b\d{3}-?\d{3}-?\d{2}-?\d{2}\b/);
-    expect(text).not.toMatch(/\b\d{10}\b/);
+  it.each(pages)('$route.locale $route.page breaks no content rule', ({ html }) => {
+    expect(contentViolations(html)).toEqual([]);
+    expect(new Set(html.match(/mailto:[^"]+/g))).toEqual(new Set([`mailto:${CONTACT_EMAIL}`]));
   });
 
-  it('offers e-mail as the only contact', () => {
-    const mailtos = new Set(all.match(/mailto:[^"]+/g));
-    expect([...mailtos]).toEqual([`mailto:${CONTACT_EMAIL}`]);
+  it('catches phone numbers, tax ids, prices, other e-mails and buzzwords', () => {
+    const page = (body: string): string => `<html><body><p>${body}</p></body></html>`;
+    expect(contentViolations(page('tel. +48 600 123 456'))).toContain('phone number');
+    expect(contentViolations(page('NIP 123-456-78-90'))).toContain('company registry id');
+    expect(contentViolations(page('1234567890'))).toContain('10-digit number');
+    expect(contentViolations(page('od 10 000 zł netto'))).toContain('price');
+    expect(contentViolations(page('przed złożeniem wniosku'))).toEqual([]);
+    expect(contentViolations('<a href="mailto:x@example.com">x</a>')).toContain(
+      'unexpected e-mail',
+    );
+    expect(contentViolations('<a href="tel:600123456">call</a>')).toContain('tel: link');
+    expect(contentViolations(page('rewolucja AI'))).toContain('buzzword or leftover placeholder');
   });
 
-  it('shows no package prices', () => {
-    // Unicode-aware boundaries: `\b` treats `ł` as a non-word character.
-    expect(text).not.toMatch(/(?<!\p{L})(?:zł|PLN|EUR|USD)(?!\p{L})|€|\$\s?\d/u);
+  it('keeps anchor ids URL-safe', () => {
+    for (const c of [pl, en]) {
+      for (const id of Object.values(c.anchors)) expect(id).toMatch(/^[a-z][a-z0-9-]*$/);
+    }
   });
 
-  it('avoids empty AI buzzwords and leftover placeholders', () => {
-    expect(text).not.toMatch(/rewolucj|magi[aić]|magic|revolution|game.?chang|lorem|TODO|TBD/i);
+  it('always states under a case-study demo that it is recorded and makes no API calls', () => {
+    for (const { route, html } of pages) {
+      if (route.page !== 'project') continue;
+      const note = escapeHtml(
+        route.locale === 'pl' ? pl.caseStudy.demoNote : en.caseStudy.demoNote,
+      );
+      expect(html).toMatch(new RegExp(`<figcaption>[^]*${note}[^]*</figcaption>`));
+    }
   });
 });
