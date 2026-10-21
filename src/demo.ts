@@ -17,39 +17,60 @@ export function createDemoFrame(doc: Document, src: string, title: string): HTML
   return frame;
 }
 
-async function embed(figure: HTMLElement): Promise<void> {
+export type HeadFetch = (
+  url: string,
+  init: { method: 'HEAD' },
+) => Promise<Pick<Response, 'status' | 'headers'>>;
+
+/** Swaps the figure's text fallback for the demo iframe, if the demo is published. */
+export async function embedDemo(
+  figure: HTMLElement,
+  headFetch: HeadFetch = fetch,
+): Promise<boolean> {
   const src = figure.dataset['demoSrc'];
   const slot = figure.querySelector<HTMLElement>('[data-demo-slot]');
-  if (!src || !slot) return;
+  if (!src || !slot) return false;
   try {
-    const res = await fetch(src, { method: 'HEAD' });
-    if (!isDemoAvailable(res.status, res.headers.get('content-type'))) return;
+    const res = await headFetch(src, { method: 'HEAD' });
+    if (!isDemoAvailable(res.status, res.headers.get('content-type'))) return false;
   } catch {
-    return; // offline or blocked: keep the text fallback
+    return false; // offline or blocked: keep the text fallback
   }
-  const frame = createDemoFrame(figure.ownerDocument, src, figure.dataset['demoTitle'] ?? '');
-  slot.replaceChildren(frame);
+  slot.replaceChildren(
+    createDemoFrame(figure.ownerDocument, src, figure.dataset['demoTitle'] ?? ''),
+  );
   figure.classList.add('demo--live');
+  return true;
 }
 
-export function mountDemos(root: ParentNode): void {
+export interface DemoEnv {
+  headFetch?: HeadFetch;
+  /** Absent in old browsers: every demo is then checked right away. */
+  Observer?: typeof IntersectionObserver | undefined;
+}
+
+export function mountDemos(
+  root: ParentNode,
+  env: DemoEnv = { Observer: globalThis.IntersectionObserver },
+): void {
   const figures = [...root.querySelectorAll<HTMLElement>('[data-demo-src]')];
   if (figures.length === 0) return;
-  if (!('IntersectionObserver' in window)) {
-    figures.forEach((f) => void embed(f));
+  const embed = (figure: HTMLElement): void => void embedDemo(figure, env.headFetch);
+  if (!env.Observer) {
+    figures.forEach(embed);
     return;
   }
-  const observer = new IntersectionObserver(
+  const observer = new env.Observer(
     (entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         observer.unobserve(entry.target);
-        void embed(entry.target as HTMLElement);
+        embed(entry.target as HTMLElement);
       }
     },
     { rootMargin: '200px' },
   );
-  figures.forEach((f) => {
-    observer.observe(f);
+  figures.forEach((figure) => {
+    observer.observe(figure);
   });
 }
