@@ -155,7 +155,8 @@ function renderHeader(route: Route): string {
   return [
     `<a class="skip-link" href="#content">${e(t.skipToContent)}</a>`,
     `<header class="site-header">`,
-    `<a class="site-header__brand" href="${e(home)}">kokot.it</a>`,
+    // Logo from the brand system (T-03, public/brand/); the alt text keeps the name readable.
+    `<a class="site-logo" href="${e(home)}"><img src="/brand/logo.svg" alt="kokot.it" width="91" height="24" /></a>`,
     `<nav class="site-nav" aria-label="${e(c.nav.label)}"><ul>`,
     anchor('services'),
     anchor('process'),
@@ -378,7 +379,11 @@ export function fillShell(shell: string, route: Route): string {
   }
   const page = renderPage(route);
   return shell
-    .replace(/<html(?:\s[^>]*)?>/, `<html lang="${page.lang}">`)
+    .replace(/<html(\s[^>]*)?>/, (_tag, attrs: string | undefined) => {
+      // Set lang from the route; keep any other attribute the shell carries.
+      const rest = (attrs ?? '').replace(/\s+lang="[^"]*"/, '');
+      return `<html lang="${page.lang}"${rest}>`;
+    })
     .replace(HEAD_MARKER, () => page.head)
     .replace(BODY_MARKER, () => page.body);
 }
