@@ -17,7 +17,7 @@ npm run dev        # http://localhost:5173/ (PL), /en/ (EN)
 | Skrypt                 | Co robi                                                                                |
 | ---------------------- | -------------------------------------------------------------------------------------- |
 | `npm run dev`          | serwer deweloperski Vite                                                               |
-| `npm run build`        | build produkcyjny do `dist/`                                                           |
+| `npm run build`        | build do `dist/` + strażnik treści (`scripts/check-dist.ts`)                           |
 | `npm run preview`      | podgląd zbudowanego `dist/`                                                            |
 | `npm run typecheck`    | `tsc --noEmit`                                                                         |
 | `npm run lint`         | ESLint + `prettier --check`                                                            |
