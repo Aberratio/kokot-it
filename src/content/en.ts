@@ -44,13 +44,13 @@ export const en: SiteContent = {
           code: 'P1',
           title: 'AI assessment and implementation plan',
           summary:
-            'For a company that wants to adopt AI but does not yet know which process to start with or how to describe the order.',
+            'For a company that wants to adopt AI but does not yet know which process to start with or how to describe what it wants to buy.',
           points: [
             'on-site workshop and a review of 3–5 processes: documents, quality, planning, maintenance',
             'review of systems (ERP, MES, spreadsheets, e-mail) and of data availability',
             '2–3 use cases with measures of benefit',
             'target architecture and an AI Act and GDPR risk review',
-            'a vendor-neutral description of the order, which the company can send to several contractors for quotes',
+            'a vendor-neutral description of what is to be bought, which the company can send to several contractors for quotes',
           ],
         },
         {
