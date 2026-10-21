@@ -7,12 +7,13 @@ import {
   parseDuration,
   readSceneTokens,
   resolvingReader,
+  themeReaders,
 } from './tokens.ts';
 
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
 const base = parseCustomProperties(css, ':root');
 const paper = parseCustomProperties(css, "[data-theme='paper']");
-const themes = { dark: resolvingReader(base), paper: resolvingReader(base, paper) };
+const themes = themeReaders(css);
 
 describe('parseCustomProperties', () => {
   it('reads only the exact top-level selector, not @media overrides', () => {

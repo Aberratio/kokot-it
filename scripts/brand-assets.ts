@@ -5,14 +5,13 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { parseCustomProperties, resolvingReader } from '../src/styles/tokens.ts';
+import { themeReaders } from '../src/styles/tokens.ts';
 import { markGeometry, wordmarkGeometry, type Geometry } from './brand-geometry.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const css = readFileSync(join(root, 'src', 'styles', 'tokens.css'), 'utf8');
-const base = parseCustomProperties(css, ':root');
-const dark = resolvingReader(base);
-const paper = resolvingReader(base, parseCustomProperties(css, "[data-theme='paper']"));
+const { dark, paper } = themeReaders(css);
+const TITLE = 'kokot.it';
 
 interface Colours {
   readonly line: string;
@@ -37,7 +36,7 @@ function body(g: Geometry, c: Colours): string {
   );
 }
 
-function svg(g: Geometry, c: Colours, title: string, background?: string): string {
+function svg(g: Geometry, c: Colours, background?: string, title = TITLE): string {
   const [x, y, w, h] = g.viewBox;
   const bg = background
     ? `<rect x="${String(x)}" y="${String(y)}" width="${String(w)}" height="${String(h)}" rx="${String(g.tileRadius)}" fill="${background}"/>`
@@ -55,14 +54,15 @@ mkdirSync(brandDir, { recursive: true });
 const word = wordmarkGeometry();
 const mark = markGeometry();
 const tile = markGeometry({ tile: true });
+const touchTile = svg(markGeometry({ tile: true, square: true }), onDark, dark('--color-bg'));
 const files: Record<string, string> = {
-  'brand/logo.svg': svg(word, onDark, 'kokot.it'),
-  'brand/logo-on-light.svg': svg(word, onLight, 'kokot.it'),
-  'brand/logo-mono.svg': svg(word, mono, 'kokot.it'),
-  'brand/mark.svg': svg(mark, onDark, 'kokot.it'),
-  'brand/mark-on-light.svg': svg(mark, onLight, 'kokot.it'),
-  'brand/mark-mono.svg': svg(mark, mono, 'kokot.it'),
-  'favicon.svg': svg(tile, onDark, 'kokot.it', dark('--color-bg')),
+  'brand/logo.svg': svg(word, onDark),
+  'brand/logo-on-light.svg': svg(word, onLight),
+  'brand/logo-mono.svg': svg(word, mono),
+  'brand/mark.svg': svg(mark, onDark),
+  'brand/mark-on-light.svg': svg(mark, onLight),
+  'brand/mark-mono.svg': svg(mark, mono),
+  'favicon.svg': svg(tile, onDark, dark('--color-bg')),
 };
 for (const [path, content] of Object.entries(files)) {
   writeFileSync(join(root, 'public', path), content);
@@ -76,15 +76,24 @@ const pngs = [
   {
     path: 'apple-touch-icon.png',
     size: 180,
-    svg: svg(markGeometry({ tile: true, square: true }), onDark, 'kokot.it', dark('--color-bg')),
+    svg: touchTile,
   },
   {
     path: 'brand/icon-512.png',
     size: 512,
-    svg: svg(markGeometry({ tile: true, square: true }), onDark, 'kokot.it', dark('--color-bg')),
+    svg: touchTile,
   },
 ];
-const browser = await chromium.launch();
+let browser;
+try {
+  browser = await chromium.launch();
+} catch (error) {
+  // Same guard as scripts/pdf.ts: the SVGs above are written, only the PNGs need Chromium.
+  console.error('Chromium for Playwright is missing. Run: npm run pdf:install');
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+}
+
 try {
   for (const png of pngs) {
     const page = await browser.newPage({ viewport: { width: png.size, height: png.size } });

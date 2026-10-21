@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { random, relayGraph } from './relay-graph.ts';
+import { mulberry32, relayGraph } from './relay-graph.ts';
 
 const options = { seed: 7, count: 40, width: 800, height: 500 };
 
-describe('random', () => {
+describe('mulberry32', () => {
   it('is deterministic per seed and stays in [0, 1)', () => {
-    const a = random(1);
-    const b = random(1);
+    const a = mulberry32(1);
+    const b = mulberry32(1);
     const values = Array.from({ length: 100 }, () => a());
     expect(values).toEqual(Array.from({ length: 100 }, () => b()));
     expect(values.every((v) => v >= 0 && v < 1)).toBe(true);

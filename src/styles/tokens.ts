@@ -109,6 +109,18 @@ export function parseCustomProperties(css: string, selector = ':root'): Map<stri
   return props;
 }
 
+/** Selector of the light print theme in tokens.css. */
+export const PAPER_THEME_SELECTOR = "[data-theme='paper']";
+
+/** Node: readers for both themes (dark screen default, paper) from the text of tokens.css. */
+export function themeReaders(css: string): { dark: TokenReader; paper: TokenReader } {
+  const base = parseCustomProperties(css, ':root');
+  return {
+    dark: resolvingReader(base),
+    paper: resolvingReader(base, parseCustomProperties(css, PAPER_THEME_SELECTOR)),
+  };
+}
+
 /** Node: a reader over parsed properties that resolves `var(--x)` references (no fallbacks). */
 export function resolvingReader(...layers: ReadonlyMap<string, string>[]): TokenReader {
   const merged = new Map<string, string>();
