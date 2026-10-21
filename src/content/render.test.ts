@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { discoverPages } from '../build/pages.ts';
@@ -75,14 +75,19 @@ describe('routes and page shells', () => {
     );
   });
 
-  it('has a shell for every route and no page outside the routes', () => {
+  // Pages that are not site content and keep their own HTML (T-03 brand preview, noindex).
+  const STANDALONE_PAGES = ['brand/index.html'];
+
+  it('has a shell for every route and no unknown page', () => {
     for (const route of allRoutes())
       expect(existsSync(shellPath(route)), routePath(route)).toBe(true);
-    const discovered = Object.values(discoverPages(ROOT)).map((file) =>
-      routeFromFile(file.slice(ROOT.length)),
+    const files = Object.values(discoverPages(ROOT)).map((file) =>
+      file.slice(ROOT.length).split(sep).join('/'),
     );
-    expect(discovered).not.toContain(undefined);
-    expect(discovered).toHaveLength(allRoutes().length);
+    const content = files.filter((file) => !STANDALONE_PAGES.includes(file));
+    expect(content.map(routeFromFile)).not.toContain(undefined);
+    expect(content).toHaveLength(allRoutes().length);
+    for (const file of STANDALONE_PAGES) expect(files).toContain(file);
   });
 
   it('maps shell files to routes', () => {
@@ -116,7 +121,7 @@ describe('routes and page shells', () => {
     expect(fillShell(shell('<html lang="pl">'), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(fillShell(shell('<html>'), en)).toMatch(/^<!doctype html>\n<html lang="en">/);
     expect(fillShell(shell('<html lang="pl" class="x">'), en)).toMatch(
-      /^<!doctype html>\n<html lang="en">/,
+      /^<!doctype html>\n<html lang="en" class="x">/,
     );
   });
 });
@@ -141,6 +146,20 @@ describe('rendered pages', () => {
       expect(html).not.toContain('kokot:body');
     },
   );
+
+  it('escapes HTML special characters', () => {
+    expect(escapeHtml(`<a href="x" title='y'>&</a>`)).toBe(
+      '&lt;a href=&quot;x&quot; title=&#39;y&#39;&gt;&amp;&lt;/a&gt;',
+    );
+  });
+
+  it.each(LOCALES)('%s home page leaves the scene container empty for T-08', (locale) => {
+    const home = pages.find((p) => p.route.page === 'home' && p.route.locale === locale);
+    expect(home?.html).toContain(
+      '<div id="scene-root" class="hero__scene" aria-hidden="true"></div>',
+    );
+    expect(home?.html).not.toContain('<canvas');
+  });
 
   it('puts the copy into static HTML, without needing JavaScript', () => {
     const home = pages.find((p) => p.route.page === 'home' && p.route.locale === 'pl');
@@ -235,6 +254,27 @@ describe('required sections', () => {
   );
 });
 
+describe('grant wording', () => {
+  // The honest framing agreed for the Dig.IT section, pinned as phrases: the copy may be
+  // reworded around them, but not lose them.
+  it('says what kokot.it does and does not do, in both languages', () => {
+    const plText = [...pl.process.grants.does.points, ...pl.process.grants.doesNot.points].join(
+      ' ',
+    );
+    expect(plText).toContain('przygotowuje ofertę wykonawcy do wniosku');
+    expect(plText).toContain('nie pisze wniosków o dotację');
+    expect(plText).toContain('nie obiecuje uzyskania dotacji');
+    expect(plText).toContain('nie zaczyna prac objętych projektem przed złożeniem wniosku');
+    const enText = [...en.process.grants.does.points, ...en.process.grants.doesNot.points].join(
+      ' ',
+    );
+    expect(enText).toContain('prepares the contractor’s quote for the application');
+    expect(enText).toContain('does not write grant applications');
+    expect(enText).toContain('does not promise that the grant will be awarded');
+    expect(enText).toContain('does not start work covered by the project before the application');
+  });
+});
+
 describe('content guards', () => {
   it.each(pages)('$route.locale $route.page breaks no content rule', ({ html }) => {
     expect(contentViolations(html)).toEqual([]);
@@ -281,8 +321,37 @@ describe('content guards', () => {
     expect(contentViolations(page('przed złożeniem wniosku'))).toEqual([]);
   });
 
+  it('reads single-quoted and data-* attributes and JSON-LD', () => {
+    expect(contentViolations("<meta name='description' content='NIP' />")).toContain(
+      'company registry id',
+    );
+    expect(contentViolations('<div data-phone="600 123 456"></div>')).toContain(
+      'phone number or tax id',
+    );
+    expect(
+      contentViolations(
+        '<script type="application/ld+json">{"telephone":"+48 600 123 456"}</script>',
+      ),
+    ).toContain('phone number or tax id');
+    expect(contentViolations("<a href='tel:600123456'>x</a>")).toContain('tel: link');
+  });
+
+  it('does not mistake asset names for e-mail addresses', () => {
+    expect(contentViolations(page('logo@2x.png'))).toEqual([]);
+  });
+
   it('catches prices', () => {
-    for (const value of ['od 10 000 zł netto', '70 tys. zł', '16 PLN', '€200', '$5', '120 tys.']) {
+    for (const value of [
+      'od 10 000 zł netto',
+      '70 tys. zł',
+      '16 PLN',
+      '€200',
+      '$5',
+      '120 tys.',
+      'sto złotych',
+      'około 70k',
+      'cena netto',
+    ]) {
       expect(contentViolations(page(value)), value).toContain('price');
     }
   });
@@ -296,12 +365,19 @@ describe('content guards', () => {
     expect(contentViolations('<a href="tel:600123456">call</a>')).toContain('tel: link');
   });
 
-  it.each(['rewolucja AI', 'AI magic', 'Strona w budowie.', 'Wkrótce', 'Coming soon', 'TODO'])(
-    'catches the buzzword or placeholder %s',
-    (value) => {
-      expect(contentViolations(page(value))).toContain('buzzword or leftover placeholder');
-    },
-  );
+  it.each([
+    'rewolucja AI',
+    'AI magic',
+    'Strona w budowie.',
+    'Wkrótce',
+    'Coming soon',
+    'TODO',
+    'TBA',
+    'XXX',
+    'Adres: do uzupełnienia',
+  ])('catches the buzzword or placeholder %s', (value) => {
+    expect(contentViolations(page(value))).toContain('buzzword or leftover placeholder');
+  });
 
   it('keeps anchor ids URL-safe', () => {
     for (const c of [pl, en]) {

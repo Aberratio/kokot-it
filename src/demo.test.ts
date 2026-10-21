@@ -72,6 +72,7 @@ describe('embedDemo', () => {
   it('does nothing without a source or a slot', async () => {
     const headFetch = vi.fn(answer(200, 'text/html'));
     expect(await embedDemo(fakeFigure({}, false).figure, headFetch)).toBe(false);
+    expect(await embedDemo(fakeFigure({ demoSrc: '' }).figure, headFetch)).toBe(false);
     expect(headFetch).not.toHaveBeenCalled();
   });
 });
