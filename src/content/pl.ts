@@ -132,7 +132,7 @@ export const pl: SiteContent = {
       },
       {
         title: 'Realizacja',
-        text: 'Etapami, z pilotażem na danych firmy i pokazem działania po każdym kamieniu milowym.',
+        text: 'Etapami, z pilotażem na danych firmy i odbiorem każdego kamienia milowego.',
       },
       {
         title: 'Przekazanie',
@@ -171,14 +171,14 @@ export const pl: SiteContent = {
   projects: {
     title: 'Projekty',
     intro:
-      'Cztery projekty pokazowe, zbudowane na fikcyjnych danych. Pokazują sposób pracy i architekturę, nie są wdrożeniami u klientów. Dema na stronie odtwarzają nagrane przebiegi i nie wywołują żadnego API.',
+      'Cztery projekty pokazowe: trzy dema zbudowane na fikcyjnych danych firm i tiller, własne narzędzie z publicznym kodem. Pokazują sposób pracy i architekturę, nie są wdrożeniami u klientów. Dema na stronie odtwarzają nagrane przebiegi i nie wywołują żadnego API.',
     cardCta: 'Case study',
   },
   about: {
     title: 'O kokot.it',
     text: [
       'kokot.it to marka usług inżynierskich w obszarze AI i agentic engineering: od analizy procesu, przez agentów i integracje, po interfejs, z którego korzystają ludzie. Ta strona i projekty pokazowe są przykładem tej pracy.',
-      'Za każdy projekt odpowiada jedna osoba prowadząca, od pierwszej rozmowy po wdrożenie. Przy większych zakresach do projektu mogą dołączyć sprawdzeni specjaliści. Skład i sposób realizacji opisuje każda oferta, zgodnie z zasadami danego programu finansowania.',
+      'Za każdy projekt odpowiada jedna osoba prowadząca, od pierwszej rozmowy po wdrożenie. Każda oferta określa, kto i w jaki sposób realizuje prace, zgodnie z zasadami danego programu finansowania.',
     ],
     principlesTitle: 'Zasady',
     principles: [
@@ -206,15 +206,15 @@ export const pl: SiteContent = {
     emailLabel: 'Napisz na',
   },
   footer: {
-    note: 'Projekty pokazowe na tej stronie korzystają wyłącznie z fikcyjnych danych.',
+    note: 'Firmy, dokumenty i dane produkcyjne w demach na tej stronie są fikcyjne.',
   },
   caseStudy: {
     back: 'Wszystkie projekty',
     problem: 'Problem',
     solution: 'Rozwiązanie',
     demo: 'Demo',
-    demoFallback:
-      'Demo jest nagrane: odtwarza zapisany przebieg i nie wywołuje API. Jeśli się tu nie wyświetla, opis działania znajduje się powyżej.',
+    demoFallback: 'Jeśli demo się tu nie wyświetla, opis działania znajduje się powyżej.',
+    demoNote: 'Demo nagrane: odtwarza zapisany przebieg, bez wywołań API.',
     demoFrameTitle: 'Nagrane demo projektu',
     stack: 'Stack',
     repo: 'Repozytorium',
@@ -308,7 +308,7 @@ export const pl: SiteContent = {
       solution: {
         text: [
           'Warunki kwalifikowalności są zapisane jako jawne, testowane reguły, a nie zostawione ocenie modelu. Model językowy szkicuje tylko opis projektu dla najlepszego dopasowania. Wynik pokazuje też listę dokumentów do przygotowania.',
-          'Asystent nie jest poradą prawną i nie gwarantuje dotacji. Dane naborów mają datę stanu i linki do źródeł.',
+          'Asystent pomaga we wstępnej ocenie; nie zastępuje wniosku ani doradcy, nie jest poradą prawną i nie gwarantuje dotacji. Dane naborów mają datę stanu i linki do źródeł.',
         ],
         points: [
           'reguły np. dla Dig.IT: lata działalności, dodatni wynik, profil produkcyjny',
