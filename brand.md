@@ -94,8 +94,10 @@ Druk (`paper`):
 | success / warning / danger na bg | 5,35 / 6,38 / 6,57 |         |                |
 | focus na bg (1.4.11)             | 5,82               |         |                |
 
-`--color-line` i `--color-line-strong` są dekoracyjne (1,5–2 : 1) — nie nadają się na tekst ani
-jako jedyna granica pola formularza; kontrolki mają tło `surface-raised` i fokus Signal.
+Linie: w motywie ciemnym `--color-line` (1,47 : 1) i `--color-line-strong` (1,99 : 1) są dekoracyjne —
+nie nadają się na tekst ani jako jedyna granica pola formularza; kontrolki mają tło
+`surface-raised` i fokus Signal. W `paper` `--color-line` ma 1,36 : 1 (podziały), a
+`--color-line-strong` 5,76 : 1 (może obrysowywać kontrolki).
 
 ## Typografia
 
@@ -193,4 +195,5 @@ Ruch rzadki i celowy — każda animacja coś przekazuje (zadanie, wynik, stan).
 - Tekstu w `--color-line*`; jasnoszarego tekstu na `surface-raised` poniżej `text-subtle`.
 - Animacji bez przyczyny (pulsowanie, wieczne obroty), ruchu ignorującego `prefers-reduced-motion`.
 - Kolorów i czasów wpisanych na sztywno w kodzie — zawsze tokeny (`var(--…)` w CSS,
-  `sceneTokensFromDocument()` w scenie).
+  `sceneTokensFromDocument()` w scenie). Jedyny wyjątek: `<meta name="theme-color">` w HTML
+  (nie czyta zmiennych CSS) — ma wartość `--color-bg` (`#0b0d12`) i komentarz przy sobie.

@@ -41,7 +41,7 @@ export interface RelayOptions {
 }
 
 /** mulberry32: small, fast, good enough for layout. */
-export function random(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -54,7 +54,7 @@ export function random(seed: number): () => number {
 
 export function relayGraph(options: RelayOptions): RelayGraph {
   const { seed, count, width, height, links = 2, pulses = 6 } = options;
-  const rand = random(seed);
+  const rand = mulberry32(seed);
 
   // Jittered grid: even coverage without the regularity of a lattice.
   const cols = Math.max(1, Math.round(Math.sqrt((count * width) / height)));

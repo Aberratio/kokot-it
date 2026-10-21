@@ -5,14 +5,14 @@ import './preview.css';
 import tokensCss from '../styles/tokens.css?raw';
 import { contrastRatio } from '../styles/color.ts';
 import { relayGraph } from '../scene/relay-graph.ts';
-import { CONTRAST_PAIRS, parseCustomProperties, resolvingReader } from '../styles/tokens.ts';
+import { CONTRAST_PAIRS, themeReaders } from '../styles/tokens.ts';
 
 const SVG = 'http://www.w3.org/2000/svg';
-const base = parseCustomProperties(tokensCss, ':root');
-const themes = {
-  dark: resolvingReader(base),
-  paper: resolvingReader(base, parseCustomProperties(tokensCss, "[data-theme='paper']")),
-};
+const themes = themeReaders(tokensCss);
+const PULSE_COLOR = {
+  task: 'var(--scene-pulse-task)',
+  result: 'var(--scene-pulse-result)',
+} as const;
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -132,13 +132,13 @@ if (still) {
   const height = 520;
   const graph = relayGraph({ seed: 2026, count: 46, width, height, links: 3, pulses: 10 });
   const root = svg('svg', { viewBox: `0 0 ${String(width)} ${String(height)}`, role: 'img' });
-  root.append(svg('title', {}));
-  (root.firstChild as SVGElement).textContent =
-    'Sieć agentów: węzły, połączenia i impulsy w drodze';
+  const title = svg('title', {});
+  title.textContent = 'Sieć agentów: węzły, połączenia i impulsy w drodze';
+  root.append(title);
   const defs = svg('defs', {});
   for (const kind of ['task', 'result'] as const) {
     const grad = svg('radialGradient', { id: `glow-${kind}` });
-    const color = kind === 'task' ? 'var(--scene-pulse-task)' : 'var(--scene-pulse-result)';
+    const color = PULSE_COLOR[kind];
     grad.append(
       svg('stop', { offset: '0', 'stop-color': color, 'stop-opacity': '0.55' }),
       svg('stop', { offset: '1', 'stop-color': color, 'stop-opacity': '0' }),
@@ -161,7 +161,7 @@ if (still) {
     if (!a || !b) continue;
     const x = a.x + (b.x - a.x) * p.t;
     const y = a.y + (b.y - a.y) * p.t;
-    const color = p.kind === 'task' ? 'var(--scene-pulse-task)' : 'var(--scene-pulse-result)';
+    const color = PULSE_COLOR[p.kind];
     // The travelled part of the edge lights up behind the pulse.
     active.append(
       svg('line', { x1: a.x, y1: a.y, x2: x, y2: y, stroke: color, 'stroke-opacity': 0.55 }),

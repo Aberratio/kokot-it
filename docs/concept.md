@@ -25,7 +25,7 @@ mobile. Kolejność ważenia: wierność celowi → odwracalność → siła dow
 
 ### Pomiary i założenia
 
-- Zmierzone: scena to wciąż zaślepka (`src/scene/index.ts`, 37 linii, pusta `Scene`) — nic nie
+- Zmierzone: scena to wciąż zaślepka (`src/scene/index.ts` przed tym PR: 37 linii, pusta `Scene`) — nic nie
   jest jeszcze utopione w żadnej opcji.
 - Zmierzone: ścieżka bez WebGL istnieje (`canvas.hidden = true`, gdy renderer rzuca wyjątek).
 - Zmierzone: `prefers-reduced-motion` nie był obsłużony w `src/` (teraz: tokeny ruchu i
