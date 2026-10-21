@@ -133,7 +133,7 @@ export const en: SiteContent = {
       },
       {
         title: 'Delivery',
-        text: 'In stages, with a pilot on the company’s data and a working demo after every milestone.',
+        text: 'In stages, with a pilot on the company’s data and an acceptance step for every milestone.',
       },
       {
         title: 'Handover',
@@ -172,14 +172,14 @@ export const en: SiteContent = {
   projects: {
     title: 'Projects',
     intro:
-      'Four showcase projects built on fictional data. They show the way of working and the architecture; they are not client deployments. The demos on this site replay recorded runs and make no API calls.',
+      'Four showcase projects: three demos built on fictional company data, and tiller, an in-house tool with public code. They show the way of working and the architecture; they are not client deployments. The demos on this site replay recorded runs and make no API calls.',
     cardCta: 'Case study',
   },
   about: {
     title: 'About kokot.it',
     text: [
       'kokot.it is an engineering services brand focused on AI and agentic engineering: from process analysis, through agents and integrations, to the interface people actually use. This site and the showcase projects are examples of that work.',
-      'Every project has one lead who is responsible for it from the first conversation to the rollout. Larger scopes can bring in trusted specialists. Each quote states who delivers the work and how, in line with the rules of the funding programme involved.',
+      'Every project has one lead who is responsible for it from the first conversation to the rollout. Each quote states who delivers the work and how, in line with the rules of the funding programme involved.',
     ],
     principlesTitle: 'Principles',
     principles: [
@@ -207,15 +207,15 @@ export const en: SiteContent = {
     emailLabel: 'Write to',
   },
   footer: {
-    note: 'The showcase projects on this site use fictional data only.',
+    note: 'The companies, documents and production data in the demos on this site are fictional.',
   },
   caseStudy: {
     back: 'All projects',
     problem: 'Problem',
     solution: 'Solution',
     demo: 'Demo',
-    demoFallback:
-      'The demo is recorded: it replays a saved run and makes no API calls. If it does not show here, the description above explains how it works.',
+    demoFallback: 'If the demo does not show here, the description above explains how it works.',
+    demoNote: 'Recorded demo: it replays a saved run and makes no API calls.',
     demoFrameTitle: 'Recorded project demo',
     stack: 'Stack',
     repo: 'Repository',
@@ -309,7 +309,7 @@ export const en: SiteContent = {
       solution: {
         text: [
           'Eligibility conditions are written as explicit, tested rules rather than left to the model’s judgement. The language model only drafts the project description for the best match. The result also lists the documents to prepare.',
-          'The assistant is not legal advice and does not guarantee a grant. Call data carries an as-of date and links to the sources.',
+          'The assistant helps with a first assessment; it does not replace the application or an adviser, is not legal advice and does not guarantee a grant. Call data carries an as-of date and links to the sources.',
         ],
         points: [
           'rules e.g. for Dig.IT: years in business, positive result, manufacturing profile',

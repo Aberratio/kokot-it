@@ -88,6 +88,8 @@ export interface SiteContent {
     solution: string;
     demo: string;
     demoFallback: string;
+    /** Always shown under the demo: it is recorded and makes no API calls (D-023). */
+    demoNote: string;
     demoFrameTitle: string;
     stack: string;
     repo: string;
