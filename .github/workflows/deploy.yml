@@ -1,0 +1,80 @@
+name: Deploy
+
+# Preview on every pull request, production on every push to main.
+# Needs repository secrets VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID (see README).
+# Without them the job ends green with a notice instead of failing.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  VERCEL_CLI: vercel@65.0.0
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    name: vercel ${{ github.event_name == 'push' && 'production' || 'preview' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check Vercel secrets
+        id: secrets
+        run: |
+          missing=()
+          [ -n "$VERCEL_TOKEN" ] || missing+=(VERCEL_TOKEN)
+          [ -n "$VERCEL_ORG_ID" ] || missing+=(VERCEL_ORG_ID)
+          [ -n "$VERCEL_PROJECT_ID" ] || missing+=(VERCEL_PROJECT_ID)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::notice title=Deploy skipped::Missing secrets: ${missing[*]}. Add them in Settings → Secrets and variables → Actions (see README, section Deploy)."
+            echo "### Deploy skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "Missing secrets: \`${missing[*]}\`. See README → Deploy." >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set target environment
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "VERCEL_ENV=production" >> "$GITHUB_ENV"
+            echo "PROD_FLAG=--prod" >> "$GITHUB_ENV"
+          else
+            echo "VERCEL_ENV=preview" >> "$GITHUB_ENV"
+            echo "PROD_FLAG=" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Pull Vercel project settings
+        if: steps.secrets.outputs.ready == 'true'
+        run: npx --yes "$VERCEL_CLI" pull --yes --environment="$VERCEL_ENV" --token="$VERCEL_TOKEN"
+
+      - name: Build
+        if: steps.secrets.outputs.ready == 'true'
+        run: npx --yes "$VERCEL_CLI" build $PROD_FLAG --token="$VERCEL_TOKEN"
+
+      - name: Deploy
+        if: steps.secrets.outputs.ready == 'true'
+        run: |
+          url=$(npx --yes "$VERCEL_CLI" deploy --prebuilt $PROD_FLAG --token="$VERCEL_TOKEN")
+          echo "::notice title=Vercel $VERCEL_ENV::$url"
+          echo "### Vercel $VERCEL_ENV" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,25 @@
+/* Shared print styles for documents rendered to PDF (A4). */
+@page {
+  size: A4;
+  margin: 18mm 16mm;
+}
+
+:root {
+  --fg: #0d0f14;
+  --muted: #5b6170;
+  --accent: #0a8fa0;
+  font-family: system-ui, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.45;
+}
+
+body {
+  margin: 0;
+  color: var(--fg);
+}
+
+.doc h1 {
+  margin: 0 0 0.5em;
+  font-size: 20pt;
+  color: var(--accent);
+}
