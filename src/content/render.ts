@@ -1,4 +1,12 @@
-import { homePath, LOCALES, messages, projectPath, type Locale } from '../i18n/index.ts';
+import {
+  DEFAULT_LOCALE,
+  homePath,
+  LOCALES,
+  messages,
+  PROJECTS_SEGMENT,
+  projectPath,
+  type Locale,
+} from '../i18n/index.ts';
 import { en } from './en.ts';
 import { pl } from './pl.ts';
 import {
@@ -18,6 +26,11 @@ import {
 // pours the output into the thin `index.html` shells.
 
 const CONTENT: Record<Locale, SiteContent> = { pl, en };
+const OG_LOCALE: Record<Locale, string> = { pl: 'pl_PL', en: 'en_GB' };
+
+function otherLocale(locale: Locale): Locale {
+  return LOCALES.find((l) => l !== locale) ?? DEFAULT_LOCALE;
+}
 
 export function content(locale: Locale): SiteContent {
   return CONTENT[locale];
@@ -56,12 +69,12 @@ export function routeFromFile(relativePath: string): Route | undefined {
   const parts = relativePath.split(/[\\/]/).filter(Boolean);
   if (parts.at(-1) !== 'index.html') return undefined;
   const dirs = parts.slice(0, -1);
-  const locale: Locale = dirs[0] === 'en' ? 'en' : 'pl';
-  const rest = locale === 'en' ? dirs.slice(1) : dirs;
+  const prefixed = LOCALES.find((l) => l !== DEFAULT_LOCALE && dirs[0] === l);
+  const locale: Locale = prefixed ?? DEFAULT_LOCALE;
+  const rest = prefixed ? dirs.slice(1) : dirs;
   if (rest.length === 0) return { locale, page: 'home' };
   const [section, slug] = rest;
-  const expected = locale === 'en' ? 'projects' : 'projekty';
-  if (rest.length === 2 && section === expected && slug && isProjectSlug(slug)) {
+  if (rest.length === 2 && section === PROJECTS_SEGMENT[locale] && slug && isProjectSlug(slug)) {
     return { locale, page: 'project', slug };
   }
   return undefined;
@@ -90,21 +103,23 @@ export interface RenderedPage {
 
 export function renderPage(route: Route): RenderedPage {
   const c = content(route.locale);
-  const study = route.page === 'project' ? c.caseStudies[route.slug] : undefined;
-  const title = study ? study.metaTitle : c.meta.title;
-  const description = study ? study.metaDescription : c.meta.description;
+  let title = c.meta.title;
+  let description = c.meta.description;
+  let main: string;
+  if (route.page === 'project') {
+    const study = c.caseStudies[route.slug];
+    title = study.metaTitle;
+    description = study.metaDescription;
+    main = renderCaseStudy(route.locale, route.slug, study);
+  } else {
+    main = renderHome(route.locale);
+  }
   return {
     lang: route.locale,
     head: renderHead(route, title, description),
-    body: [
-      renderHeader(route),
-      `<main id="content">`,
-      study && route.page === 'project'
-        ? renderCaseStudy(route.locale, route.slug, study)
-        : renderHome(route.locale),
-      `</main>`,
-      renderFooter(route),
-    ].join('\n'),
+    body: [renderHeader(route), `<main id="content">`, main, `</main>`, renderFooter(route)].join(
+      '\n',
+    ),
   };
 }
 
@@ -114,7 +129,7 @@ function renderHead(route: Route, title: string, description: string): string {
     (locale) =>
       `<link rel="alternate" hreflang="${locale}" href="${e(absolute(routePath(counterpart(route, locale))))}" />`,
   );
-  const xDefault = absolute(routePath(counterpart(route, 'pl')));
+  const xDefault = absolute(routePath(counterpart(route, DEFAULT_LOCALE)));
   return [
     `<title>${e(title)}</title>`,
     `<meta name="description" content="${e(description)}" />`,
@@ -126,7 +141,7 @@ function renderHead(route: Route, title: string, description: string): string {
     `<meta property="og:title" content="${e(title)}" />`,
     `<meta property="og:description" content="${e(description)}" />`,
     `<meta property="og:url" content="${e(url)}" />`,
-    `<meta property="og:locale" content="${route.locale === 'pl' ? 'pl_PL' : 'en_GB'}" />`,
+    `<meta property="og:locale" content="${OG_LOCALE[route.locale]}" />`,
   ].join('\n    ');
 }
 
@@ -134,7 +149,7 @@ function renderHeader(route: Route): string {
   const c = content(route.locale);
   const t = messages(route.locale);
   const home = homePath(route.locale);
-  const other = t.langSwitch.target === 'en' ? 'en' : 'pl';
+  const other = otherLocale(route.locale);
   const anchor = (key: keyof SiteContent['anchors']): string =>
     `<li><a href="${e(`${home}#${c.anchors[key]}`)}">${e(c.nav[key])}</a></li>`;
   return [
@@ -186,7 +201,7 @@ function renderSteps(steps: readonly Step[]): string {
 function renderContact(locale: Locale, title: string, text: string, headingId: string): string {
   const c = content(locale);
   return [
-    `<h2 id="${headingId}">${e(title)}</h2>`,
+    `<h2 id="${e(headingId)}">${e(title)}</h2>`,
     `<p>${e(text)}</p>`,
     `<p class="contact__email">${e(c.contact.emailLabel)} <a class="button" href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>`,
   ].join('');
@@ -194,7 +209,9 @@ function renderContact(locale: Locale, title: string, text: string, headingId: s
 
 function renderHome(locale: Locale): string {
   const c = content(locale);
-  const a = c.anchors;
+  const a = Object.fromEntries(
+    Object.entries(c.anchors).map(([key, id]) => [key, e(id)]),
+  ) as SiteContent['anchors'];
   const s = c.services;
   const g = c.process.grants;
   const cards = list(PROJECT_SLUGS, (slug) => {
@@ -212,7 +229,7 @@ function renderHome(locale: Locale): string {
   return [
     `<section class="hero" aria-labelledby="hero-title">`,
     // Mount point for the 3D scene (T-08). The hero's text does not depend on it.
-    `<div id="scene-root" class="hero__scene" aria-hidden="true"><canvas class="scene" data-scene></canvas></div>`,
+    `<div id="scene-root" class="hero__scene" aria-hidden="true"></div>`,
     `<div class="hero__content">`,
     `<p class="eyebrow">${e(c.hero.eyebrow)}</p>`,
     `<h1 id="hero-title">${e(c.hero.title)}</h1>`,
@@ -328,7 +345,7 @@ function renderCaseStudy(locale: Locale, slug: ProjectSlug, study: CaseStudy): s
     `<h2 id="demo-title">${e(cs.demo)}</h2>`,
     `<figure class="demo" data-demo-src="${e(demoSrc(slug))}" data-demo-title="${e(`${cs.demoFrameTitle}: ${study.card.title}`)}">`,
     `<div class="demo__frame" data-demo-slot><p class="demo__fallback">${e(cs.demoFallback)}</p></div>`,
-    `<figcaption><strong>${e(study.demo.title)}.</strong> ${e(study.demo.text)}</figcaption>`,
+    `<figcaption><strong>${e(study.demo.title)}.</strong> ${e(study.demo.text)} <span class="demo__note">${e(cs.demoNote)}</span></figcaption>`,
     `</figure>`,
     `</section>`,
 
