@@ -270,8 +270,11 @@ describe('required sections', () => {
       }
       // The note must sit inside the figcaption, so it stays when the iframe replaces the fallback.
       const caption = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(page)?.[1] ?? '';
-      // A static transcript is not a recording, so it carries its own note instead.
-      expect(caption).toContain(escapeHtml(study.transcript?.note ?? c.caseStudy.toolNote));
+      // A static transcript is not a recording, so it carries its own note instead; so does an
+      // application that does not replay recordings (the game).
+      expect(caption).toContain(
+        escapeHtml(study.transcript?.note ?? study.toolNote ?? c.caseStudy.toolNote),
+      );
     },
   );
 });

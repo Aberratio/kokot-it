@@ -10,8 +10,8 @@ reference applications, and the print templates for the offer and the CV.
   scripts only add the 3D scene and the embedded applications.
 - **"Relay" 3D scene.** Vanilla Three.js with custom GLSL shaders, loaded lazily, with adaptive
   quality, reduced-motion and no-WebGL fallbacks.
-- **Reference applications.** Three case studies embed a working application built from its own
-  public repository at a pinned commit.
+- **Embedded applications.** Four case studies embed a working application built from its own
+  public repository at a pinned commit: three reference applications and the Relay Defense game.
 - **Guarded content.** The build fails on a phone number, a tax id, a price, a stray e-mail
   address or wording that must not ship; the test suite keeps the repository in English.
 
@@ -80,8 +80,9 @@ slug in `PROJECT_SLUGS` and `REPOS` (`src/content/types.ts`), its copy in `pl.ts
 ## Reference applications
 
 The case studies of [factory-twin](https://github.com/Aberratio/factory-twin),
-[production-docs-agent](https://github.com/Aberratio/production-docs-agent) and
-[grant-assistant](https://github.com/Aberratio/grant-assistant) embed the application itself.
+[production-docs-agent](https://github.com/Aberratio/production-docs-agent),
+[grant-assistant](https://github.com/Aberratio/grant-assistant) and
+[relay-defense](https://github.com/Aberratio/relay-defense) embed the application itself.
 Each one is a static build from its public repository at the commit pinned in
 `tools.lock.json`, committed under `public/tools/<slug>/`, so the site's build and deploy never
 fetch or build anything else.
@@ -96,7 +97,9 @@ fetch or build anything else.
 - **Updating**: put the new commit SHA in `tools.lock.json`, run `npm run tools:sync` (or
   `npm run tools:sync -- <slug>`) and commit the lock file with the rebuilt directory. See
   `public/tools/README.md`.
-- The applications replay recorded runs on sample data and make no API calls.
+- The applications make no API calls: the reference applications replay recorded runs on sample
+  data, and Relay Defense is a game that runs entirely in the browser. A case study can replace
+  the site-wide note under its application (`toolNote` in the copy) when that note does not fit.
 
 ## Search, social, privacy and accessibility
 

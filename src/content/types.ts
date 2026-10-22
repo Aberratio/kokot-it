@@ -39,6 +39,8 @@ export interface CaseStudy {
   flow?: { title: string; steps: Step[]; diagram?: FlowDiagram };
   /** Caption of the embedded application or of the sample run: what the reader sees. */
   preview: { title: string; text: string };
+  /** Replaces the site-wide note under an embedded application when it does not fit this one. */
+  toolNote?: string;
   /**
    * A static, illustrative session log shown in place of an embedded application. It is text in
    * the page, so it needs no JavaScript and no published application.
@@ -188,6 +190,7 @@ export const PROJECT_SLUGS = [
   'production-docs-agent',
   'grant-assistant',
   'tiller',
+  'relay-defense',
 ] as const;
 export type ProjectSlug = (typeof PROJECT_SLUGS)[number];
 
@@ -204,6 +207,7 @@ export const REPOS: Record<ProjectSlug, Repo> = {
   'production-docs-agent': { name: 'Aberratio/production-docs-agent', public: true },
   'grant-assistant': { name: 'Aberratio/grant-assistant', public: true },
   tiller: { name: 'Aberratio/tiller', public: true },
+  'relay-defense': { name: 'Aberratio/relay-defense', public: true },
 };
 
 /** The only contact channel on the site. */
@@ -215,7 +219,12 @@ export const SITE_ORIGIN = 'https://kokot.it';
  * Case studies that embed their reference application from `public/tools/<slug>/`
  * (built by scripts/sync-tools.ts from tools.lock.json). The others show a sample run as text.
  */
-export const TOOL_SLUGS = ['factory-twin', 'production-docs-agent', 'grant-assistant'] as const;
+export const TOOL_SLUGS = [
+  'factory-twin',
+  'production-docs-agent',
+  'grant-assistant',
+  'relay-defense',
+] as const;
 export type ToolSlug = (typeof TOOL_SLUGS)[number];
 
 export function isToolSlug(slug: ProjectSlug): slug is ToolSlug {
