@@ -179,7 +179,7 @@ export const en: SiteContent = {
     title: 'About kokot.it',
     text: [
       'kokot.it is an engineering services brand focused on AI and agentic engineering: from process analysis, through agents and integrations, to the interface people actually use. This site and the showcase projects are examples of that work.',
-      'Every project has one lead who is responsible for it from the first conversation to the rollout. Each quote states who delivers the work and how, in line with the rules of the funding programme involved.',
+      'kokot.it runs each project directly, from the first conversation to the rollout. The quote sets out the scope and how the work is delivered, in line with the rules of the funding programme involved.',
     ],
     principlesTitle: 'Principles',
     principles: [
