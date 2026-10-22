@@ -93,12 +93,59 @@ samp {
   top: var(--space-4);
 }
 
-.scene {
+/*
+ * The Relay scene (src/scene/) is a fixed backdrop under the whole home page: the network
+ * re-forms as sections pass (docs/concept.md). It is sized to the large viewport so a mobile
+ * browser bar sliding away does not resize the drawing buffer.
+ */
+/* The host leaves the hero once the scene mounts: a fixed layer inside a scrolled-away
+   absolute box gets culled by the browser. */
+.hero .scene-host {
   position: fixed;
   inset: 0;
+}
+
+.scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100lvh;
+  z-index: var(--z-scene);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-scene) var(--ease-out);
+}
+
+.scene.is-ready {
+  opacity: 1;
+}
+
+.scene--still svg {
+  display: block;
   width: 100%;
   height: 100%;
+}
+
+/* Contrast guard: the scene dims under the text column, wherever the network happens to be. */
+.scene-scrim {
+  position: fixed;
+  inset: 0;
   z-index: var(--z-scene);
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--scene-bg) 72%, transparent) 0%,
+    color-mix(in srgb, var(--scene-bg) 48%, transparent) 42%,
+    transparent 72%
+  );
+}
+
+@media (max-width: 48rem) {
+  .scene-scrim {
+    background: color-mix(in srgb, var(--scene-bg) 50%, transparent);
+  }
 }
 
 .site-header,
@@ -125,7 +172,8 @@ main {
 }
 
 @media print {
-  .scene {
+  .scene,
+  .scene-scrim {
     display: none;
   }
 }

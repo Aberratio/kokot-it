@@ -83,7 +83,7 @@ main {
   padding-top: 0;
 }
 
-/* Hero: the scene mount (T-08) sits behind the text; the text stands on its own. */
+/* Hero: the scene mount sits behind the text; the text stands on its own. */
 .hero {
   position: relative;
   display: grid;
@@ -165,7 +165,8 @@ main {
   padding: var(--space-5);
   border: var(--border-width) solid var(--color-line);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  /* Slightly translucent: the Relay scene stays legible behind the cards. */
+  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
 }
 
 .offer__code {
