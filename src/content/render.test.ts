@@ -415,6 +415,44 @@ describe('content guards', () => {
     expect(contentViolations(page(value))).toContain('buzzword or leftover placeholder');
   });
 
+  // The public pattern sets of tiller’s lib/leak-guard.sh and the private harness paths (T-12).
+  it('catches the credential shapes and private paths of tiller’s leak guard', () => {
+    for (const value of [
+      'ghp_' + 'A'.repeat(24),
+      'github_pat_' + 'a'.repeat(22),
+      'sk-ant-' + 'x'.repeat(12),
+      'AKIA' + 'A'.repeat(16),
+      ['-----BEGIN', 'RSA PRIVATE KEY-----'].join(' '),
+    ]) {
+      expect(contentViolations(page(value)), value).toContain('credential shape');
+    }
+    // Built from parts, so this file does not itself match the shapes it tests.
+    const claude = ['', '.claude', ''].join('/');
+    for (const value of [`~${claude}memory/x.md`, `/Users/someone${claude}plans/a.md`]) {
+      expect(contentViolations(page(value)), value).toContain('private agent record path');
+    }
+  });
+
+  it('catches a tiller path that names a real profile, brain, person or the helm', () => {
+    for (const value of [
+      'profiles/acme/profile.md',
+      'brains/acme/decisions.md',
+      'personal/someone/leak-terms.txt',
+      'helm/events/x.md',
+    ]) {
+      expect(contentViolations(page(value)), value).toContain('private harness path');
+    }
+    for (const value of [
+      'profiles/_template/profile.md',
+      'brains/_template/README.md',
+      'personal/_templates/README.md',
+      'profiles/&lt;name&gt;/',
+      'flow-helm',
+    ]) {
+      expect(contentViolations(page(value)), value).not.toContain('private harness path');
+    }
+  });
+
   it('keeps anchor ids URL-safe', () => {
     for (const c of [pl, en]) {
       for (const id of Object.values(c.anchors)) expect(id).toMatch(/^[a-z][a-z0-9-]*$/);
