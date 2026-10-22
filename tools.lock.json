@@ -14,6 +14,11 @@
       "slug": "grant-assistant",
       "repo": "https://github.com/Aberratio/grant-assistant.git",
       "commit": "2e86b43c6e8ca3aa431b00c4df52d96294f19e58"
+    },
+    {
+      "slug": "relay-defense",
+      "repo": "https://github.com/Aberratio/relay-defense.git",
+      "commit": "8d3deb7bac3c795757f720f872839da9f5c78b31"
     }
   ]
 }
