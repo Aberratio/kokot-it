@@ -1,7 +1,7 @@
 # 3D scene concept — "Relay"
 
 Status: implemented in `src/scene/` (deviations from this document, with reasons:
-`docs/superpowers/decisions/relay-scene.md`). Direction: dark, technical, generative —
+`docs/decisions/relay-scene.md`). Direction: dark, technical, generative —
 "intelligence in motion".
 
 ## Goal

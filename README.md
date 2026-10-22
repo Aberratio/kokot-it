@@ -110,7 +110,7 @@ e-mail address).
 - Adaptive quality (`src/scene/quality.ts`): the start level comes from the device, then a mean
   frame time above 20 ms for 2 s lowers the level (node count, DPR, glow); it never goes back up.
   The current level is exposed as `data-level` on `canvas.scene`.
-- Paused in a hidden tab and off screen; colours and durations come only from the tokens
+- The animation loop stops while the tab is hidden; colours and durations come only from the tokens
   (`src/styles/tokens.css`).
 - The logic (graph, layouts, routing, quality, input) is pure and unit-tested with Vitest; the
   renderer and shaders (`renderer.ts`, `shaders.ts`) are checked in the browser — screenshots in
