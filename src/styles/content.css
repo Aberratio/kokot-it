@@ -165,9 +165,19 @@ main {
   padding: var(--space-5);
   border: var(--border-width) solid var(--color-line);
   border-radius: var(--radius-lg);
-  /* Slightly translucent: the Relay scene stays legible behind the cards. */
   background: var(--color-surface);
-  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+}
+
+/*
+ * Slightly translucent where color-mix() exists: the Relay scene stays legible behind the
+ * cards. Inside @supports, because a color-mix() with var() is accepted at parse time and
+ * would replace the opaque fallback with nothing in browsers that cannot compute it.
+ */
+@supports (background: color-mix(in srgb, red, blue)) {
+  .offer,
+  .card {
+    background: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  }
 }
 
 .offer__code {
