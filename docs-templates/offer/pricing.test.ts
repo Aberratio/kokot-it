@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { findPackage, isDraft, pricing, pricingProblems, type Pricing } from './pricing.ts';
 
-// Expected values copied by hand from the private brain's research/cennik.md (T-04) and
-// decisions D-032 / D-033. If the price list changes there, change both places on purpose.
+// Expected values copied by hand from the owner's private price list. If the price list
+// changes there, change both places on purpose.
 const CENNIK = {
   dayRateNet: 2000,
   vatRate: 0.23,
@@ -70,7 +70,7 @@ describe('pricing.json — the single source of prices', () => {
     expect(pricingProblems(broken)).toEqual([expect.stringContaining('P2: netMax 150000')]);
   });
 
-  it('stays a draft until the owner approves the price list (D-021)', () => {
+  it('stays a draft until the owner approves the price list', () => {
     expect(pricing.status).toBe('draft');
     expect(isDraft()).toBe(true);
     expect(isDraft({ ...pricing, status: 'approved' })).toBe(false);

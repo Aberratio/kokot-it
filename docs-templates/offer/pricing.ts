@@ -1,7 +1,7 @@
 import pricingJson from './pricing.json' with { type: 'json' };
 import type { Lang } from '../shared/html.ts';
 
-/** Dig.IT cost categories a stage belongs to (Wzór wniosku, pkt 20.1.1.3). */
+/** Dig.IT cost categories a stage belongs to (application form "Wzór wniosku", point 20.1.1.3). */
 export type Category = 'programming' | 'implementation' | 'training';
 
 export interface Stage {
@@ -23,7 +23,7 @@ export interface Package {
 }
 
 export interface Pricing {
-  /** `draft` until the owner approves the price list (D-021); drives the "preliminary" badge. */
+  /** `draft` until the owner approves the price list; drives the "preliminary" badge. */
   status: 'draft' | 'approved';
   currency: 'PLN';
   vatRate: number;

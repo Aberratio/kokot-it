@@ -3,13 +3,13 @@ import {
   pricing as defaultPricing,
   type Category,
   type Pricing,
-} from '../oferta/pricing.ts';
+} from '../offer/pricing.ts';
 
-// Data of one price quote for a Dig.IT application (T-05 form b, Polish only — D-035).
+// Data of one price quote for a Dig.IT application (form b, Polish only).
 // Strings may hold `{{FIELD}}` placeholders; the blank template (data.template.json) is all
 // placeholders, the example (data.example.json) is a fictional company. A real quote is a
 // private file outside the repo, rendered with `npm run pdf -- --quote <file> --final`.
-// Contractor data (name, NIP, address) is never stored in the repo (D-028).
+// Contractor data (name, NIP, address) is never stored in the repo.
 
 export interface QuoteStage {
   /** Stage id from pricing.json for the chosen package. */
@@ -25,7 +25,7 @@ export interface ExternalCost {
   provider: string;
   dataRegion: string;
   sla: string;
-  /** Estimated net cost during the project, whole złoty; `null` in the blank template. */
+  /** Estimated net cost during the project, whole zloty; `null` in the blank template. */
   projectNet: number | null;
   /** Estimated monthly net cost paid by the company after the project. */
   monthlyAfter: string;

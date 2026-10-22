@@ -1,5 +1,5 @@
 {
-  "$comment": "Single source of prices for the offer and price-quote templates. Mirrors research/cennik.md in the private brain (T-04, D-032, D-033). Net PLN. Set status to \"approved\" only after the owner approves the price list (D-021); while it is \"draft\" every document shows a \"preliminary pricing\" badge.",
+  "$comment": "Single source of prices for the offer and price-quote templates. Mirrors the owner's private price list. Net PLN. Set status to \"approved\" only after the owner approves the price list; while it is \"draft\" every document shows a \"preliminary pricing\" badge.",
   "status": "draft",
   "currency": "PLN",
   "vatRate": 0.23,

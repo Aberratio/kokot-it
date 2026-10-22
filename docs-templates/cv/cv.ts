@@ -1,7 +1,7 @@
 import type { Lang } from '../shared/html.ts';
 
 // CV content schema (schemaVersion 1). The real content lives outside this repository, in the
-// private brain (cv/cv.pl.json, cv/cv.en.json; T-06); the repo holds only the template and a
+// private location outside the repo (cv/cv.pl.json, cv/cv.en.json); the repo holds only the template and a
 // fictional fixture (tests/fixtures/cv.sample.json). Any object may carry `TODO_OWNER`: a
 // question for the owner that is never rendered and makes the PDF script warn.
 

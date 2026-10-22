@@ -1,5 +1,5 @@
 // What a price quote attached to a Dig.IT 2/2026 application has to carry, numbered as in the
-// research note (brain: research/digit-wymogi-oferty.md, T-05). Sources: Regulamin Konkursu
+// requirements research note. Sources: Regulamin Konkursu
 // 2/2026 (Reg.), zał. 1, 2, 3, 8, 9 — https://digit.arp.pl/eventy/nabory/digit-konkurs-22026/.
 // Every number must be placed in the template with a `data-req` attribute; a test checks it.
 //

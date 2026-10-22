@@ -19,7 +19,7 @@ export interface OfferOptions {
   pricing?: Pricing;
 }
 
-/** The presentation offer (T-05 form a): 1–2 A4 pages, PL or EN. */
+/** The presentation offer (form a): 1–2 A4 pages, PL or EN. */
 export function renderOffer(opts: OfferOptions): string {
   const { lang } = opts;
   const p = opts.pricing ?? defaultPricing;
@@ -124,5 +124,5 @@ ${packages}
   </section>
 </article>`;
 
-  return documentHtml({ lang, title: c.docTitle, styles: ['oferta/offer.css'], body });
+  return documentHtml({ lang, title: c.docTitle, styles: ['offer/offer.css'], body });
 }

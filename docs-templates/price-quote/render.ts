@@ -1,4 +1,4 @@
-import { offerCopy } from '../oferta/content.ts';
+import { offerCopy } from '../offer/content.ts';
 import {
   brandSvg,
   documentHtml,
@@ -13,10 +13,10 @@ import {
   pricing as defaultPricing,
   type Category,
   type Pricing,
-} from '../oferta/pricing.ts';
+} from '../offer/pricing.ts';
 import { priceQuote, type QuoteData, type Totals } from './quote.ts';
 
-// Price quote for a Dig.IT 2/2026 application (T-05 form b), Polish only (D-035). Every
+// Price quote for a Dig.IT 2/2026 application (form b), Polish only. Every
 // requirement from requirements.ts is placed with `data-req`; requirements.test.ts checks it.
 
 export interface QuoteOptions {
@@ -281,7 +281,7 @@ export function renderQuote(opts: QuoteOptions): string {
   return documentHtml({
     lang: 'pl',
     title: `Oferta cenowa ${q.offer.number} — kokot.it`,
-    styles: ['oferta-cenowa/quote.css'],
+    styles: ['price-quote/quote.css'],
     body,
   });
 }

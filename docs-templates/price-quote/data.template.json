@@ -1,5 +1,5 @@
 {
-  "$comment": "Blank price quote: every value to fill is a {{FIELD}}. Copy to a private file OUTSIDE this repo (e.g. the brain), fill it in, then run: npm run pdf -- --quote <file> --final. Contractor data (contractor.name, nip, address, signatory) goes only into that private file (D-028). Prices come from docs-templates/oferta/pricing.json: give only person-days per stage.",
+  "$comment": "Blank price quote: every value to fill is a {{FIELD}}. Copy to a private file OUTSIDE this repo, fill it in, then run: npm run pdf -- --quote <file> --final. Contractor data (contractor.name, nip, address, signatory) goes only into that private file. Prices come from docs-templates/offer/pricing.json: give only person-days per stage.",
   "offer": {
     "number": "{{NUMER_OFERTY}}",
     "date": "{{DATA_OFERTY}}",

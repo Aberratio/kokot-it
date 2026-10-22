@@ -1,4 +1,4 @@
-/* Presentation offer (T-05 form a): two A4 pages, paper theme. */
+/* Presentation offer (form a): two A4 pages, paper theme. */
 
 .offer h1 {
   font-size: 21pt;
@@ -134,7 +134,7 @@
   color: var(--color-text-muted);
 }
 
-/* Contact: e-mail as the single call to action (D-028). */
+/* Contact: e-mail as the single call to action. */
 .offer .contact {
   margin-top: 2mm;
   padding: 4mm 5mm;

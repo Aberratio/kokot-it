@@ -150,7 +150,7 @@ body {
   text-align: right;
 }
 
-/* "Preliminary pricing" badge: one flag in pricing.json (status) turns it off (D-021). */
+/* "Preliminary pricing" badge: one flag in pricing.json (status) turns it off. */
 .draft-badge {
   margin: 0;
   padding: 0.9mm 2.2mm;

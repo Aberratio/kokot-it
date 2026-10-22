@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { findPackage, pricing } from '../oferta/pricing.ts';
+import { findPackage, pricing } from '../offer/pricing.ts';
 import { findPlaceholders, visibleText } from '../shared/html.ts';
 import { priceQuote, quoteDataProblems, quoteProblems, type QuoteData } from './quote.ts';
 import { renderQuote } from './render.ts';
@@ -53,11 +53,11 @@ describe('Dig.IT requirements (research/digit-wymogi-oferty.md)', () => {
 });
 
 describe('price quote template', () => {
-  it('is Polish (D-035)', () => {
+  it('is Polish', () => {
     expect(blankHtml).toContain('<html lang="pl"');
   });
 
-  it('keeps contractor data as fields: name, NIP, address (D-028)', () => {
+  it('keeps contractor data as fields: name, NIP, address', () => {
     const fields = findPlaceholders(visibleText(blankHtml));
     expect(fields).toEqual(
       expect.arrayContaining([

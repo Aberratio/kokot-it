@@ -4,7 +4,7 @@ import { visibleText } from '../shared/html.ts';
 import { cvProblems, todoOwnerNotes, type CvContent } from './cv.ts';
 import { formatMonth, renderCv } from './render.ts';
 
-// Fictional person: the real CV content never enters this repo (T-06).
+// Fictional person: the real CV content never enters this repo.
 const sample = JSON.parse(
   readFileSync(new URL('../../tests/fixtures/cv.sample.json', import.meta.url), 'utf8'),
 ) as CvContent;

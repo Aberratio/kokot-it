@@ -31,7 +31,7 @@ describe('presentation offer', () => {
     expect(visibleText(approved)).not.toContain('Cennik wstępny');
   });
 
-  it('covers the content the task asks for (T-05)', () => {
+  it('covers the content the task asks for', () => {
     for (const heading of [
       'Gdzie firma traci czas',
       'Co robi kokot.it',

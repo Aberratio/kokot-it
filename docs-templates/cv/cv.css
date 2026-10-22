@@ -1,4 +1,4 @@
-/* CV (T-06): A4, paper theme, one reading column; section labels above their content. */
+/* CV: A4, paper theme, one reading column; section labels above their content. */
 
 /* No page counter: margin boxes come first in the PDF text, and an ATS should read the name first. */
 @page {

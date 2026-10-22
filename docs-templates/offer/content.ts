@@ -1,8 +1,8 @@
 import type { Lang } from '../shared/html.ts';
 
-// Copy of the presentation offer (T-05 form a). Prices are not here: they come from
+// Copy of the presentation offer (form a). Prices are not here: they come from
 // pricing.json. The price quote for the Dig.IT application is a separate template
-// (docs-templates/oferta-cenowa/), Polish only (D-035).
+// (docs-templates/price-quote/), Polish only.
 
 export interface PackageCopy {
   title: string;

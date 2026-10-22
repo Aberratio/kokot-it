@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { repoTextFiles } from './repo-files.ts';
 
-// D-028: no company data (name, NIP, address) or phone number in the repo — only {{FIELDS}}.
+// No company data (name, NIP, address) or phone number in the repo — only {{FIELDS}}.
 
 const scanned = repoTextFiles().filter(
   (f) => /^(docs-templates|tests|scripts)\//.test(f.path) && !f.path.endsWith('.test.ts'),
@@ -11,8 +11,8 @@ describe('documents and fixtures carry no private data', () => {
   it('scans the document sources', () => {
     expect(scanned.map((f) => f.path)).toEqual(
       expect.arrayContaining([
-        'docs-templates/oferta-cenowa/data.template.json',
-        'docs-templates/oferta-cenowa/data.example.json',
+        'docs-templates/price-quote/data.template.json',
+        'docs-templates/price-quote/data.example.json',
         'tests/fixtures/cv.sample.json',
       ]),
     );

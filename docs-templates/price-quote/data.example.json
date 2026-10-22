@@ -1,5 +1,5 @@
 {
-  "$comment": "EXAMPLE ONLY: a fictional company and illustrative values, to show how data.template.json is filled in. Not an offer. Contractor fields stay as {{...}} placeholders (D-028).",
+  "$comment": "EXAMPLE ONLY: a fictional company and illustrative values, to show how data.template.json is filled in. Not an offer. Contractor fields stay as {{...}} placeholders.",
   "example": "PRZYKŁAD — fikcyjna firma i wartości przykładowe. To nie jest oferta.",
   "offer": {
     "number": "PRZYKŁAD/2026/01",
