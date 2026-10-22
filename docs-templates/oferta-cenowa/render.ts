@@ -1,4 +1,13 @@
-import { documentHtml, escapeHtml, formatMoney, logoSvg, text } from '../shared/html.ts';
+import { offerCopy } from '../oferta/content.ts';
+import {
+  brandSvg,
+  documentHtml,
+  draftBadge,
+  escapeHtml,
+  formatMoney,
+  list,
+  text,
+} from '../shared/html.ts';
 import {
   isDraft,
   pricing as defaultPricing,
@@ -40,9 +49,6 @@ const money = (grosze: number | null | undefined, field = '{{KWOTA}}'): string =
     ? text(field)
     : escapeHtml(formatMoney(grosze, 'pl', { decimals: true }));
 
-const list = (items: string[]): string =>
-  `<ul>${items.map((i) => `<li>${text(i)}</li>`).join('')}</ul>`;
-
 const totalsCells = (t: Totals | null | undefined): string =>
   `<td class="num">${money(t?.net)}</td><td class="num">${money(t?.vat)}</td><td class="num">${money(t?.gross)}</td>`;
 
@@ -60,9 +66,7 @@ export function renderQuote(opts: QuoteOptions): string {
     signatory: q.contractor?.signatory ?? '{{OSOBA_PODPISUJACA}}',
   };
 
-  const draft = isDraft(p)
-    ? '<p class="draft-badge" data-draft>Cennik wstępny — do zatwierdzenia</p>'
-    : '';
+  const draft = isDraft(p) ? draftBadge(offerCopy.pl.draftBadge) : '';
   const example = q.example
     ? `<p class="example-banner" data-example>${escapeHtml(q.example)}</p>`
     : '';
@@ -121,7 +125,7 @@ export function renderQuote(opts: QuoteOptions): string {
 
   const body = `<article class="doc quote">
   <header class="doc-header">
-    ${logoSvg('doc-logo')}
+    ${brandSvg('logo-on-light', 'doc-logo')}
     <div class="doc-header-meta">
       <p class="label">Oferta cenowa · Dig.IT 2/2026</p>
       ${draft}
