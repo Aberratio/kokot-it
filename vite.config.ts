@@ -1,13 +1,16 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { contentPlugin } from './src/build/content-plugin.ts';
 import { discoverPages } from './src/build/pages.ts';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
 // Multi-page build: every index.html outside src/, docs-templates/ etc. is an entry
 // (/, /en/, /projekty/<slug>/, /en/projects/<slug>/). All pages share src/main.ts.
+// contentPlugin renders the copy from src/content/ into each page shell as static HTML.
 export default defineConfig({
   appType: 'mpa',
+  plugins: [contentPlugin(root)],
   build: {
     target: 'es2023',
     // three.js alone is ~500 kB; the scene task will code-split it.

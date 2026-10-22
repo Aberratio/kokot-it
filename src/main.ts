@@ -1,19 +1,19 @@
 import './styles/main.css';
-import { alternatePath, isLocale, localeFromPath, messages } from './i18n/index.ts';
+import './styles/content.css';
+import { mountDemos } from './demo.ts';
 import { mountScene } from './scene/index.ts';
 
-// Shared entry for every page. The page's own HTML carries its content;
-// this wires up the parts that are common to all locales.
-const locale = localeFromPath(window.location.pathname);
-const t = messages(locale);
+// Shared entry for every page. The copy, navigation and language switch are rendered
+// into static HTML at build time (src/content/), so everything here is enhancement.
 
-const switcher = document.querySelector<HTMLAnchorElement>('[data-lang-switch]');
-const target = t.langSwitch.target;
-if (switcher && isLocale(target)) {
-  switcher.href = alternatePath(window.location.pathname, target);
-  switcher.textContent = t.langSwitch.label;
-  switcher.hreflang = target;
+// The hero's #scene-root is an empty container in the static HTML; the scene (T-08)
+// adds its own canvas, so pages without JavaScript or WebGL carry no blank canvas.
+const sceneRoot = document.getElementById('scene-root');
+if (sceneRoot) {
+  const canvas = document.createElement('canvas');
+  canvas.className = 'scene';
+  sceneRoot.append(canvas);
+  mountScene(canvas);
 }
 
-const canvas = document.querySelector<HTMLCanvasElement>('[data-scene]');
-if (canvas) mountScene(canvas);
+mountDemos(document);

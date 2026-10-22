@@ -1,4 +1,5 @@
 import { Color, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { sceneTokensFromDocument } from '../styles/tokens.ts';
 
 /**
  * Placeholder for the 3D background scene. It only sets up a renderer that
@@ -15,7 +16,8 @@ export function mountScene(canvas: HTMLCanvasElement): () => void {
   }
 
   const scene = new Scene();
-  scene.background = new Color(0x07080b);
+  // Colours come from the brand tokens (src/styles/tokens.css), never from literals here.
+  scene.background = new Color(sceneTokensFromDocument().colors.bg);
   const camera = new PerspectiveCamera(50, 1, 0.1, 100);
   camera.position.z = 5;
 

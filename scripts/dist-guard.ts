@@ -1,0 +1,49 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import { contentViolations, standaloneViolations } from '../src/content/guards.ts';
+import { allRoutes, routePath } from '../src/content/render.ts';
+
+// Checks a built dist/ directory: every route page exists and was rendered; route pages pass
+// every content guard (phone, tax id, prices, e-mails, placeholders), and so does any other
+// page except STANDALONE_PAGES (the brand preview and its type specimens): contact + amount rules.
+
+function htmlFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) return htmlFiles(full);
+    return entry.name.endsWith('.html') ? [full] : [];
+  });
+}
+
+export interface DistReport {
+  pages: number;
+  failures: string[];
+}
+
+/** Built pages that are not site content and may show digits (T-03 brand preview). */
+export const STANDALONE_PAGES: readonly string[] = ['brand/index.html'];
+
+const routeFile = (path: string): string =>
+  [...path.split('/').filter(Boolean), 'index.html'].join('/');
+
+export function checkDist(dist: string): DistReport {
+  if (!existsSync(dist)) return { pages: 0, failures: ['dist/ does not exist'] };
+  const failures: string[] = [];
+  const routeFiles = new Set(allRoutes().map((route) => routeFile(routePath(route))));
+  for (const route of allRoutes()) {
+    if (!existsSync(join(dist, routeFile(routePath(route))))) {
+      failures.push(`${routePath(route)}: page missing from the build`);
+    }
+  }
+  const files = htmlFiles(dist);
+  for (const file of files) {
+    const html = readFileSync(file, 'utf8');
+    const name = relative(dist, file).split(sep).join('/');
+    // A shell the content plugin did not fill would ship an empty page.
+    if (html.includes('<!-- kokot:')) failures.push(`${name}: unrendered page shell`);
+    const standalone = STANDALONE_PAGES.includes(name) && !routeFiles.has(name);
+    const rules = standalone ? standaloneViolations : contentViolations;
+    for (const violation of rules(html)) failures.push(`${name}: ${violation}`);
+  }
+  return { pages: files.length, failures };
+}

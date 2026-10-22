@@ -14,17 +14,18 @@ npm run dev        # http://localhost:5173/ (PL), /en/ (EN)
 
 ## Skrypty
 
-| Skrypt                | Co robi                                                                                |
-| --------------------- | -------------------------------------------------------------------------------------- |
-| `npm run dev`         | serwer deweloperski Vite                                                               |
-| `npm run build`       | build produkcyjny do `dist/`                                                           |
-| `npm run preview`     | podgląd zbudowanego `dist/`                                                            |
-| `npm run typecheck`   | `tsc --noEmit`                                                                         |
-| `npm run lint`        | ESLint + `prettier --check`                                                            |
-| `npm run format`      | Prettier `--write` + `eslint --fix`                                                    |
-| `npm test`            | Vitest (jednorazowo); `npm run test:watch` w trybie watch                              |
-| `npm run pdf`         | renderuje `docs-templates/<dokument>/<pl\|en>.html` do `out/pdf/<dokument>-<lang>.pdf` |
-| `npm run pdf:install` | jednorazowo pobiera Chromium dla Playwright (potrzebny tylko do `pdf`)                 |
+| Skrypt                 | Co robi                                                                                |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `npm run dev`          | serwer deweloperski Vite                                                               |
+| `npm run build`        | build do `dist/` + strażnik treści (`scripts/check-dist.ts`)                           |
+| `npm run preview`      | podgląd zbudowanego `dist/`                                                            |
+| `npm run typecheck`    | `tsc --noEmit`                                                                         |
+| `npm run lint`         | ESLint + `prettier --check`                                                            |
+| `npm run format`       | Prettier `--write` + `eslint --fix`                                                    |
+| `npm test`             | Vitest (jednorazowo); `npm run test:watch` w trybie watch                              |
+| `npm run pdf`          | renderuje `docs-templates/<dokument>/<pl\|en>.html` do `out/pdf/<dokument>-<lang>.pdf` |
+| `npm run pdf:install`  | jednorazowo pobiera Chromium dla Playwright (potrzebny do `pdf` i `brand:assets`)      |
+| `npm run brand:assets` | generuje logo, sygnet i favicony (`public/brand/`, `public/favicon*`) z `tokens.css`   |
 
 `out/` i `dist/` są w `.gitignore`. CI nie instaluje przeglądarki — `pdf` uruchamia się lokalnie.
 
@@ -36,15 +37,27 @@ en/index.html               strona EN (/en/)
 projekty/<slug>/index.html  case study PL (/projekty/<slug>/)
 en/projects/<slug>/index.html  case study EN (/en/projects/<slug>/)
 src/main.ts                 wspólny punkt wejścia wszystkich stron
-src/i18n/                   słowniki PL/EN i mapowanie ścieżek między językami
-src/scene/                  scena Three.js (na razie zaślepka)
+src/content/                treść strony PL/EN (słowniki) i renderer do statycznego HTML
+src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
+src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback; katalog dodają T-10/11/13)
+src/i18n/                   teksty interfejsu PL/EN, ścieżki stron per język
+src/scene/                  scena Three.js (na razie zaślepka) i graf „Relay” (relay-graph.ts)
+src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
+src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
+src/styles/content.css      układ sekcji treści, wyłącznie na tokenach z tokens.css
+src/assets/fonts/           fonty marki woff2 (OFL) + licencje
+brand/index.html            podgląd systemu marki (/brand/, noindex)
+brand.md                    zasady marki; docs/concept.md — koncept sceny 3D
 src/build/pages.ts          wykrywanie stron do buildu (każdy index.html poza src/, docs-templates/ …)
 docs-templates/             szablony HTML dokumentów: oferta/, cv/ (pl.html, en.html), shared/docs.css
 scripts/pdf.ts              HTML → PDF (Playwright Chromium)
-public/                     pliki statyczne kopiowane bez zmian
+public/                     pliki statyczne kopiowane bez zmian (logo: public/brand/)
 ```
 
-Nowa podstrona = nowy `index.html` w odpowiednim folderze; konfiguracja Vite jej nie wymienia.
+Strony to cienkie szkielety `index.html` ze znacznikami `<!-- kokot:head -->` i `<!-- kokot:body -->`;
+treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest czytelny bez JavaScriptu.
+Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
+oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test sprawdza, że każda trasa ma szkielet; typy pilnują kompletu treści PL/EN).
 
 ## CI
 

@@ -3,25 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>kokot.it</title>
-    <meta name="description" content="kokot.it — strona w budowie." />
-    <link rel="alternate" hreflang="pl" href="https://kokot.it/" />
-    <link rel="alternate" hreflang="en" href="https://kokot.it/en/" />
-    <link rel="alternate" hreflang="x-default" href="https://kokot.it/" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- theme-color = --color-bg in src/styles/tokens.css (meta tags cannot read CSS vars) -->
+    <meta name="theme-color" content="#0b0d12" />
+    <!-- kokot:head -->
   </head>
   <body>
-    <a class="skip-link" href="#content">Przejdź do treści</a>
-    <canvas class="scene" data-scene aria-hidden="true"></canvas>
-    <header class="site-header">
-      <a href="/">kokot.it</a>
-      <a data-lang-switch href="/en/" hreflang="en">English</a>
-    </header>
-    <main id="content">
-      <!-- Treść strony PL: osobne zadanie. -->
-      <h1>kokot.it</h1>
-      <p>Strona w budowie.</p>
-    </main>
+    <!-- kokot:body -->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
