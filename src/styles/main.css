@@ -136,6 +136,12 @@ samp {
   pointer-events: none;
   background: linear-gradient(
     90deg,
+    var(--scene-scrim-strong) 0%,
+    var(--scene-scrim-soft) 42%,
+    transparent 72%
+  );
+  background: linear-gradient(
+    90deg,
     color-mix(in srgb, var(--scene-bg) 72%, transparent) 0%,
     color-mix(in srgb, var(--scene-bg) 48%, transparent) 42%,
     transparent 72%
@@ -144,6 +150,7 @@ samp {
 
 @media (max-width: 48rem) {
   .scene-scrim {
+    background: var(--scene-scrim-narrow);
     background: color-mix(in srgb, var(--scene-bg) 50%, transparent);
   }
 }
