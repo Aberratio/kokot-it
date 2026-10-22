@@ -201,6 +201,13 @@ typecheck, test, build. Changes reach `main` through pull requests.
 "Deploy skipped" notice. Project settings (Vite, `npm run build`, output `dist`, trailing
 slashes, headers) are in `vercel.json`.
 
+The Vercel project `kokot-it` is linked and live at https://kokot-it.vercel.app (production).
+Every `*.vercel.app` host answers with `X-Robots-Tag: noindex`, so only the custom domain gets
+indexed once DNS points to Vercel. `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are set in the
+repository secrets; automatic deploys from GitHub Actions start as soon as `VERCEL_TOKEN` is added
+(the Vercel CLI cannot create tokens, so it comes from the dashboard). Until then, deploy by hand
+with `npx vercel@65.0.0 deploy --prod` from a linked checkout.
+
 ### Secrets
 
 Add them in GitHub: repository → **Settings → Secrets and variables → Actions → New repository
