@@ -19,6 +19,23 @@ const TEXT_RULES: [string, RegExp][] = [
     'buzzword or leftover placeholder',
     /rewolucj|magi[aić]|magic|revolution|game.?chang|lorem|TODO|TBD|\bTBA\b|\bXXX\b|w budowie|wkrótce|do uzupełnienia|coming soon|under construction/i,
   ],
+  // The two public pattern sets of tiller's lib/leak-guard.sh (SECRETS and PRIVATE), copied as
+  // written there. Its third set, the project and person terms, lives in private local lists
+  // that this repository never sees; the tool itself is run by hand on the built pages.
+  [
+    'credential shape',
+    /(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9-]{10,}|xox[abprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/,
+  ],
+  [
+    'private agent record path',
+    /(~|\$HOME|\/Users\/[^/ ]+|\/home\/[^/ ]+)\/\.claude\/(plans|projects|memory|qa-evidence|meeting-notes|[A-Za-z0-9_-]+-reflections)\//,
+  ],
+  // A tiller path that names a real profile, brain, person or the helm: those directories are
+  // private by design. Templates and the `<name>` placeholder are public.
+  [
+    'private harness path',
+    /\b(?:brains|profiles|personal)\/(?!_templates?\b|<)[A-Za-z0-9]|\bhelm\/[A-Za-z0-9]/,
+  ],
 ];
 
 const ENTITIES: Record<string, string> = {
