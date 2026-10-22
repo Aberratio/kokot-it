@@ -7,14 +7,13 @@
 //
 // CV content is read from $CV_CONTENT_DIR (default: the private brain); missing → CV skipped.
 // First run: npm run pdf:install (downloads Chromium).
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium, type Browser } from 'playwright';
 import { cvContentDir, loadCvSources } from './cv-source.ts';
 import { planDocuments, type Mode } from './documents.ts';
-import { inspectPdf, pdfProblems } from './pdf-check.ts';
-import { renderPdf } from './pdf-render.ts';
+import { renderDocument } from './pdf-render.ts';
 
 const { values } = parseArgs({
   options: {
@@ -29,7 +28,7 @@ if (values.help) {
   process.exit(0);
 }
 
-const root = fileURLToPath(new URL('..', import.meta.url));
+const outDir = fileURLToPath(new URL('../out/pdf/', import.meta.url));
 const mode: Mode = values.final ? 'final' : 'draft';
 const cvDir = cvContentDir();
 const plan = planDocuments({
@@ -54,20 +53,12 @@ try {
 let failed = false;
 try {
   for (const doc of plan.docs) {
-    const name = doc.output.replace(/\.pdf$/, '');
-    const pdfPath = join(root, 'out', 'pdf', doc.output);
-    const htmlPath = join(root, 'out', 'html', `${name}.html`);
-    let info = await inspectPdf(await renderPdf(browser, doc.html, htmlPath, pdfPath));
-    if (doc.fallbackHtml && doc.maxPages !== undefined && info.pages > doc.maxPages) {
-      console.log(
-        `${doc.output}: ${String(info.pages)} pages, re-rendering without the optional section`,
+    const { pdfPath, info, problems, usedFallback } = await renderDocument(browser, doc, outDir);
+    if (usedFallback) {
+      console.warn(
+        `WARNING: ${doc.output} was over ${String(doc.maxPages)} pages; rendered without its optional section (CV: "additional").`,
       );
-      info = await inspectPdf(await renderPdf(browser, doc.fallbackHtml, htmlPath, pdfPath));
     }
-    const problems = pdfProblems(info, {
-      ...(doc.maxPages !== undefined ? { maxPages: doc.maxPages } : {}),
-      phrases: doc.phrases,
-    });
     const pages = `${String(info.pages)} ${info.pages === 1 ? 'page' : 'pages'}`;
     if (problems.length === 0) {
       console.log(`PDF ok: ${pdfPath} (${pages})`);

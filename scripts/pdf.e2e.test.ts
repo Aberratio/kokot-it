@@ -4,8 +4,8 @@ import { chromium, type Browser } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { CvContent } from '../docs-templates/cv/cv.ts';
 import { planDocuments } from './documents.ts';
-import { inspectPdf, pdfProblems, type PdfInfo } from './pdf-check.ts';
-import { renderPdf } from './pdf-render.ts';
+import type { PdfInfo } from './pdf-check.ts';
+import { renderDocument, type RenderedDocument } from './pdf-render.ts';
 
 // Real PDFs through Chromium: page limits, embedded brand fonts, extractable text (ATS).
 // Needs the Playwright browser (`npm run pdf:install`); skipped with a note when it is missing.
@@ -18,24 +18,26 @@ const sample = JSON.parse(
 
 describe.skipIf(!hasChromium)('generated PDFs', () => {
   let browser: Browser;
+  const rendered = new Map<string, RenderedDocument>();
   const results = new Map<string, PdfInfo>();
+  // EN copy carries an oversized optional section, so the two-page fallback is exercised too.
+  const longEn: CvContent = {
+    ...sample,
+    lang: 'en',
+    additional: Array.from({ length: 150 }, (_, i) => `Optional line ${String(i + 1)}.`),
+  };
   const plan = planDocuments({
     mode: 'draft',
-    cv: { dir: 'fixture', pl: sample, en: { ...sample, lang: 'en' } },
+    cv: { dir: 'fixture', pl: sample, en: longEn },
     cvDir: 'fixture',
   });
 
   beforeAll(async () => {
     browser = await chromium.launch();
     for (const doc of plan.docs) {
-      const name = doc.output.replace(/\.pdf$/, '');
-      const bytes = await renderPdf(
-        browser,
-        doc.html,
-        join(out, `${name}.html`),
-        join(out, doc.output),
-      );
-      results.set(doc.output, await inspectPdf(bytes));
+      const result = await renderDocument(browser, doc, out);
+      rendered.set(doc.output, result);
+      results.set(doc.output, result.info);
     }
   }, 120_000);
 
@@ -43,16 +45,14 @@ describe.skipIf(!hasChromium)('generated PDFs', () => {
     await browser.close();
   });
 
-  it.each(plan.docs.map((d) => [d.output, d] as const))('%s meets its checks', (output, doc) => {
-    const info = results.get(output);
-    expect(info).toBeDefined();
-    if (!info) return;
-    expect(
-      pdfProblems(info, {
-        ...(doc.maxPages !== undefined ? { maxPages: doc.maxPages } : {}),
-        phrases: doc.phrases,
-      }),
-    ).toEqual([]);
+  it.each(plan.docs.map((d) => d.output))('%s meets its checks', (output) => {
+    expect(rendered.get(output)?.problems).toEqual([]);
+  });
+
+  it('drops the optional CV section only when the CV would exceed two pages', () => {
+    expect(rendered.get('cv-pl.pdf')?.usedFallback).toBe(false);
+    expect(rendered.get('cv-en.pdf')?.usedFallback).toBe(true);
+    expect(results.get('cv-en.pdf')?.text).not.toContain('Optional line');
   });
 
   it('the offers and the CV fit in 1–2 pages', () => {
