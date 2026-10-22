@@ -1,7 +1,7 @@
 import type { SiteContent } from './types.ts';
 
-// English copy. Same shape as `pl.ts`. Package prices are left out on purpose: the price
-// list is awaiting the owner's approval (D-021).
+// English copy. Same shape as `pl.ts`. Package prices are left out on purpose until the price
+// list is approved.
 export const en: SiteContent = {
   meta: {
     title: 'kokot.it — AI implementation for manufacturing and software teams',
@@ -12,7 +12,7 @@ export const en: SiteContent = {
   nav: {
     label: 'Main navigation',
     services: 'Services',
-    process: 'How we work',
+    process: 'Process',
     projects: 'Projects',
     about: 'About',
     contact: 'Contact',
@@ -115,7 +115,7 @@ export const en: SiteContent = {
     },
   },
   process: {
-    title: 'How we work',
+    title: 'How a project runs',
     intro:
       'Every project starts with the process and the data, not with picking a model. An agent is only as good as the data it gets and the rules that check it.',
     steps: [
@@ -172,13 +172,13 @@ export const en: SiteContent = {
   projects: {
     title: 'Projects',
     intro:
-      'Four showcase projects: three demos built on fictional company data, and tiller, an in-house tool with public code. They show the way of working and the architecture; they are not client deployments. The demos on this site replay recorded runs and make no API calls.',
+      'Four reference projects: three applications running on sample data from fictional companies, and tiller, an in-house tool with public code. They show the way of working and the architecture; they are not client deployments. The applications on this site replay recorded runs and make no API calls.',
     cardCta: 'Case study',
   },
   about: {
     title: 'About kokot.it',
     text: [
-      'kokot.it is an engineering services brand focused on AI and agentic engineering: from process analysis, through agents and integrations, to the interface people actually use. This site and the showcase projects are examples of that work.',
+      'kokot.it is an engineering services brand focused on AI and agentic engineering: from process analysis, through agents and integrations, to the interface people actually use. This site and the reference projects are examples of that work.',
       'kokot.it runs each project directly, from the first conversation to the rollout. The quote sets out the scope and how the work is delivered, in line with the rules of the funding programme involved.',
     ],
     principlesTitle: 'Principles',
@@ -189,7 +189,7 @@ export const en: SiteContent = {
       },
       {
         title: 'A measurable goal',
-        text: 'Before the start we agree what to measure: handling time, error rate, downtime.',
+        text: 'Before the start, the project gets a success measure: handling time, error rate or downtime.',
       },
       {
         title: 'Data under control',
@@ -207,16 +207,20 @@ export const en: SiteContent = {
     emailLabel: 'Write to',
   },
   footer: {
-    note: 'The companies, documents and production data in the demos on this site are fictional.',
+    note: 'The reference applications on this site run on sample data: the companies, documents and production data are fictional.',
   },
   caseStudy: {
     back: 'All projects',
     problem: 'Problem',
     solution: 'Solution',
-    demo: 'Demo',
-    demoFallback: 'If the demo does not show here, the description above explains how it works.',
-    demoNote: 'Recorded demo: it replays a saved run and makes no API calls.',
-    demoFrameTitle: 'Recorded project demo',
+    tryIt: 'Try it',
+    toolFallback:
+      'The application loads here as you scroll and needs JavaScript. You can also open it in a separate tab.',
+    toolNote:
+      'Recorded run: the application replays saved answers on sample data and makes no API calls.',
+    toolFrameTitle: 'Reference application',
+    toolOpen: 'Open the application in a new tab',
+    newTab: 'opens in a new tab',
     stack: 'Stack',
     repo: 'Repository',
     repoPending: 'the repository will be made public after review',
@@ -228,7 +232,7 @@ export const en: SiteContent = {
     'factory-twin': {
       metaTitle: 'Shop-floor digital twin with an AI agent — kokot.it',
       metaDescription:
-        'Showcase project: a 3D production hall with machine status and an AI agent that answers questions about orders, downtime and quality.',
+        'Reference solution: a 3D production hall with machine status and an AI agent that answers questions about orders, downtime and quality.',
       card: {
         title: 'Shop-floor digital twin with an AI agent',
         summary:
@@ -236,7 +240,7 @@ export const en: SiteContent = {
         tags: ['manufacturing', 'Three.js', 'AI agent'],
       },
       lead: 'A 3D production hall where an AI agent answers questions about the state of production and shows the answer on the model: it highlights the machine and moves the camera.',
-      kind: 'Showcase project, fictional company and data',
+      kind: 'Reference solution, sample data',
       problem: [
         'Information about the state of production is scattered: orders in the ERP, downtime in the maintenance log, quality inspection results in separate spreadsheets. Answering “why is line 2 stopped and which orders are at risk” means looking in several places.',
         'Reports and dashboards show numbers, but rarely show where on the floor the problem is.',
@@ -248,12 +252,12 @@ export const en: SiteContent = {
         points: [
           'the agent uses only the data exposed through its tools, not general knowledge',
           'a text answer plus an action in the scene: machine highlight, camera move',
-          'demo data: a fictional company, orders, downtime and quality inspection results',
+          'sample data: a fictional company, orders, downtime and quality inspection results',
           'a recorded mode at no cost and a live mode with an API key, run locally',
         ],
       },
-      demo: {
-        title: 'Demo: questions about the hall',
+      preview: {
+        title: 'Questions about the hall',
         text: 'A few recorded scenarios, e.g. a question about downtime on a line and about orders at risk of delay.',
       },
       stack: ['TypeScript', 'Three.js', 'Vite', 'Claude API (tool use)', 'Vitest'],
@@ -261,7 +265,7 @@ export const en: SiteContent = {
     'production-docs-agent': {
       metaTitle: 'Production documents agent — kokot.it',
       metaDescription:
-        'Showcase project: an AI agent reads purchase orders and quality reports, fills a spreadsheet or ERP records and flags uncertain fields for review.',
+        'Reference solution: an AI agent reads purchase orders and quality reports, fills a spreadsheet or ERP records and flags uncertain fields for review.',
       card: {
         title: 'Production documents agent',
         summary:
@@ -269,7 +273,7 @@ export const en: SiteContent = {
         tags: ['documents', 'quality', 'ERP'],
       },
       lead: 'The agent reads orders and quality reports in different formats, extracts their data into a fixed schema, and hands the fields it is not sure about to a person.',
-      kind: 'Showcase project, fictional documents',
+      kind: 'Reference solution, sample documents',
       problem: [
         'Orders arrive as PDFs, scans or e-mail bodies, each with its own layout. Quality reports have their own forms. Someone retypes them into a spreadsheet or the ERP, which takes time and causes mistakes that surface only on the shop floor or in a complaint.',
         'Full automation without control is risky: a missing field or an ambiguous quantity must not be “guessed”.',
@@ -281,12 +285,12 @@ export const en: SiteContent = {
         points: [
           'extraction into a schema (structured output) and rule validation',
           'hard cases, such as a missing field or an ambiguity, are flagged, not guessed',
-          'export to CSV and XLSX, standing in for an ERP integration in the demo',
+          'export to CSV and XLSX, standing in for an ERP integration in the reference version',
           'a recorded mode at no cost and a live mode with an API key, run locally',
         ],
       },
-      demo: {
-        title: 'Demo: from document to record',
+      preview: {
+        title: 'From document to record',
         text: 'Recorded runs on several fictional orders and quality reports, including documents with missing data.',
       },
       stack: ['TypeScript', 'Vite', 'Claude API (structured output)', 'SheetJS', 'Vitest'],
@@ -294,21 +298,21 @@ export const en: SiteContent = {
     'grant-assistant': {
       metaTitle: 'Grant application assistant — kokot.it',
       metaDescription:
-        'Showcase project: matching a company to funding calls with explicit eligibility rules, plus a draft project description. Not legal advice or a grant guarantee.',
+        'Reference solution: matching a company to funding calls with explicit eligibility rules, plus a draft project description. Not legal advice or a grant guarantee.',
       card: {
         title: 'Grant application assistant',
         summary:
           'Matches a company to funding calls with explicit rules and drafts a project description for the best match.',
         tags: ['grants', 'rules', 'AI agent'],
       },
-      lead: 'From a short company profile, the assistant checks the conditions of several funding calls, points out the unmet ones and drafts a project description for the best match.',
-      kind: 'Showcase project, call data with an as-of date',
+      lead: 'From a short company profile, the assistant checks the conditions of several funding calls, points out the unmet ones and prepares a working draft of the project description for the best match, a starting point for the company or its adviser.',
+      kind: 'Reference solution, call data with an as-of date',
       problem: [
         'A company considering a grant first has to work out which calls it qualifies for at all: company age, financial result, industry, region. These conditions are spread across rulebooks, and the first assessment takes time for the company and its adviser.',
       ],
       solution: {
         text: [
-          'Eligibility conditions are written as explicit, tested rules rather than left to the model’s judgement. The language model only drafts the project description for the best match. The result also lists the documents to prepare.',
+          'Eligibility conditions are written as explicit, tested rules rather than left to the model’s judgement. The language model only prepares a working draft of the project description; the company writes and files the application. The result also lists the documents to prepare.',
           'The assistant helps with a first assessment; it does not replace the application or an adviser, is not legal advice and does not guarantee a grant. Call data carries an as-of date and links to the sources.',
         ],
         points: [
@@ -318,8 +322,8 @@ export const en: SiteContent = {
           'the disclaimer visible in the interface',
         ],
       },
-      demo: {
-        title: 'Demo: matching to funding calls',
+      preview: {
+        title: 'Matching to funding calls',
         text: 'Recorded runs for several fictional company profiles.',
       },
       stack: ['TypeScript', 'Vite', 'Zod', 'Claude API', 'Vitest'],
@@ -444,7 +448,7 @@ export const en: SiteContent = {
           },
         ],
       },
-      demo: {
+      preview: {
         title: 'A sample run',
         text: 'A session on the fictional bookshelf-api project, from opening the ticket to the verdict.',
       },
@@ -562,13 +566,13 @@ export const en: SiteContent = {
           { value: '23', label: 'flow-* skills', source: 'skills/flow-*/SKILL.md' },
           {
             value: '1011',
-            label: 'tests declared across 104 Node test files',
+            label: 'tests declared across 89 Node test files',
             source: 'lines starting with test( (indented too) in *.test.mjs',
           },
           {
             value: '168',
             label: 'commits on main since the first one, 12 October 2026',
-            source: 'git log main',
+            source: 'git rev-list --count d536250',
           },
           {
             value: '14',

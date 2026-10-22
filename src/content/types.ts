@@ -31,16 +31,17 @@ export interface CaseStudy {
   metaDescription: string;
   card: ProjectCard;
   lead: string;
-  /** Short honest label, e.g. "showcase project, fictional data". */
+  /** Short honest label, e.g. "reference solution, sample data". */
   kind: string;
   problem: string[];
   solution: { text: string[]; points: string[] };
   /** Optional ordered walkthrough (used by the tiller case study). */
   flow?: { title: string; steps: Step[]; diagram?: FlowDiagram };
-  demo: { title: string; text: string };
+  /** Caption of the embedded application or of the sample run: what the reader sees. */
+  preview: { title: string; text: string };
   /**
-   * A static, illustrative session log shown in place of the recorded demo slot. It is text in
-   * the page, so it needs no JavaScript and no published demo file.
+   * A static, illustrative session log shown in place of an embedded application. It is text in
+   * the page, so it needs no JavaScript and no published application.
    */
   transcript?: Transcript;
   /** Facts with their source in the public repository, and lessons drawn from them. */
@@ -153,11 +154,17 @@ export interface SiteContent {
     back: string;
     problem: string;
     solution: string;
-    demo: string;
-    demoFallback: string;
-    /** Always shown under the demo: it is recorded and makes no API calls (D-023). */
-    demoNote: string;
-    demoFrameTitle: string;
+    /** Heading of the section that embeds the reference application. */
+    tryIt: string;
+    /** Shown in place of the application until it loads (or without JavaScript). */
+    toolFallback: string;
+    /** Always shown under the application: it replays recorded runs and makes no API calls. */
+    toolNote: string;
+    toolFrameTitle: string;
+    /** Link that opens the application on its own page, in a new tab. */
+    toolOpen: string;
+    /** Accessible hint appended to links that open a new tab. */
+    newTab: string;
     stack: string;
     repo: string;
     repoPending: string;
@@ -179,19 +186,30 @@ export type ProjectSlug = (typeof PROJECT_SLUGS)[number];
 export interface Repo {
   /** `owner/name` on GitHub. */
   name: string;
-  /** False until the owner reviews and publishes it (D-024): rendered as a marked placeholder. */
+  /** False while the repository is private: rendered as a marked placeholder instead of a link. */
   public: boolean;
 }
 
 /** Repositories behind each case study. Language independent. */
 export const REPOS: Record<ProjectSlug, Repo> = {
-  'factory-twin': { name: 'Aberratio/factory-twin', public: false },
-  'production-docs-agent': { name: 'Aberratio/production-docs-agent', public: false },
-  'grant-assistant': { name: 'Aberratio/grant-assistant', public: false },
+  'factory-twin': { name: 'Aberratio/factory-twin', public: true },
+  'production-docs-agent': { name: 'Aberratio/production-docs-agent', public: true },
+  'grant-assistant': { name: 'Aberratio/grant-assistant', public: true },
   tiller: { name: 'Aberratio/tiller', public: true },
 };
 
-/** The only contact channel on the site (D-028). Taken from the owner's CV `basics.email`. */
+/** The only contact channel on the site. */
 export const CONTACT_EMAIL = 'joanna@kokot.it';
 
 export const SITE_ORIGIN = 'https://kokot.it';
+
+/**
+ * Case studies that embed their reference application from `public/tools/<slug>/`
+ * (built by scripts/sync-tools.ts from tools.lock.json). The others show a sample run as text.
+ */
+export const TOOL_SLUGS = ['factory-twin', 'production-docs-agent', 'grant-assistant'] as const;
+export type ToolSlug = (typeof TOOL_SLUGS)[number];
+
+export function isToolSlug(slug: ProjectSlug): slug is ToolSlug {
+  return (TOOL_SLUGS as readonly string[]).includes(slug);
+}

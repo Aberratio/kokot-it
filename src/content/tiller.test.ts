@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { LOCALES, type Locale } from '../i18n/index.ts';
 import { diagramHeight, LAYOUT, renderFlowDiagram } from './diagram.ts';
 import { contentViolations, readableText } from './guards.ts';
-import { content, escapeHtml, renderPage } from './render.ts';
+import { escapeHtml } from './html.ts';
+import { content, renderPage } from './render.ts';
 import { REPOS, type CaseStudy, type FlowDiagram } from './types.ts';
 
-// The tiller case study (T-12): a diagram, an illustrative session log and facts from the public
+// The tiller case study: a diagram, an illustrative session log and facts from the public
 // repository. These tests pin what the page promises: an accessible diagram drawn on brand
 // tokens, a log that says it is an illustration and follows the skills' real order, and no
 // private name, path or credential anywhere on the page.
@@ -29,7 +30,7 @@ describe('tiller case study sections', () => {
     expect(s.transcript).toBeDefined();
     expect(s.results).toBeDefined();
     const html = page(locale);
-    for (const id of ['problem', 'solution', 'flow', 'demo', 'results', 'stack', 'repo']) {
+    for (const id of ['problem', 'solution', 'flow', 'preview', 'results', 'stack', 'repo']) {
       expect(html).toContain(`id="${id}-title"`);
     }
     for (const lesson of s.results?.lessons ?? []) expect(html).toContain(escapeHtml(lesson.title));

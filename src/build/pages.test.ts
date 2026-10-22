@@ -8,7 +8,7 @@ describe('entryName', () => {
   it('names the root page main and nested pages by their folder', () => {
     expect(entryName('index.html')).toBe('main');
     expect(entryName('en/index.html')).toBe('en');
-    expect(entryName(join('projekty', 'demo', 'index.html'))).toBe('projekty/demo');
+    expect(entryName(join('projekty', 'sample', 'index.html'))).toBe('projekty/sample');
   });
 });
 
@@ -26,16 +26,16 @@ describe('discoverPages', () => {
     };
     page('index.html');
     page('en', 'index.html');
-    page('projekty', 'demo', 'index.html');
-    page('en', 'projects', 'demo', 'index.html');
+    page('projekty', 'sample', 'index.html');
+    page('en', 'projects', 'sample', 'index.html');
     page('docs-templates', 'cv', 'index.html');
     page('node_modules', 'x', 'index.html');
 
     expect(Object.keys(discoverPages(root)).sort()).toEqual([
       'en',
-      'en/projects/demo',
+      'en/projects/sample',
       'main',
-      'projekty/demo',
+      'projekty/sample',
     ]);
   });
 });
