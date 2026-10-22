@@ -48,3 +48,39 @@
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/*
+ * Metric-matched fallbacks: while the brand fonts load (font-display: swap), text is set in a
+ * local font scaled to the same advance widths, so the swap does not re-wrap lines and shift the
+ * page (Cumulative Layout Shift). Ratios measured in Chromium over the home page copy:
+ * Schibsted Grotesk is 4.0 % wider than Arial at 400 and 0.5 % narrower than Arial Bold at 600;
+ * JetBrains Mono matches Courier New. Ascent and descent come from the brand fonts' own metrics.
+ */
+@font-face {
+  font-family: 'Schibsted Grotesk Fallback';
+  font-weight: 400 500;
+  src: local('Arial'), local('ArialMT'), local('Helvetica');
+  size-adjust: 104%;
+  ascent-override: 94%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Schibsted Grotesk Fallback';
+  font-weight: 600 900;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Helvetica Bold');
+  size-adjust: 99.5%;
+  ascent-override: 98.5%;
+  descent-override: 26%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New'), local('CourierNewPSMT');
+  size-adjust: 100%;
+  ascent-override: 102%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
