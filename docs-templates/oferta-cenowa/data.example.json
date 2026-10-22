@@ -1,0 +1,92 @@
+{
+  "$comment": "EXAMPLE ONLY: a fictional company and illustrative values, to show how data.template.json is filled in. Not an offer. Contractor fields stay as {{...}} placeholders (D-028).",
+  "example": "PRZYKŁAD — fikcyjna firma i wartości przykładowe. To nie jest oferta.",
+  "offer": {
+    "number": "PRZYKŁAD/2026/01",
+    "date": "05.11.2026",
+    "place": "Wrocław",
+    "validityDays": 90
+  },
+  "inquiry": {
+    "date": "03.11.2026",
+    "subject": "Wdrożenie agenta AI do obsługi zamówień (przykład)",
+    "reference": "zapytanie ofertowe nr 1/2026 (przykład)"
+  },
+  "client": {
+    "name": "Przykładowe Zakłady Metalowe sp. z o.o. (firma fikcyjna)",
+    "address": "ul. Przykładowa 1, 00-000 Przykładowo"
+  },
+  "package": "P2",
+  "duration": "5 miesięcy od podpisania umowy",
+  "scope": {
+    "title": "Agent AI do obsługi zamówień i specyfikacji klientów z integracją z ERP (przykład)",
+    "process": "Zamówienia i specyfikacje od klientów przychodzą e-mailem jako PDF i arkusze; dział obsługi zamówień przepisuje je ręcznie do ERP. Agent ma odczytać dokument, wyciągnąć pozycje, sprawdzić je z kartoteką indeksów i cennikiem, a pola niepewne przekazać do weryfikacji.",
+    "functions": [
+      "odczyt zamówień i specyfikacji z e-maili i załączników PDF / XLSX",
+      "walidacja pozycji z kartoteką indeksów, cennikiem i warunkami klienta",
+      "panel weryfikacji pól niepewnych i zatwierdzania zamówień",
+      "zapis zatwierdzonych zamówień do ERP ze śladem decyzji"
+    ],
+    "integrations": [
+      "ERP Zamawiającego (API lub import plików)",
+      "skrzynka e-mail działu zamówień",
+      "jednokrotne logowanie użytkowników (SSO)"
+    ],
+    "deliverables": [
+      "działający agent AI na infrastrukturze Zamawiającego lub w chmurze w regionie UE",
+      "kod źródłowy z przeniesieniem autorskich praw majątkowych",
+      "dokumentacja techniczna i użytkowa",
+      "raport z testów z miernikami (KPI)",
+      "przeszkoleni pracownicy",
+      "notatka zgodności z AI Act"
+    ]
+  },
+  "stages": [
+    { "id": "analysis", "days": 4, "schedule": "1. miesiąc" },
+    { "id": "build", "days": 24, "schedule": "1.–3. miesiąc" },
+    { "id": "integration", "days": 12, "schedule": "2.–4. miesiąc" },
+    { "id": "pilot", "days": 6, "schedule": "4. miesiąc" },
+    { "id": "training", "days": 3, "schedule": "5. miesiąc" },
+    { "id": "hypercare", "days": 2, "schedule": "5. miesiąc" }
+  ],
+  "externalCosts": [
+    {
+      "name": "API modelu językowego",
+      "provider": "dostawca modeli z umową SLA (przykład)",
+      "dataRegion": "UE",
+      "sla": "99,9% (przykład)",
+      "projectNet": 4000,
+      "monthlyAfter": "ok. 300 zł netto / mies. (przykład)"
+    },
+    {
+      "name": "Hosting aplikacji",
+      "provider": "dostawca chmury z umową SLA (przykład)",
+      "dataRegion": "UE",
+      "sla": "99,9% (przykład)",
+      "projectNet": 1500,
+      "monthlyAfter": "ok. 150 zł netto / mies. (przykład)"
+    }
+  ],
+  "training": {
+    "participants": "6 pracowników działu zamówień i 1 administrator (przykład)",
+    "days": "2 dni szkoleniowe w siedzibie Zamawiającego (przykład)",
+    "program": [
+      "praca z agentem i panelem: przegląd wyników, weryfikacja pól niepewnych, zatwierdzanie",
+      "obsługa wyjątków i zgłaszanie błędów",
+      "administracja: użytkownicy, reguły walidacji, monitoring i logi"
+    ]
+  },
+  "advantages": [
+    "pola niepewne trafiają do weryfikacji przez człowieka, zamiast być zgadywane",
+    "każda decyzja agenta zostawia ślad: źródło danych, zastosowane reguły, wynik",
+    "modele od dostawców z regionem danych w UE albo modele uruchamiane lokalnie",
+    "pomiar mierników przed wdrożeniem i po nim: czas obsługi dokumentu, odsetek błędów"
+  ],
+  "warranty": "12 miesięcy na wady oprogramowania od odbioru końcowego (przykład)",
+  "payment": [
+    { "milestone": "Odbiór analizy i projektu rozwiązania", "share": "10%" },
+    { "milestone": "Odbiór oprogramowania (agent)", "share": "40%" },
+    { "milestone": "Odbiór integracji i pilotażu", "share": "30%" },
+    { "milestone": "Odbiór końcowy: szkolenie i wsparcie", "share": "20%" }
+  ]
+}
