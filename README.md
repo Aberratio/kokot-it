@@ -14,20 +14,54 @@ npm run dev        # http://localhost:5173/ (PL), /en/ (EN)
 
 ## Skrypty
 
-| Skrypt                 | Co robi                                                                                |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `npm run dev`          | serwer deweloperski Vite                                                               |
-| `npm run build`        | build do `dist/` + strażnik treści (`scripts/check-dist.ts`)                           |
-| `npm run preview`      | podgląd zbudowanego `dist/`                                                            |
-| `npm run typecheck`    | `tsc --noEmit`                                                                         |
-| `npm run lint`         | ESLint + `prettier --check`                                                            |
-| `npm run format`       | Prettier `--write` + `eslint --fix`                                                    |
-| `npm test`             | Vitest (jednorazowo); `npm run test:watch` w trybie watch                              |
-| `npm run pdf`          | renderuje `docs-templates/<dokument>/<pl\|en>.html` do `out/pdf/<dokument>-<lang>.pdf` |
-| `npm run pdf:install`  | jednorazowo pobiera Chromium dla Playwright (potrzebny do `pdf` i `brand:assets`)      |
-| `npm run brand:assets` | generuje logo, sygnet i favicony (`public/brand/`, `public/favicon*`) z `tokens.css`   |
+| Skrypt                 | Co robi                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `npm run dev`          | serwer deweloperski Vite                                                                  |
+| `npm run build`        | build do `dist/` + strażnik treści (`scripts/check-dist.ts`)                              |
+| `npm run preview`      | podgląd zbudowanego `dist/`                                                               |
+| `npm run typecheck`    | `tsc --noEmit`                                                                            |
+| `npm run lint`         | ESLint + `prettier --check`                                                               |
+| `npm run format`       | Prettier `--write` + `eslint --fix`                                                       |
+| `npm test`             | Vitest (jednorazowo); `npm run test:watch` w trybie watch                                 |
+| `npm run pdf`          | oferta PL/EN, oferta cenowa PL (szablon + przykład), CV PL/EN → `out/pdf/` + kontrola PDF |
+| `npm run pdf:preview`  | renderuje strony PDF-ów z `out/pdf/` do PNG w `out/preview/` (kontrola wzrokowa)          |
+| `npm run pdf:install`  | jednorazowo pobiera Chromium dla Playwright (potrzebny do `pdf` i `brand:assets`)         |
+| `npm run brand:assets` | generuje logo, sygnet i favicony (`public/brand/`, `public/favicon*`) z `tokens.css`      |
 
-`out/` i `dist/` są w `.gitignore`. CI nie instaluje przeglądarki — `pdf` uruchamia się lokalnie.
+`out/` i `dist/` są w `.gitignore`. CI instaluje Chromium tylko dla testów PDF (na fikcyjnym CV).
+
+## Dokumenty: oferta, oferta cenowa, CV
+
+`npm run pdf` generuje jedną komendą (`out/pdf/`):
+
+| Plik                             | Co to jest                                                               |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| `oferta-pl.pdf`, `oferta-en.pdf` | oferta ogólna / prezentacyjna, 2 strony A4                               |
+| `oferta-cenowa-szablon-pl.pdf`   | szablon oferty cenowej do wniosku Dig.IT, z polami `{{...}}` (tylko PL)  |
+| `oferta-cenowa-przyklad-pl.pdf`  | ten sam szablon wypełniony danymi fikcyjnej firmy (oznaczony „PRZYKŁAD”) |
+| `cv-pl.pdf`, `cv-en.pdf`         | CV, 1–2 strony; pomijane z komunikatem, gdy treści CV nie ma (np. w CI)  |
+
+Po wygenerowaniu skrypt sprawdza każdy PDF: limit stron (oferta ogólna i CV ≤ 2), fonty marki
+osadzone jako prawdziwe fonty TrueType (`docs-templates/shared/print-fonts.css`: statyczne
+instancje z `@fontsource/*`, bo zmienne woff2 Chromium zapisuje jako Type 3) i obecność fraz w
+tekście wyciągniętym z PDF (czytelność dla ATS).
+
+- **Ceny** mają jedno źródło: `docs-templates/oferta/pricing.json` (zgodne z cennikiem w
+  brainie; `pricing.test.ts` pilnuje widełek). Dopóki `"status": "draft"`, każdy dokument ma
+  znacznik „Cennik wstępny — do zatwierdzenia”. Po zatwierdzeniu cennika: `"status": "approved"`.
+- **Dane wykonawcy** (nazwa, NIP, adres) nigdy nie trafiają do repo: w szablonie są polami
+  `{{NAZWA_FIRMY}}`, `{{NIP}}`, `{{ADRES}}`. Konkretną ofertę cenową przygotowuje się z kopii
+  `docs-templates/oferta-cenowa/data.template.json` trzymanej **poza repo** (np. w brainie):
+  `npm run pdf -- --quote <plik.json> --final`. Ceny liczą się z `pricing.json` (osobodni × stawka).
+- **Wymogi Dig.IT:** `docs-templates/oferta-cenowa/requirements.ts` to 32 wymogi z researchu;
+  każdy ma w szablonie element z `data-req="<nr>"` (`requirements.test.ts`).
+- **CV:** szablon jest w repo, treść nie. Skrypt czyta `cv.pl.json` / `cv.en.json` z
+  `$CV_CONTENT_DIR` (domyślnie `C:/Repos/tiller/brains/personal-brand/cv`). Pola `TODO_OWNER`
+  nie są renderowane, a skrypt wypisuje je jako ostrzeżenia. Testy używają fikcyjnej osoby z
+  `tests/fixtures/cv.sample.json`; `tests/cv-content-guard.test.ts` (gdy brain jest dostępny)
+  sprawdza, że żadna charakterystyczna fraza z CV nie trafiła do repo.
+- **`--final`** (wersja do wysyłki): ostrzega o niewypełnionych polach `{{...}}`, `TODO_OWNER`
+  i cenniku w statusie `draft` („NOT READY TO SEND”).
 
 ## Struktura
 
@@ -49,8 +83,9 @@ src/assets/fonts/           fonty marki woff2 (OFL) + licencje
 brand/index.html            podgląd systemu marki (/brand/, noindex)
 brand.md                    zasady marki; docs/concept.md — koncept sceny 3D
 src/build/pages.ts          wykrywanie stron do buildu (każdy index.html poza src/, docs-templates/ …)
-docs-templates/             szablony HTML dokumentów: oferta/, cv/ (pl.html, en.html), shared/docs.css
-scripts/pdf.ts              HTML → PDF (Playwright Chromium)
+docs-templates/             szablony dokumentów (TS → HTML): oferta/, oferta-cenowa/, cv/, shared/
+scripts/pdf.ts              HTML → PDF (Playwright Chromium) i kontrola PDF (pdf-check.ts)
+tests/                      strażnicy danych prywatnych w repo i fikcyjne fixture'y
 public/                     pliki statyczne kopiowane bez zmian (logo: public/brand/)
 ```
 

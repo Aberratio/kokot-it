@@ -23,8 +23,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      # Playwright's browser is not needed here: `npm run pdf` is not part of CI.
       - run: npm ci
+      # Chromium for the PDF tests (scripts/pdf.e2e.test.ts): offer, price quote and a CV
+      # rendered from the fictional fixture; the real CV content is not available in CI.
+      - run: npx playwright install --with-deps chromium
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
