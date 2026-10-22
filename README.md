@@ -77,7 +77,7 @@ src/content/                treść strony PL/EN (słowniki) i renderer do staty
 src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
 src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback; katalog dodają T-10/11/13)
 src/i18n/                   teksty interfejsu PL/EN, ścieżki stron per język
-src/scene/                  scena Three.js (na razie zaślepka) i graf „Relay” (relay-graph.ts)
+src/scene/                  scena „Relay”: logika (graf, układy, trasy, jakość) + renderer Three.js i shadery GLSL
 src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
 src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
 src/styles/content.css      układ sekcji treści, wyłącznie na tokenach z tokens.css
@@ -95,6 +95,23 @@ Strony to cienkie szkielety `index.html` ze znacznikami `<!-- kokot:head -->` i 
 treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest czytelny bez JavaScriptu.
 Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
 oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test sprawdza, że każda trasa ma szkielet; typy pilnują kompletu treści PL/EN).
+
+## Scena 3D („Relay”)
+
+Koncept i uzasadnienie: `docs/concept.md`. Scena to stałe tło strony głównej: rzadki graf agentów,
+po którego krawędziach biegną impulsy zadań (ciepłe) i wyników (chłodne); sieć przebudowuje się
+między sekcjami (hero → 3 klastry usług → 4 konstelacje projektów → zbieżność przy adresie e-mail).
+
+- Ładowanie: `src/scene/index.ts` (w głównym bundlu, bez three.js) czeka na `load` i bezczynność
+  przeglądarki, potem dynamicznie importuje `src/scene/app.ts` z three.js w osobnym chunku.
+- Tryby: WebGL2 → scena na żywo; `prefers-reduced-motion` → jedna nieruchoma klatka; brak WebGL,
+  utrata kontekstu albo zbyt wolne urządzenie → statyczny kadr SVG (`src/scene/still.ts`).
+- Jakość adaptacyjna (`src/scene/quality.ts`): poziom startowy z urządzenia, potem średni czas
+  klatki > 20 ms przez 2 s obniża poziom (liczba węzłów, DPR, poświata); nigdy nie podnosi.
+  Bieżący poziom widać w atrybucie `data-level` na `canvas.scene`.
+- Pauza w ukrytej karcie i poza ekranem; kolory i czasy tylko z tokenów (`src/styles/tokens.css`).
+- Logika (graf, układy, trasy, jakość, wejście) jest czysta i testowana w Vitest; renderer i
+  shadery (`renderer.ts`, `shaders.ts`) sprawdza się w przeglądarce — zrzuty w `docs/screenshots/scene-*.png`.
 
 ## CI
 
