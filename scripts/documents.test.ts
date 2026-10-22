@@ -69,6 +69,14 @@ describe('npm run pdf — document plan', () => {
       'oferta-cenowa-firma-x-pl.pdf: unfilled fields {{ADRES}} {{NAZWA_FIRMY}} {{NIP}} {{OSOBA_PODPISUJACA}}',
     );
   });
+
+  it('stops with a readable message when a private quote file is malformed', () => {
+    const file = join(mkdtempSync(join(tmpdir(), 'quote-')), 'broken.json');
+    writeFileSync(file, JSON.stringify({ package: 'P2' }));
+    expect(() => planDocuments({ mode: 'final', cv: null, cvDir: 'x', quoteFile: file })).toThrow(
+      /broken\.json: offer missing; inquiry missing/,
+    );
+  });
 });
 
 describe('CV content location', () => {

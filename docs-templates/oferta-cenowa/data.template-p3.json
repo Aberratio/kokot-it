@@ -1,0 +1,128 @@
+{
+  "$comment": "Blank price quote for package P3 (programme: 2-3 processes + digital twin + training). Same rules as data.template.json (P2): copy OUTSIDE the repo, fill in, npm run pdf -- --quote <file> --final.",
+  "offer": {
+    "number": "{{NUMER_OFERTY}}",
+    "date": "{{DATA_OFERTY}}",
+    "place": "{{MIEJSCOWOSC}}",
+    "validityDays": 90
+  },
+  "inquiry": {
+    "date": "{{DATA_ZAPYTANIA}}",
+    "subject": "{{TEMAT_ZAPYTANIA}}",
+    "reference": "{{NUMER_ZAPYTANIA}}"
+  },
+  "client": {
+    "name": "{{NAZWA_KLIENTA}}",
+    "address": "{{ADRES_KLIENTA}}"
+  },
+  "package": "P3",
+  "duration": "{{CZAS_REALIZACJI}}",
+  "scope": {
+    "title": "{{TYTUL_ZAMOWIENIA}}",
+    "process": "{{OPIS_PROCESU_I_WYMAGAN}}",
+    "functions": ["{{FUNKCJA_1}}", "{{FUNKCJA_2}}", "{{FUNKCJA_3}}"],
+    "integrations": ["{{SYSTEM_1}}", "{{SYSTEM_2}}", "{{ZRODLO_DANYCH_PRODUKCYJNYCH}}"],
+    "deliverables": [
+      "platforma agentów AI z 2–3 wdrożonymi procesami",
+      "cyfrowy bliźniak hali z warstwą danych i agentem AI",
+      "kod źródłowy z przeniesieniem autorskich praw majątkowych",
+      "dokumentacja techniczna i użytkowa",
+      "raport mierników (KPI) przed wdrożeniem i po nim",
+      "przeszkolony zespół (operatorzy, liderzy, administrator)",
+      "notatka zgodności z AI Act"
+    ]
+  },
+  "stages": [
+    {
+      "id": "analysis",
+      "days": null,
+      "schedule": "{{TERMIN_1}}"
+    },
+    {
+      "id": "agents",
+      "days": null,
+      "schedule": "{{TERMIN_2}}"
+    },
+    {
+      "id": "twin",
+      "days": null,
+      "schedule": "{{TERMIN_3}}"
+    },
+    {
+      "id": "integration",
+      "days": null,
+      "schedule": "{{TERMIN_4}}"
+    },
+    {
+      "id": "pilot",
+      "days": null,
+      "schedule": "{{TERMIN_5}}"
+    },
+    {
+      "id": "training",
+      "days": null,
+      "schedule": "{{TERMIN_6}}"
+    },
+    {
+      "id": "hypercare",
+      "days": null,
+      "schedule": "{{TERMIN_7}}"
+    }
+  ],
+  "externalCosts": [
+    {
+      "name": "API modelu językowego",
+      "provider": "{{DOSTAWCA_MODELU}}",
+      "dataRegion": "{{REGION_DANYCH}}",
+      "sla": "{{SLA}}",
+      "projectNet": null,
+      "monthlyAfter": "{{KOSZT_MIESIECZNY_PO_PROJEKCIE}}"
+    },
+    {
+      "name": "Hosting aplikacji",
+      "provider": "{{DOSTAWCA_HOSTINGU}}",
+      "dataRegion": "{{REGION_DANYCH}}",
+      "sla": "{{SLA}}",
+      "projectNet": null,
+      "monthlyAfter": "{{KOSZT_MIESIECZNY_PO_PROJEKCIE}}"
+    }
+  ],
+  "training": {
+    "participants": "{{UCZESTNICY_SZKOLENIA}}",
+    "days": "{{CZAS_SZKOLENIA}}",
+    "program": [
+      "praca z agentem i panelem: przegląd wyników, weryfikacja pól niepewnych, zatwierdzanie",
+      "obsługa wyjątków i zgłaszanie błędów",
+      "administracja: użytkownicy, reguły walidacji, monitoring i logi"
+    ]
+  },
+  "advantages": [
+    "pola niepewne trafiają do weryfikacji przez człowieka, zamiast być zgadywane",
+    "każda decyzja agenta zostawia ślad: źródło danych, zastosowane reguły, wynik",
+    "modele od dostawców z regionem danych w UE albo modele uruchamiane lokalnie",
+    "pomiar mierników przed wdrożeniem i po nim: czas obsługi dokumentu, odsetek błędów"
+  ],
+  "warranty": "{{GWARANCJA}}",
+  "payment": [
+    {
+      "milestone": "Odbiór analizy, architektury i modelu danych",
+      "share": "{{UDZIAL_1}}"
+    },
+    {
+      "milestone": "Odbiór agentów AI dla procesów",
+      "share": "{{UDZIAL_2}}"
+    },
+    {
+      "milestone": "Odbiór cyfrowego bliźniaka hali",
+      "share": "{{UDZIAL_3}}"
+    },
+    {
+      "milestone": "Odbiór integracji i pilotażu",
+      "share": "{{UDZIAL_4}}"
+    },
+    {
+      "milestone": "Odbiór końcowy: szkolenia i wsparcie",
+      "share": "{{UDZIAL_5}}"
+    }
+  ]
+}
