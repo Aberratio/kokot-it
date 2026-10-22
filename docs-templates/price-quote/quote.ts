@@ -4,6 +4,7 @@ import {
   type Category,
   type Pricing,
 } from '../offer/pricing.ts';
+import { isString, isStringArray, stringFieldProblems } from '../shared/validate.ts';
 
 // Data of one price quote for a Dig.IT application (form b, Polish only).
 // Strings may hold `{{FIELD}}` placeholders; the blank template (data.template.json) is all
@@ -149,9 +150,6 @@ export function priceQuote(q: QuoteData, p: Pricing = defaultPricing): PricedQuo
   };
 }
 
-const isString = (v: unknown): v is string => typeof v === 'string';
-const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every(isString);
-
 /**
  * Shape problems of quote data read from a file (a trust boundary: the private quote lives
  * outside the repo). Empty when it can be priced and rendered.
@@ -208,11 +206,24 @@ export function quoteDataProblems(input: unknown, p: Pricing = defaultPricing): 
   if (!costs) problems.push('externalCosts must be an array');
   costs?.forEach((c, i) => {
     const net = c?.projectNet;
-    if (net !== null && typeof net !== 'number') {
-      problems.push(`externalCosts[${String(i)}].projectNet must be a number or null`);
+    if (net !== null && !(typeof net === 'number' && Number.isInteger(net) && net >= 0)) {
+      problems.push(
+        `externalCosts[${String(i)}].projectNet must be a whole number of zloty (0 or more) or null`,
+      );
     }
   });
-  if (!Array.isArray(q.payment)) problems.push('payment must be an array');
+  if (costs) {
+    problems.push(
+      ...stringFieldProblems(q.externalCosts, 'externalCosts', [
+        'name',
+        'provider',
+        'dataRegion',
+        'sla',
+        'monthlyAfter',
+      ]),
+    );
+  }
+  problems.push(...stringFieldProblems(q.payment, 'payment', ['milestone', 'share']));
   return problems;
 }
 
@@ -241,4 +252,25 @@ export function quoteProblems(q: QuoteData, p: Pricing = defaultPricing): string
   if (q.offer.validityDays < 90)
     problems.push(`validity ${String(q.offer.validityDays)} days, at least 90 required`);
   return problems;
+}
+
+/**
+ * Shares of a total in tenths of a percent that always add up to exactly 100.0%: each share is
+ * rounded down, and the tenths still missing go to the largest remainders.
+ */
+export function sharesInTenths(values: readonly number[]): number[] {
+  const total = values.reduce((sum, v) => sum + v, 0);
+  if (total <= 0) return values.map(() => 0);
+  const exact = values.map((v) => (v / total) * 1000);
+  const shares = exact.map(Math.floor);
+  let missing = 1000 - shares.reduce((sum, v) => sum + v, 0);
+  const order = exact
+    .map((v, i) => ({ i, rest: v - Math.floor(v) }))
+    .sort((a, b) => b.rest - a.rest || a.i - b.i);
+  for (const { i } of order) {
+    if (missing <= 0) break;
+    shares[i] = (shares[i] ?? 0) + 1;
+    missing -= 1;
+  }
+  return shares;
 }

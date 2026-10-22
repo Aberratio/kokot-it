@@ -1,7 +1,8 @@
 import type { Lang } from '../shared/html.ts';
+import { isString, isStringArray, stringFieldProblems } from '../shared/validate.ts';
 
-// CV content schema (schemaVersion 1). The real content lives outside this repository, in the
-// private location outside the repo (cv/cv.pl.json, cv/cv.en.json); the repo holds only the template and a
+// CV content schema (schemaVersion 1). The real content lives outside this repository
+// (cv.pl.json, cv.en.json in $CV_CONTENT_DIR); the repo holds only the template and a
 // fictional fixture (tests/fixtures/cv.sample.json). Any object may carry `TODO_OWNER`: a
 // question for the owner that is never rendered and makes the PDF script warn.
 
@@ -77,8 +78,6 @@ export function todoOwnerNotes(value: unknown, path = ''): TodoOwner[] {
   return notes;
 }
 
-const isString = (v: unknown): v is string => typeof v === 'string';
-const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every(isString);
 const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 /** Schema problems; empty when the content can be rendered. Unknown keys are ignored. */
@@ -134,9 +133,25 @@ export function cvProblems(input: unknown): string[] {
       if (pr.url !== null && !isString(pr.url))
         p.push(`projects[${String(i)}].url must be a string or null`);
     });
-  for (const k of ['education', 'certifications', 'languages'] as const) {
-    if (!Array.isArray(cv[k])) p.push(`${k} must be an array`);
+  p.push(
+    ...stringFieldProblems(cv.education, 'education', [
+      'degree',
+      'field',
+      'institution',
+      'start',
+      'end',
+    ]),
+  );
+  p.push(...stringFieldProblems(cv.certifications, 'certifications', ['name']));
+  if (Array.isArray(cv.certifications)) {
+    cv.certifications.forEach((c: unknown, i) => {
+      const issuer = (c as { issuer?: unknown } | null)?.issuer;
+      if (issuer !== null && !isString(issuer)) {
+        p.push(`certifications[${String(i)}].issuer must be a string or null`);
+      }
+    });
   }
+  p.push(...stringFieldProblems(cv.languages, 'languages', ['language', 'level']));
   if (cv.additional !== undefined && !isStringArray(cv.additional))
     p.push('additional must be a string array');
   return p;

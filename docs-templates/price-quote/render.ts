@@ -14,7 +14,7 @@ import {
   type Category,
   type Pricing,
 } from '../offer/pricing.ts';
-import { priceQuote, type QuoteData, type Totals } from './quote.ts';
+import { priceQuote, sharesInTenths, type QuoteData, type Totals } from './quote.ts';
 
 // Price quote for a Dig.IT 2/2026 application (form b), Polish only. Every
 // requirement from requirements.ts is placed with `data-req`; requirements.test.ts checks it.
@@ -83,12 +83,14 @@ export function renderQuote(opts: QuoteOptions): string {
     )
     .join('');
 
-  const splitRows = CATEGORIES.map((cat) => {
+  const byCategory = priced.byCategory;
+  const tenths =
+    byCategory && priced.services && priced.services.net > 0
+      ? sharesInTenths(CATEGORIES.map((cat) => byCategory[cat].net))
+      : null;
+  const splitRows = CATEGORIES.map((cat, i) => {
     const t = priced.byCategory?.[cat];
-    const share =
-      t && priced.services && priced.services.net > 0
-        ? `${(Math.round((t.net / priced.services.net) * 1000) / 10).toLocaleString('pl-PL')}%`
-        : '{{UDZIAL}}';
+    const share = tenths ? `${((tenths[i] ?? 0) / 10).toLocaleString('pl-PL')}%` : '{{UDZIAL}}';
     return `<tr>
       <td><strong>${escapeHtml(CATEGORY_LABEL[cat].part)}</strong><br /><span class="form-cat">${escapeHtml(CATEGORY_LABEL[cat].form)}</span></td>
       ${totalsCells(t)}
@@ -252,7 +254,7 @@ export function renderQuote(opts: QuoteOptions): string {
   <section>
     <h2>10. Wykonawca</h2>
     <ul>
-      <li data-req="23">Usługi programistyczne objęte ofertą wykonawca realizuje samodzielnie, bez podzlecania osobom lub podmiotom trzecim (Reg. § 6 ust. 11 lit. e). Doświadczenie i potencjał: CV wykonawcy w załączniku, projekty pokazowe opisane na kokot.it, otwarte narzędzie tiller (github.com/Aberratio/tiller).</li>
+      <li data-req="23">Usługi programistyczne objęte ofertą wykonawca realizuje samodzielnie, bez podzlecania osobom lub podmiotom trzecim (Reg. § 6 ust. 11 lit. e). Doświadczenie i potencjał: CV wykonawcy w załączniku, projekty referencyjne opisane na kokot.it, otwarte narzędzie tiller (github.com/Aberratio/tiller).</li>
       <li data-req="22">Wykonawca oświadcza, że nie jest powiązany z Zamawiającym kapitałowo, osobowo ani faktycznie, w tym przez powiązania rodzinne z członkami organów lub właścicielami Zamawiającego (w rozumieniu Reg. § 1 pkt 17–18).</li>
     </ul>
   </section>

@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+// One HTML escape for the site and the documents.
+import { escapeHtml } from '../../src/content/html.ts';
 
 /** Document languages. The price quote for the Dig.IT application is Polish only. */
 export type Lang = 'pl' | 'en';
@@ -6,17 +8,7 @@ export type Lang = 'pl' | 'en';
 /** A fill-in field such as `{{NAZWA_FIRMY}}`: upper-case ASCII, digits, underscores. */
 export const PLACEHOLDER = /\{\{[A-Z0-9_]+\}\}/g;
 
-const ESCAPES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c);
-}
+export { escapeHtml };
 
 /**
  * Escapes text and wraps every `{{FIELD}}` in a highlighted span, so unfilled fields stand
