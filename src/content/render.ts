@@ -416,7 +416,7 @@ function renderTool(locale: Locale, slug: ToolSlug, study: CaseStudy): string {
   return [
     `<figure class="tool tool--${slug}" data-tool="${slug}" data-tool-src="${e(toolEmbedSrc(slug, locale))}" data-tool-title="${e(`${cs.toolFrameTitle}: ${study.card.title}`)}">`,
     `<div class="tool__frame" data-tool-slot><p class="tool__fallback">${e(cs.toolFallback)}</p></div>`,
-    previewCaption(study.preview.text, cs.toolNote, study.preview.title),
+    previewCaption(study.preview.text, study.toolNote ?? cs.toolNote, study.preview.title),
     `<p class="tool__open">${open}</p>`,
     `</figure>`,
   ].join('');

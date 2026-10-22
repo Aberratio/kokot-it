@@ -176,7 +176,7 @@ export const pl: SiteContent = {
   projects: {
     title: 'Projekty',
     intro:
-      'Cztery projekty referencyjne: trzy aplikacje działające na przykładowych danych fikcyjnych firm i tiller, własne narzędzie z publicznym kodem. Pokazują sposób pracy i architekturę; nie są wdrożeniami u klientów. Aplikacje na stronie odtwarzają zapisane przebiegi i nie wywołują żadnego API.',
+      'Pięć projektów: trzy aplikacje referencyjne działające na przykładowych danych fikcyjnych firm, tiller, własne narzędzie z publicznym kodem, oraz Relay Defense, gra logiczna. Pokazują sposób pracy i architekturę; nie są wdrożeniami u klientów. Aplikacje na stronie nie wywołują żadnego API: aplikacje referencyjne odtwarzają zapisane przebiegi, a gra działa w całości w przeglądarce.',
     cardCta: 'Case study',
   },
   about: {
@@ -620,6 +620,41 @@ export const pl: SiteContent = {
         ],
       },
       stack: ['Claude Code', 'Codex', 'Bash', 'Node.js', 'GitHub CLI'],
+    },
+    'relay-defense': {
+      metaTitle: 'Relay Defense: logiczna gra tower defense — kokot.it',
+      metaDescription:
+        'Własny projekt: przeglądarkowa gra tower defense zaprojektowana jak łamigłówka, z deterministyczną symulacją i poziomami wyważonymi przez solver.',
+      card: {
+        title: 'Relay Defense: gra logiczna',
+        summary:
+          'Tower defense, w którym plan wygrywa z refleksem. Poziomy wyważone solverem z przewidywaniem i sprawdzone w CI.',
+        tags: ['gra', 'symulacja', 'open source'],
+      },
+      lead: 'Gra tower defense w przeglądarce, zaprojektowana jak łamigłówka: każda fala jest widoczna z wyprzedzeniem, symulacja jest deterministyczna, a między falami gra czeka na gracza. Dziesięć poziomów, każdy zbudowany wokół jednego pomysłu.',
+      kind: 'Własny projekt, publiczne repozytorium (MIT)',
+      problem: [
+        'Grę tower defense łatwo zrobić trudną, a trudno uczciwą. Liczby ustawiane na wyczucie dają poziomy albo banalne, albo wygrywane szczęściem, a każda zmiana jednej wieży przesuwa balans wszystkich.',
+        'Projekty z agentami i automatyzacją mają ten sam problem: zachowanie trzeba sprawdzać powtarzalnymi przebiegami i mierzalnym kryterium, a nie wrażeniem.',
+      ],
+      solution: {
+        text: [
+          'Logika gry to czysta, deterministyczna symulacja oddzielona od rysowania: te same ruchy zawsze dają ten sam wynik. Dzięki temu rozwiązania można odtwarzać w testach i wyszukiwać automatycznie.',
+          'Solver z przewidywaniem sprawdza każdy dostępny ruch, symuluje nadchodzące fale i zostawia najlepszy. To on zapisał rozwiązanie referencyjne każdego poziomu; testy je odtwarzają i oczekują wygranej. Sonda z nieuważnym graczem, który stawia losowych agentów przy trasie, pokazuje, że od trzeciego poziomu szczęście nie wystarcza.',
+        ],
+        points: [
+          'siedmiu agentów i siedem rodzajów usterek, każda z jedną wyraźną odpowiedzią: pancerz, niewidzialność, rozpad, naprawy i boss osłaniający eskortę',
+          'otwarta posadzka, na której każdy agent jest częścią labiryntu, z podglądem nowej trasy przed budową',
+          'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa w 0–6% prób',
+          'grafika Canvas 2D w barwach kokot.it, pełna obsługa klawiaturą, ograniczony ruch, polski i angielski',
+        ],
+      },
+      preview: {
+        title: 'Dziesięć poziomów',
+        text: 'Zacznij od pierwszego: każda odprawa wyjaśnia nowego agenta albo usterkę. Postęp zapisuje się tylko w tej przeglądarce.',
+      },
+      toolNote: 'Gra działa w całości w przeglądarce i nigdzie niczego nie wysyła.',
+      stack: ['TypeScript', 'Canvas 2D', 'Vite', 'Vitest', 'Playwright'],
     },
   },
 };
