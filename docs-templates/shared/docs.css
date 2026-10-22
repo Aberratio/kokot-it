@@ -1,21 +1,39 @@
 /*
- * Shared print styles for documents rendered to PDF (A4). Same tokens as the site
- * (src/styles/tokens.css); the templates set <html data-theme="paper">, the light print
- * theme: ink-friendly, readable on office printers and in greyscale. See brand.md.
+ * Shared print styles for documents rendered to PDF (A4): offer, price quote, CV. Same tokens
+ * as the site (src/styles/tokens.css); the templates set <html data-theme="paper">, the light
+ * print theme: ink-friendly, readable on office printers and in greyscale. See brand.md.
+ * Fonts: static print instances (print-fonts.css), embedded as real text in the PDF.
  */
 @import url('../../src/styles/tokens.css');
+@import url('./print-fonts.css');
+
+:root {
+  --font-sans: 'Schibsted Grotesk Print', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Print', ui-monospace, monospace;
+  --doc-text: 9.5pt;
+  --doc-small: 8pt;
+  --doc-label: 7pt;
+}
 
 @page {
   size: A4;
-  margin: 18mm 16mm;
+  margin: 14mm 15mm 15mm;
+
+  @bottom-right {
+    content: counter(page) ' / ' counter(pages);
+    font-family: 'JetBrains Mono Print', monospace;
+    font-size: 6.5pt;
+    color: #5f6676; /* --paper-600: custom properties do not reach page-margin boxes */
+  }
 }
 
 html {
   font-family: var(--font-sans);
-  font-size: 10.5pt;
-  line-height: 1.45;
+  font-size: var(--doc-text);
+  line-height: 1.42;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
+  font-kerning: normal;
 }
 
 body {
@@ -25,29 +43,143 @@ body {
 }
 
 .doc h1 {
-  margin: 0 0 0.5em;
-  font-size: 20pt;
+  margin: 0 0 0.35em;
+  font-size: 19pt;
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-heading);
   line-height: var(--leading-snug);
-  color: var(--color-text);
 }
 
 .doc h2 {
-  margin: 1.4em 0 0.4em;
-  font-size: 13pt;
+  margin: 0 0 0.45em;
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-accent);
+  break-after: avoid;
+}
+
+.doc h3 {
+  margin: 0 0 0.3em;
+  font-size: 10.5pt;
   font-weight: var(--weight-semibold);
-  color: var(--color-text);
+  letter-spacing: -0.01em;
+  line-height: var(--leading-snug);
+  break-after: avoid;
+}
+
+.doc p {
+  margin: 0 0 0.5em;
+}
+
+.doc ul,
+.doc ol {
+  margin: 0 0 0.5em;
+  padding: 0;
+  list-style: none;
+}
+
+.doc ul > li {
+  position: relative;
+  margin: 0 0 0.28em;
+  padding-left: 1.05em;
+}
+
+/* Bullet = a small node, the brand's only ornament (brand.md: Ikony). */
+.doc ul > li::before {
+  content: '';
+  position: absolute;
+  left: 0.15em;
+  top: 0.55em;
+  width: 0.36em;
+  height: 0.36em;
+  border-radius: 50%;
+  background: var(--color-accent);
 }
 
 .doc a {
   color: var(--color-accent-2);
+  text-decoration: none;
 }
 
 .doc .label {
+  margin: 0;
   font-family: var(--font-mono);
-  font-size: 7.5pt;
+  font-size: var(--doc-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.doc .lead {
+  font-size: 10.5pt;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.doc .fine {
+  font-size: var(--doc-small);
+  line-height: 1.4;
+  color: var(--color-text-subtle);
+}
+
+/* Header: logotype left, document label right. */
+.doc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: 7mm;
+  padding-bottom: 3mm;
+  border-bottom: var(--border-width) solid var(--color-line);
+}
+
+.doc-logo {
+  width: auto;
+  height: 6.5mm;
+}
+
+.doc-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5mm;
+  text-align: right;
+}
+
+/* "Preliminary pricing" badge: one flag in pricing.json (status) turns it off (D-021). */
+.draft-badge {
+  margin: 0;
+  padding: 0.9mm 2.2mm;
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--color-accent);
+}
+
+/* An unfilled {{FIELD}}: visible on screen and in print, never mistaken for content. */
+.field {
+  padding: 0 0.2em;
+  border-bottom: 1px dashed var(--color-accent);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--color-accent);
+}
+
+.cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+}
+
+.doc section {
+  margin-bottom: 5mm;
 }
