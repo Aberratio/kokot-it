@@ -1,8 +1,12 @@
 import { readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
-/** Directories that never hold site pages. */
+/**
+ * Directories that never hold site pages. `brand` is the brand system preview: served by the
+ * dev server at /brand/ for review, never built for production.
+ */
 const IGNORED = new Set([
+  'brand',
   'node_modules',
   'dist',
   'out',

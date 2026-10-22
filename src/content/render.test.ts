@@ -68,19 +68,15 @@ describe('routes and page shells', () => {
     );
   });
 
-  // Pages that are not site content and keep their own HTML (the brand preview, noindex).
-  const STANDALONE_PAGES = ['brand/index.html'];
-
   it('has a shell for every route and no unknown page', () => {
     for (const route of allRoutes())
       expect(existsSync(shellPath(route)), routePath(route)).toBe(true);
     const files = Object.values(discoverPages(ROOT)).map((file) =>
       file.slice(ROOT.length).split(sep).join('/'),
     );
-    const content = files.filter((file) => !STANDALONE_PAGES.includes(file));
-    expect(content.map(routeFromFile)).not.toContain(undefined);
-    expect(content).toHaveLength(allRoutes().length);
-    for (const file of STANDALONE_PAGES) expect(files).toContain(file);
+    // Every built page is a route; the brand preview (brand/index.html) is a dev-only page.
+    expect(files.map(routeFromFile)).not.toContain(undefined);
+    expect(files).toHaveLength(allRoutes().length);
   });
 
   it('maps shell files to routes', () => {

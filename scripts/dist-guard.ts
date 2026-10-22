@@ -21,7 +21,7 @@ export interface DistReport {
   failures: string[];
 }
 
-/** Built pages that are not site content and may show digits (the brand preview). */
+/** Pages that are not site content and may show digits: the brand preview, should it be built. */
 export const STANDALONE_PAGES: readonly string[] = ['brand/index.html'];
 
 const routeFile = (path: string): string =>

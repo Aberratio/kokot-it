@@ -18,7 +18,7 @@ describe('discoverPages', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it('finds locale and case-study pages and skips non-page folders', () => {
+  it('finds locale and case-study pages and skips non-page folders and the brand preview', () => {
     root = mkdtempSync(join(tmpdir(), 'pages-'));
     const page = (...p: string[]): void => {
       mkdirSync(join(root, ...p.slice(0, -1)), { recursive: true });
@@ -30,6 +30,7 @@ describe('discoverPages', () => {
     page('en', 'projects', 'sample', 'index.html');
     page('docs-templates', 'cv', 'index.html');
     page('node_modules', 'x', 'index.html');
+    page('brand', 'index.html');
 
     expect(Object.keys(discoverPages(root)).sort()).toEqual([
       'en',
