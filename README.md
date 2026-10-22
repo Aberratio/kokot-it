@@ -77,7 +77,7 @@ src/content/                treść strony PL/EN (słowniki) i renderer do staty
 src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
 src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback; katalog dodają T-10/11/13)
 src/i18n/                   teksty interfejsu PL/EN, ścieżki stron per język
-src/scene/                  scena „Relay”: logika (graf, układy, trasy, jakość) + renderer Three.js i shadery GLSL
+src/scene/                  Relay scene: pure logic (graph, layouts, routing, quality) + Three.js renderer and GLSL shaders
 src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
 src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
 src/styles/content.css      układ sekcji treści, wyłącznie na tokenach z tokens.css
@@ -96,22 +96,25 @@ treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest cz
 Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
 oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test sprawdza, że każda trasa ma szkielet; typy pilnują kompletu treści PL/EN).
 
-## Scena 3D („Relay”)
+## 3D scene ("Relay")
 
-Koncept i uzasadnienie: `docs/concept.md`. Scena to stałe tło strony głównej: rzadki graf agentów,
-po którego krawędziach biegną impulsy zadań (ciepłe) i wyników (chłodne); sieć przebudowuje się
-między sekcjami (hero → 3 klastry usług → 4 konstelacje projektów → zbieżność przy adresie e-mail).
+Concept and rationale: `docs/concept.md`. The scene is the fixed backdrop of the home page: a sparse
+graph of agents whose links carry task pulses (warm) and result pulses (cool); the network re-forms
+between sections (hero → 3 service clusters → 4 project constellations → convergence next to the
+e-mail address).
 
-- Ładowanie: `src/scene/index.ts` (w głównym bundlu, bez three.js) czeka na `load` i bezczynność
-  przeglądarki, potem dynamicznie importuje `src/scene/app.ts` z three.js w osobnym chunku.
-- Tryby: WebGL2 → scena na żywo; `prefers-reduced-motion` → jedna nieruchoma klatka; brak WebGL,
-  utrata kontekstu albo zbyt wolne urządzenie → statyczny kadr SVG (`src/scene/still.ts`).
-- Jakość adaptacyjna (`src/scene/quality.ts`): poziom startowy z urządzenia, potem średni czas
-  klatki > 20 ms przez 2 s obniża poziom (liczba węzłów, DPR, poświata); nigdy nie podnosi.
-  Bieżący poziom widać w atrybucie `data-level` na `canvas.scene`.
-- Pauza w ukrytej karcie i poza ekranem; kolory i czasy tylko z tokenów (`src/styles/tokens.css`).
-- Logika (graf, układy, trasy, jakość, wejście) jest czysta i testowana w Vitest; renderer i
-  shadery (`renderer.ts`, `shaders.ts`) sprawdza się w przeglądarce — zrzuty w `docs/screenshots/scene-*.png`.
+- Loading: `src/scene/index.ts` (main bundle, no three.js) waits for `load` and an idle browser,
+  then dynamically imports `src/scene/app.ts` with three.js in a separate chunk.
+- Modes: WebGL2 → live scene; `prefers-reduced-motion` → one still frame; no WebGL, a lost context
+  or a device too slow even at the lowest quality → static SVG still (`src/scene/still.ts`).
+- Adaptive quality (`src/scene/quality.ts`): the start level comes from the device, then a mean
+  frame time above 20 ms for 2 s lowers the level (node count, DPR, glow); it never goes back up.
+  The current level is exposed as `data-level` on `canvas.scene`.
+- Paused in a hidden tab and off screen; colours and durations come only from the tokens
+  (`src/styles/tokens.css`).
+- The logic (graph, layouts, routing, quality, input) is pure and unit-tested with Vitest; the
+  renderer and shaders (`renderer.ts`, `shaders.ts`) are checked in the browser — screenshots in
+  `docs/screenshots/scene-*.png`.
 
 ## CI
 

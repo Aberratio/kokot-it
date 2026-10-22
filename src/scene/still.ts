@@ -1,5 +1,5 @@
 /**
- * The static still of the Relay network (docs/concept.md, "Fallbacki"): the deterministic
+ * The static still of the Relay network (docs/concept.md, "Fallbacks"): the deterministic
  * 2D graph from relay-graph.ts drawn as SVG with the scene tokens. Shown when WebGL is missing,
  * lost, or too slow even at the lowest quality, and on the /brand/ page.
  */

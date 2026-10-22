@@ -1,6 +1,6 @@
 /**
  * How the page talks to the scene: which mode to run, where the pointer is in the world, when
- * a resting pointer becomes an order (docs/concept.md: "Kursor jest klientem, nie magnesem"),
+ * a resting pointer becomes an order (docs/concept.md: "the cursor is a client, not a magnet"),
  * and which network state each section of the page asks for. Pure functions only; the DOM
  * wiring lives in app.ts and boot.ts.
  */

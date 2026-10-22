@@ -1,116 +1,107 @@
-# Koncept sceny 3D — „Relay”
+# 3D scene concept — "Relay"
 
-Stan: 2026-10-21 · decyzja: _proposed_ (do potwierdzenia przez właścicielkę) · wykonanie: T-08.
-Kierunek z decyzji D-026: ciemny, techniczny, generatywny, „inteligencja w ruchu”.
+Status: implemented in `src/scene/` (deviations from this document, with reasons:
+`docs/superpowers/decisions/relay-scene.md`). Direction: dark, technical, generative —
+"intelligence in motion".
 
-## Cel
+## Goal
 
-Odwiedzający zapamiętuje kokot.it jako „inteligencję w ruchu” — agentów AI, którzy współpracują
-jak sieć — a treść pozostaje szybka i czytelna na średnim telefonie (budżet T-08: 60 fps na
-średnim laptopie, płynnie na telefonie, Lighthouse mobile ≥ 85, scena nie jest LCP).
+A visitor remembers kokot.it as "intelligence in motion" — AI agents that cooperate as a network —
+while the content stays fast and readable on a mid-range phone (budget: 60 fps on a mid-range
+laptop, smooth on a phone, Lighthouse mobile Performance ≥ 85, the scene is never the LCP element).
 
-## Opcje (sesja flow-brainstorm)
+## Options considered
 
-| Opcja                               | Na czym polega                                                                                                                                                                                                 | Najmocniejszy argument przeciw                                                                                                                                                  | Koszt wydajnościowy                                                                                                                                                      | Koszt odwrotu                                                                                            |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **A. Relay: sieć przekazań** ✅     | Rzadki graf 3D węzłów-agentów; ciepłe impulsy (zadania) biegną krawędziami, chłodne (wyniki) wracają; kursor to zlecenie klienta, do którego sieć wyznacza trasę; scroll przebudowuje graf pod kolejne sekcje. | Sieć węzłów i linii to najczęstsze „techniczne” tło (plexus z particles.js); jeśli ruch impulsów będzie zbyt subtelny, scena zapadnie się dokładnie w ten banał.                | Niski: ~1–1,5 tys. instancjonowanych węzłów, ~3–4 tys. odcinków, kilkadziesiąt impulsów; 3 draw calle, bez render targetów. CPU: trasowanie BFS na małym grafie, rzadko. | Teraz: 1 dokument. Po T-08: przepisanie `src/scene` (ok. 6 plików, 1,5 dnia); tokeny i strona bez zmian. |
-| **B. Rój: GPGPU swarm** (runner-up) | 30–60 tys. cząsteczek jako boidy na GPU (ping-pong FBO), kursor to cel, do którego lecą; sekcje układają rój w formacje.                                                                                       | Rój formujący kształty to najczęściej klonowany pokaz WebGL; pokazuje ruch, nie współpracę; tekstury float jako render target to pierwsze, na czym dławią się średnie telefony. | Wysoki: fill-rate przy addytywnym mieszaniu, 2 symulacje na klatkę; na mobile trzeba ciąć do ~8–16 tys., a i tak ryzyko < 45 fps.                                        | Teraz: 1 dokument. Po T-08: przepisanie `src/scene` + pomocniki GPGPU (ok. 8 plików, 2 dni).             |
-| **C. Grzybnia: rosnąca sieć**       | Agenci jako końcówki eksplorujące przestrzeń (space colonisation) — sieć rośnie od kursora; scroll dokańcza wzrost aż do pełnego grafu przy kontakcie.                                                         | Wzrost to historia jednokierunkowa, zużyta po pierwszym przewinięciu; organiczny wygląd ciągnie markę w biologię zamiast inżynierii; geometria rośnie co klatkę na CPU.         | Średni, rosnący: bufory geometrii powiększane w locie, algorytm wzrostu na CPU (lub w workerze).                                                                         | Teraz: 1 dokument. Po T-08: przepisanie `src/scene` i workera (ok. 7 plików, 2 dni).                     |
-| **D. Statyczny diagram** (minimum)  | Bez WebGL: jeden wygenerowany SVG sieci za hero, paralaksa CSS i podświetlenie za kursorem.                                                                                                                    | Łamie D-010 i D-012: strona ma być pokazem rzemiosła frontendowego z prawdziwym 3D, a statyczny diagram ma każdy szablon agencji.                                               | Minimalny.                                                                                                                                                               | Teraz: 1 dokument. Później: 1 SVG + 1 CSS, 1 godzina.                                                    |
+| Option                                | What it is                                                                                                                                                                                              | Strongest case against                                                                                                                                                 | Performance cost                                                                                                                                               | Reversal cost                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **A. Relay: a hand-off network** ✅   | A sparse 3D graph of agent nodes; warm pulses (tasks) travel along the links, cool ones (results) return; the cursor is a client order the network routes to; scrolling re-forms the graph per section. | Nodes and lines are the most common "technical" background (the particles.js plexus); if the pulses are too subtle, the scene collapses into exactly that cliché.      | Low: ~1–1.5k instanced nodes, ~3–4k segments, a few dozen pulses; a handful of draw calls, no render targets. CPU: BFS routing on a small graph, occasionally. | Before implementation: one document. After: rewrite `src/scene` (about 6 files, 1.5 days); tokens and pages unchanged. |
+| **B. Swarm: GPGPU boids** (runner-up) | 30–60k particles as boids on the GPU (ping-pong FBOs); the cursor is a target they fly to; sections arrange the swarm into formations.                                                                  | A swarm forming shapes is the most cloned WebGL showcase; it shows motion, not cooperation; float render targets are the first thing mid-range phones choke on.        | High: additive fill rate, 2 simulations per frame; on mobile it has to drop to ~8–16k and still risks < 45 fps.                                                | Before: one document. After: rewrite `src/scene` + GPGPU helpers (about 8 files, 2 days).                              |
+| **C. Mycelium: a growing network**    | Agents as tips exploring space (space colonisation) — the network grows from the cursor; scrolling completes the growth until the full graph at the contact section.                                    | Growth is a one-way story, spent after the first scroll; an organic look pulls the brand toward biology instead of engineering; geometry grows every frame on the CPU. | Medium and rising: geometry buffers resized on the fly, growth algorithm on the CPU (or in a worker).                                                          | Before: one document. After: rewrite `src/scene` and the worker (about 7 files, 2 days).                               |
+| **D. Static diagram** (minimum)       | No WebGL: one generated SVG network behind the hero, CSS parallax and a highlight following the cursor.                                                                                                 | Fails the brief: the site itself is meant to show front-end craft with real 3D, and a static diagram is what every agency template has.                                | Minimal.                                                                                                                                                       | Before: one document. Later: 1 SVG + 1 CSS, one hour.                                                                  |
 
-**Wybór: A — Relay.** A pokazuje _współpracę_ (przekazanie pracy między agentami), nie sam ruch,
-i mieści się w budżecie telefonu kilkoma tysiącami instancji zamiast symulacji GPGPU.
-**Runner-up: B — Rój**: efektowniejszy na desktopie, ale to bardziej sklonowany efekt i droższy na
-mobile. Kolejność ważenia: wierność celowi → odwracalność → siła dowodów → konwencje repo → tempo.
+**Choice: A — Relay.** It shows _cooperation_ (work handed between agents), not just motion, and
+fits a phone budget with a few thousand instances instead of a GPGPU simulation.
+**Runner-up: B — Swarm**: more spectacular on desktop, but more of a cloned effect and more
+expensive on mobile. Weighting order: fidelity to the goal → reversibility → strength of evidence →
+repository conventions → speed.
 
-### Pomiary i założenia
+### Assumptions to verify
 
-- Zmierzone: scena to wciąż zaślepka (`src/scene/index.ts` przed tym PR: 37 linii, pusta `Scene`) — nic nie
-  jest jeszcze utopione w żadnej opcji.
-- Zmierzone: ścieżka bez WebGL istnieje (`canvas.hidden = true`, gdy renderer rzuca wyjątek).
-- Zmierzone: `prefers-reduced-motion` nie był obsłużony w `src/` (teraz: tokeny ruchu i
-  `--motion-scale` w `src/styles/tokens.css`).
-- Zmierzone: three.js 0.186.1 (instancing, `ShaderMaterial`, WebGL2).
-- **Założenie (odwraca decyzję):** średni telefon rysuje ~1,5 tys. węzłów + ~4 tys. odcinków z
-  impulsami w 60 fps, a 30 tys.+ cząsteczek GPGPU spada poniżej 45 fps. Sprawdzić w T-08: sonda
-  wydajności (DevTools CPU 4×, profil telefonu klasy Moto G), czasy klatek obu budżetów.
-- **Założenie (odwraca decyzję):** rzadki graf ze skierowanymi, trasowanymi impulsami czyta się
-  jako „agenci przekazują sobie pracę”, a nie jako generyczny plexus. Sprawdzić w T-08: test
-  5 sekund prototypu na 3 osobach spoza projektu („co pokazuje tło?”).
+- **Assumption (would reverse the choice):** a mid-range phone draws ~1.5k nodes + ~4k segments with
+  pulses at 60 fps, while 30k+ GPGPU particles fall below 45 fps. Check: frame-time probe with
+  DevTools CPU throttling and a Moto G class device profile.
+- **Assumption (would reverse the choice):** a sparse graph with directed, routed pulses reads as
+  "agents handing work to each other", not as a generic plexus. Check: a 5-second test of the
+  prototype with 3 people outside the project ("what does the background show?").
 
-## Relay — opis
+## Relay — description
 
-### Elementy
+### Elements
 
-| Element        | Znaczenie                  | Wygląd (tokeny)                                                                                 |
-| -------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| Węzeł          | agent                      | punkt, rozmiar i jasność wg „obciążenia” (`--scene-node`)                                       |
-| Krawędź        | kanał przekazania          | cienka linia, prawie niewidoczna w spoczynku (`--scene-edge`)                                   |
-| Impuls zadania | praca wychodzi do agenta   | ciepły punkt z krótką smugą; krawędź za nim się rozświetla (`--scene-pulse-task`)               |
-| Impuls wyniku  | wynik wraca do zlecającego | chłodny punkt, wolniejszy (`--scene-pulse-result`)                                              |
-| Kursor / dotyk | klient zlecający pracę     | słaba poświata (`--scene-cursor`); najbliższy węzeł staje się „wejściem”, sieć trasuje do niego |
-| Głębia         | skala organizacji          | 3 plany głębi, mgła liniowa do `--scene-bg`, lekka paralaksa przy ruchu kursora                 |
+| Element        | Meaning                    | Look (tokens)                                                                                    |
+| -------------- | -------------------------- | ------------------------------------------------------------------------------------------------ |
+| Node           | agent                      | point; size and brightness by "load" (`--scene-node`)                                            |
+| Link           | hand-off channel           | thin line, almost invisible at rest (`--scene-edge`)                                             |
+| Task pulse     | work going out to an agent | warm point with a short trail; the link behind it lights up (`--scene-pulse-task`)               |
+| Result pulse   | result returning           | cool point, slower (`--scene-pulse-result`)                                                      |
+| Cursor / touch | the client placing work    | faint glow (`--scene-cursor`); the nearest node becomes the "entry" and the network routes to it |
+| Depth          | scale of the organisation  | 3 depth planes, linear fog toward `--scene-bg`, slight parallax with the cursor                  |
 
-Co odróżnia to od plexusa (kotwice oryginalności, obowiązkowe w T-08):
+What sets it apart from a plexus (originality anchors, mandatory):
 
-1. **Graf jest stały, nie odległościowy.** Krawędzie nie migają, gdy punkty się zbliżają — to
-   topologia organizacji (k najbliższych sąsiadów w 3D, z kilkoma „hubami”), a nie efekt.
-2. **Ruch ma kierunek i przyczynę.** Każdy impuls jedzie trasą (BFS) od zlecającego do agenta i
-   wraca z wynikiem innego koloru. Nic nie pulsuje „dla ozdoby”.
-3. **Kursor jest klientem, nie magnesem.** Kursor nie odpycha punktów; po zatrzymaniu (~300 ms)
-   sieć wysyła do niego wynik — strona „odpowiada”.
-4. **Cisza jako stan bazowy.** W spoczynku ruch jest rzadki (kilka impulsów na sekundę), krawędzie
-   ledwo widoczne. Ma to być tło dla treści, nie wygaszacz ekranu.
+1. **The graph is fixed, not distance-based.** Links do not flicker as points drift closer — it is
+   the topology of an organisation (nearest neighbours in 3D, with a few hubs), not an effect.
+2. **Motion has a direction and a cause.** Every pulse follows a route (BFS) from the requester to
+   an agent and comes back as a result of another colour. Nothing pulses "for decoration".
+3. **The cursor is a client, not a magnet.** The cursor does not push points away; when it rests
+   (~300 ms) the network sends work out from the node under it and the result comes back — the page
+   "answers".
+4. **Silence as the base state.** At rest motion is sparse (a few pulses per second) and links are
+   barely visible. It is a background for the content, not a screensaver.
 
-### Scena a sekcje strony (scroll)
+### Scene and page sections
 
-Przejścia trwają `--duration-scene` (1400 ms) z `--ease-in-out`; stan sekcji wyznacza
-`IntersectionObserver`, nie surowy scroll (bez pracy co zdarzenie scroll).
+Transitions take `--duration-scene` (1400 ms) with `--ease-in-out`; the active section comes from an
+`IntersectionObserver`, not raw scroll events (no work per scroll event).
 
-| Sekcja    | Stan sieci                                                                                                                            | Przekaz                                 |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Hero      | Pełna, swobodna sieć w głębi; pierwsze impulsy startują po ~1 s od załadowania; kursor = zlecenie.                                    | „inteligencja w ruchu”                  |
-| Usługi    | Sieć ściąga się w 3 klastry (pakiety P1 / P2 / P3, D-033); impulsy krążą wewnątrz klastra podświetlonego przy aktywnej karcie usługi. | jeden proces → kilka procesów → program |
-| Portfolio | 4 konstelacje (4 projekty pokazowe, D-019); hover nad kartą projektu odpala serię przekazań w jego konstelacji.                       | działające przebiegi, nie slajdy        |
-| Kontakt   | Wszystkie trasy zbiegają się w jeden węzeł przy adresie e-mail; sieć wycisza się do kilku impulsów.                                   | jeden punkt kontaktu (D-028)            |
+| Section  | Network state                                                                                                                | Message                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| Hero     | Full, free network in depth; the first pulses start ~1 s after load; the cursor places work.                                 | "intelligence in motion"                  |
+| Services | The network gathers into 3 clusters (packages P1 / P2 / P3); pulses circulate inside the cluster of the active service card. | one process → several processes → program |
+| Projects | 4 constellations (the 4 showcase projects); hovering a project card fires a series of hand-offs in its constellation.        | working runs, not slides                  |
+| Contact  | All routes converge on one node next to the e-mail address; the network quietens to a few pulses.                            | one point of contact                      |
 
-Na treściach (podstrony projektów) scena działa w trybie „tła”: niższa jasność, bez interakcji.
+### Performance
 
-### Wydajność (budżet T-08)
+- Nodes: instanced quads with the circle and glow drawn in the fragment shader; links: one
+  `LineSegments` with an "activity" attribute; pulses: a pool of instances.
+- Motion computed in the vertex shader from `uTime` (node drift); the CPU only plans pulse routes
+  (BFS on the graph, a few times per second).
+- Adaptive quality: start from a level chosen by `hardwareConcurrency` and screen width (phones get
+  fewer nodes and DPR ≤ 1.5), then measure the mean frame time — above 20 ms for 2 s lowers the level
+  (node count, DPR, glow); it never goes back up during a session (no pumping).
+- Paused off screen (`IntersectionObserver` on the canvas) and in a hidden tab (`visibilitychange`);
+  `requestAnimationFrame` is stopped, not just idle.
+- Lazy loading: three.js and the scene live in a separate chunk loaded with a dynamic `import()`
+  after the content has rendered (`requestIdleCallback`).
 
-- Węzły: `InstancedMesh` z quadami w shaderze (okrąg i poświata w fragment shaderze), krawędzie:
-  jeden `LineSegments` z atrybutem „aktywności”, impulsy: pula instancji. Razem 3 draw calle.
-- Ruch liczony w vertex shaderze z `uTime` (dryf węzłów szumem); CPU tylko planuje trasy impulsów
-  (BFS na grafie ~1,5 tys. węzłów, kilka razy na sekundę).
-- Jakość adaptacyjna: start od poziomu wg `hardwareConcurrency` i szerokości ekranu (mobile:
-  ~600 węzłów, DPR ≤ 1,5), potem pomiar średniego czasu klatki — powyżej 20 ms przez 2 s obniża
-  poziom (liczba węzłów, DPR, poświata), nigdy nie podnosi w trakcie sesji (bez „pompowania”).
-- Pauza poza ekranem (`IntersectionObserver` na canvasie) i w ukrytej karcie
-  (`visibilitychange`); `requestAnimationFrame` zatrzymany, nie tylko pusty.
-- Leniwe ładowanie: three.js i scena w osobnym chunku przez dynamiczny `import()` po pierwszym
-  renderze treści (`requestIdleCallback`); do tego czasu tło = statyczny kadr (niżej).
+### Fallbacks
 
-### Fallbacki
+- **No WebGL** (the renderer throws, or `webglcontextlost` without a restore): the canvas is removed
+  and a static still of the network is shown instead — the deterministic graph from
+  `src/scene/relay-graph.ts` drawn as SVG with the scene tokens. Preview: `/brand/`.
+- **`prefers-reduced-motion: reduce`**: `--motion-scale` = 0 — no drift and no autonomous pulses;
+  the scene renders one still frame, section changes cut to the new layout instead of re-forming,
+  and the cursor starts no animation. Content and navigation are unchanged.
+- **Weak hardware** (the lowest quality level still above 20 ms per frame): the same static still as
+  without WebGL.
+- **Print / PDF**: the scene is not rendered (`display: none` in print); documents use the `paper`
+  theme.
 
-- **Brak WebGL** (renderer rzuca wyjątek lub `webglcontextlost` bez powrotu): canvas ukryty, w tle
-  statyczny kadr sieci — ten sam graf (`src/scene/relay-graph.ts`, deterministyczny seed)
-  narysowany jako SVG tokenami sceny. Podgląd kadru: `/brand/`.
-- **`prefers-reduced-motion: reduce`**: `--motion-scale` = 0 — brak dryfu i impulsów
-  autonomicznych; scena renderuje jedną klatkę statycznie, przejścia sekcji to krótkie przenikanie
-  zamiast przebudowy grafu; kursor nie uruchamia animacji. Treść i nawigacja bez zmian.
-- **Słaby sprzęt** (najniższy poziom jakości nadal > 20 ms/klatkę): przejście na statyczny kadr
-  jak przy braku WebGL.
-- **Druk / PDF**: scena nie istnieje (`display: none` w druku); dokumenty używają motywu `paper`.
+### Colours and motion only from tokens
 
-### Kolory i ruch tylko z tokenów
-
-Scena nie ma literałów kolorów. Czyta `sceneTokensFromDocument()` z `src/styles/tokens.ts`
+The scene has no colour literals. It reads `sceneTokensFromDocument()` from `src/styles/tokens.ts`
 (`--scene-bg`, `--scene-node`, `--scene-edge`, `--scene-pulse-task`, `--scene-pulse-result`,
-`--scene-cursor`, `--motion-scale`, `--duration-scene`). Zmiana palety w `tokens.css` zmienia
-scenę, stronę, logo (`npm run brand:assets`) i PDF-y naraz.
-
-## Koszt odwrotu
-
-Dziś: ten dokument. Po T-08: przepisanie `src/scene` (ok. 6 plików, 1,5 dnia); `tokens.css`,
-`relay-graph.ts` (kadr fallbacku) i treść strony zostają bez zmian. Runner-up B wymagałby nowego
-modułu GPGPU i osobnej ścieżki mobile.
+`--scene-cursor`, `--motion-scale`, `--duration-scene`) and the easing curves `--ease-in-out` and
+`--ease-signal`. Changing the palette in `tokens.css` changes the scene, the pages, the logo
+(`npm run brand:assets`) and the PDFs at once.

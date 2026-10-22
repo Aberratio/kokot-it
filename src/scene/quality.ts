@@ -1,5 +1,5 @@
 /**
- * Adaptive quality (docs/concept.md, "Wydajność"): start from a level guessed from the device,
+ * Adaptive quality (docs/concept.md, "Performance"): start from a level guessed from the device,
  * then measure the mean frame time; over 20 ms for 2 s steps one level down. Levels never go
  * back up during a session (no pumping between levels), and if the lowest level still misses
  * the budget the scene gives way to the static still.

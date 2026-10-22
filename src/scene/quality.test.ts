@@ -13,7 +13,7 @@ describe('LEVELS', () => {
   });
 
   // docs/concept.md budgets ~1–1.5k agents (desktop) and ~600 (phone) as a performance ceiling;
-  // the sparse look ("cisza jako stan bazowy") settles well below it (see the decision ledger).
+  // the sparse look ("silence as the base state") settles well below it (see the decision ledger).
   it('stays inside the concept budget: at most ~1.5k agents, phones at most ~600 at DPR ≤ 1.5', () => {
     expect(LEVELS[0]?.nodes).toBeLessThanOrEqual(1500);
     const phone = LEVELS[initialLevel({ width: 390, cores: 8, coarsePointer: true })];

@@ -1,6 +1,6 @@
 /**
  * Work moving through the Relay network: every pulse has a cause and a direction
- * (docs/concept.md, "Ruch ma kierunek i przyczynę"). A job is a route from the agent that asks
+ * (docs/concept.md, "motion has a direction and a cause"). A job is a route from the agent that asks
  * to the agent that does the work; the task travels out hop by hop (warm), the agent works for
  * a moment, and the result travels back the same way (cool, slower).
  *
