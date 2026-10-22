@@ -13,7 +13,7 @@ describe('LEVELS', () => {
   });
 
   // docs/concept.md budgets ~1–1.5k agents (desktop) and ~600 (phone) as a performance ceiling;
-  // the sparse look ("silence as the base state") settles well below it (see the decision ledger).
+  // the sparse look ("silence as the base state") settles well below it (docs/decisions/relay-scene.md).
   it('stays inside the concept budget: at most ~1.5k agents, phones at most ~600 at DPR ≤ 1.5', () => {
     expect(LEVELS[0]?.nodes).toBeLessThanOrEqual(1500);
     const phone = LEVELS[initialLevel({ width: 390, cores: 8, coarsePointer: true })];
@@ -74,10 +74,13 @@ describe('FrameMonitor', () => {
     expect(run(monitor, 25, 100)).toEqual([]);
   });
 
-  it('never upgrades during a session', () => {
-    const monitor = new FrameMonitor(2);
-    run(monitor, 4, 60 * 60);
-    expect(monitor.level).toBe(2);
+  it('never upgrades during a session, however fast the frames get after a downgrade', () => {
+    const monitor = new FrameMonitor(0);
+    expect(run(monitor, 25, 120)).toEqual(['downgrade']);
+    // A minute of 4 ms frames: an "upgrade" rule (any action, or the level going back to 0)
+    // would show here.
+    expect(run(monitor, 4, 60 * 250)).toEqual([]);
+    expect(monitor.level).toBe(1);
   });
 
   it('falls back to the static still when even the lowest level is over budget', () => {
@@ -85,10 +88,23 @@ describe('FrameMonitor', () => {
     expect(run(monitor, 40, 60 * 4)).toEqual(['fallback']);
   });
 
-  it('ignores stalls (hidden tab, a paused debugger): they are not frame cost', () => {
+  it('ignores single stalls (garbage collection, a paused debugger): they are not frame cost', () => {
     const monitor = new FrameMonitor(0);
-    const actions = [...run(monitor, 16, 90), ...run(monitor, 900, 5), ...run(monitor, 16, 200)];
+    const actions: string[] = [];
+    for (let k = 0; k < 10; k++) actions.push(...run(monitor, 16, 60), ...run(monitor, 900, 1));
     expect(actions).toEqual([]);
+  });
+
+  it('steps down on a device stuck below 4 fps: long frames in a row are cost, not stalls', () => {
+    const monitor = new FrameMonitor(0);
+    // 300 ms frames: two are taken for a stall, then they count; ~1 s warm-up + 2 s window.
+    expect(run(monitor, 300, 20)).toEqual(['downgrade']);
+    expect(monitor.level).toBe(1);
+  });
+
+  it('falls back to the still on a device stuck below 4 fps at the lowest level', () => {
+    const monitor = new FrameMonitor(LEVELS.length - 1);
+    expect(run(monitor, 300, 20)).toEqual(['fallback']);
   });
 
   it('warms up again after a pause', () => {
