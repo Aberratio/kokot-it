@@ -327,51 +327,285 @@ export const en: SiteContent = {
     tiller: {
       metaTitle: 'Agentic dev workflow: the tiller case study — kokot.it',
       metaDescription:
-        'Case study: tiller, a set of procedures for AI agents in software delivery, from ticket plan through TDD to review.',
+        'Case study: tiller, an open set of procedures for AI agents in software delivery. Planning, TDD, two-axis review, a verdict measured at one SHA, and boundaries the agent does not cross.',
       card: {
         title: 'Agentic dev workflow: tiller',
         summary:
-          'Procedures for AI agents from ticket plan through TDD to review, kept apart from the facts of any one project.',
+          'Procedures for AI agents from ticket plan through TDD to review and PR, with a project profile, a decision register and hard boundaries.',
         tags: ['software teams', 'AI agents', 'open source'],
       },
-      lead: 'tiller is a set of procedures for AI agents in software delivery. The procedures are shared by every project; the facts of a given project live in its profile.',
-      kind: 'Own tool, public repository',
+      lead: 'tiller is an open set of procedures (skills) for AI agents in software delivery. The procedures are shared by every project, a project’s facts live in its profile, and its decisions in a register that the later steps read.',
+      kind: 'Own tool, public repository (MIT)',
       problem: [
-        'Instructions for AI agents that grow inside one project absorb its facts: merge rules, test commands, environment hosts. Moving them to a second project means copying and hand-editing, and an agent without clear rules can apply one project’s rules to another.',
+        'An AI agent in a repository writes code quickly. Without a process around it, though, a team gets changes nobody planned, tests written after the fact, and reviews that check style rather than whether the change does what it was meant to do.',
+        'The gaps are usually four. No specification for the agent to start from. No review that keeps conformance to conventions apart from conformance to the ticket. No boundaries: what the agent does not do alone, such as merging, sending a message or touching someone else’s PR. No memory of decisions, so every session starts from zero and reviews report deviations agreed earlier as defects.',
+        'On top of that, agent instructions that grow inside one project absorb its facts: merge rules, test commands, environment hosts. A second project means copying and hand-editing them, and an agent can apply one project’s rules to another.',
       ],
       solution: {
         text: [
-          'The procedure, meaning how a ticket is opened, planned, tested, reviewed and merged, is kept apart from the project’s facts. Every procedure starts by resolving the project’s profile and stops if it finds none.',
+          'tiller keeps the procedure apart from the facts. The procedure is how a ticket is opened, planned, tested, reviewed and merged. The facts are everything that differs between projects: the tracker, the branch convention, test commands, CI gates, who may merge. Every skill starts by resolving the project’s profile (step −1) and stops if it finds none.',
+          'The steps that hold quality stand on that frame. The plan checks the ticket’s premise against the code. TDD starts from a test that fails for the reason the ticket describes. Review runs on two independent axes. The verdict comes from a fresh session that did not write the code.',
         ],
         points: [
-          'flow-* procedures with no project facts in them',
-          'a project profile: merge rules, test commands, quality gates',
-          'two-axis review: standards and specification, never merged into one score',
-          'access guards and a leak guard that rejects content naming projects or credentials',
+          'flow-* skills: from opening a ticket, planning and TDD through review, commit and PR to the verdict, bug diagnosis and manual QA; none of them carries the facts of a particular project',
+          'a project profile: a local file of facts (tracker, branches, test commands, gates, merge rules, boundaries), checked by a script before an unattended run',
+          'brains: private knowledge repositories for a project, with a register of decisions D-nnn and questions Q-nnn; a decision becomes “agreed” only once a person confirms it',
+          'the branch’s decision ledger: a deliberate deviation recorded the moment it is taken, read by the reviews and the verdict',
+          'two-axis review: Standards (the repository’s conventions) and Spec (the ticket plus later agreements), reported side by side and never merged into one score',
+          'confidence check: a high-confidence or needs-review verdict computed from conditions, including green CI at one specific SHA',
+          'unattended runs: a ticket in fourteen phases with checkpoints and caps; a decision that touches a boundary on the inviolables list stops the run and waits for a person',
+          'helm: a private overview of every project (stage, deadlines, promises); it advises and never starts work by itself',
+          'a leak guard and an access hook: a commit naming a project, a person or a credential is refused, and one project’s session reads neither another project’s profile nor a brain it was not granted',
         ],
       },
       flow: {
         title: 'How a ticket moves',
+        diagram: {
+          title: 'How a ticket moves through tiller',
+          desc: 'A top-to-bottom diagram. The skill resolves the project profile and stops without one. Then the ticket start, the plan, TDD, review on two parallel axes (Standards and Spec), the commit and a draft PR, and a confidence-check verdict in a fresh session. At the end, either the agent merges, when the profile allows it, or the PR waits for a human signature. Alongside runs the branch’s decision ledger: the plan and TDD write it, the reviews and the verdict read it.',
+          caption:
+            'The interactive path, one skill per step. An unattended run takes the same steps through the driver’s fourteen phases.',
+          rows: [
+            [{ label: 'Project profile', skill: 'step −1', note: 'no profile = stop' }],
+            [{ label: 'Start', skill: 'flow-start-ticket', note: 'ticket, branch, short plan' }],
+            [
+              {
+                label: 'Plan',
+                skill: 'flow-plan-ticket',
+                note: 'premise, seams, decisions',
+                ledger: 'write',
+              },
+            ],
+            [{ label: 'TDD', skill: 'flow-tdd', note: 'red → green, repo gates', ledger: 'write' }],
+            [
+              {
+                label: 'Standards',
+                skill: 'flow-code-review',
+                note: 'repo conventions',
+                ledger: 'read',
+              },
+              {
+                label: 'Spec',
+                skill: 'flow-code-review',
+                note: 'ticket + agreements',
+                ledger: 'read',
+              },
+            ],
+            [
+              {
+                label: 'Commit and PR',
+                skill: 'flow-create-pull-request',
+                note: 'always a draft PR',
+              },
+            ],
+            [
+              {
+                label: 'Verdict',
+                skill: 'flow-confidence-check',
+                note: 'fresh session, CI at the SHA',
+                ledger: 'read',
+              },
+            ],
+            [
+              { label: 'Agent merges', skill: 'merge authority', note: 'profile permitting' },
+              { label: 'Human signature', skill: 'ready-to-sign', note: 'the PR waits open' },
+            ],
+          ],
+          rail: 'branch decision ledger → read by review and verdict',
+        },
         steps: [
-          { title: 'Start', text: 'Ticket, branch and a short agreement on intent before code.' },
+          {
+            title: 'Profile',
+            text: 'The skill resolves the project from an environment variable, a .tiller-profile file or the repository path. No profile means stop, not a guess.',
+          },
+          {
+            title: 'Start',
+            text: 'The ticket is checked (status, blockers, acceptance criteria), a branch is cut from a fresh main, and a short plan is agreed before code.',
+          },
           {
             title: 'Plan',
-            text: 'Checking the ticket’s premise against the repository and planning the change.',
+            text: 'The ticket’s premise is checked against the repository; a seam table names the test level and what is deliberately not tested. Decisions go into the register.',
           },
-          { title: 'TDD', text: 'A test that fails first, then the implementation.' },
+          {
+            title: 'TDD',
+            text: 'The test fails first for the reason the ticket describes, then passes. Green means the repository’s gates pass at a specific SHA, not just the assertion.',
+          },
           {
             title: 'Review',
-            text: 'Review against standards and against the specification, separately.',
+            text: 'Two axes in parallel, in separate subagents: Standards and Spec. Every finding carries a file location and gets a ruling.',
+          },
+          {
+            title: 'Commit and PR',
+            text: 'A commit in the profile’s format and a PR that always opens as a draft, with the test results and screenshots when the change touches the interface.',
           },
           {
             title: 'Verdict',
-            text: 'A readiness verdict on the branch and a pull request; merging follows the profile’s rules.',
+            text: 'A confidence check in a fresh session: high-confidence or needs-review. The profile says who merges, the agent or a person.',
           },
         ],
       },
       demo: {
-        title: 'Recorded run',
-        text: 'A recorded run on a synthetic, public example.',
+        title: 'A sample run',
+        text: 'A session on the fictional bookshelf-api project, from opening the ticket to the verdict.',
+      },
+      transcript: {
+        label: 'Illustrative example',
+        intro:
+          'A fictional mini-project, bookshelf-api (a REST API in TypeScript), and ticket SHELF-12: filter the list of books by author. The log shows what each skill does according to its description in the repository; names, numbers and results are made up for the example.',
+        entries: [
+          {
+            command: '/flow-start-ticket SHELF-12',
+            output: [
+              {
+                tone: 'muted',
+                text: 'profile: bookshelf (a .tiller-profile file in the repository)',
+              },
+              {
+                tone: 'plain',
+                text: 'SHELF-12 · Filter books by author · Backlog, unblocked, 2 acceptance criteria',
+              },
+              {
+                tone: 'plain',
+                text: 'branch SHELF-12-filter-by-author from origin/main · status: In Progress',
+              },
+              { tone: 'plain', text: 'a 3-step plan agreed before any code' },
+            ],
+          },
+          {
+            command: '/flow-plan-ticket SHELF-12',
+            output: [
+              {
+                tone: 'plain',
+                text: 'premise confirmed: GET /books exists (src/routes/books.ts), no author parameter yet',
+              },
+              {
+                tone: 'plain',
+                text: 'kind: code · seam: filterBooks(books, query) · unit · cases written up front',
+              },
+              {
+                tone: 'plain',
+                text: 'deliberately not tested here: the HTTP layer beyond one request test',
+              },
+              {
+                tone: 'muted',
+                text: 'decision (self, overridable): an empty ?author= returns the whole list → ledger',
+              },
+            ],
+          },
+          {
+            command: '/flow-tdd',
+            output: [
+              {
+                tone: 'red',
+                text: '✗ filterBooks › filters by author, ignoring case: expected 2 books, received 5',
+              },
+              { tone: 'muted', text: 'red for the ticket’s reason, not a harness failure' },
+              { tone: 'green', text: '✓ 6 passed · lint ok · typecheck ok' },
+              {
+                tone: 'plain',
+                text: 'pin: without the parameter the list is unchanged (green by design)',
+              },
+              {
+                tone: 'muted',
+                text: 'with the implementation reverted, the test fails again for the same reason',
+              },
+            ],
+          },
+          {
+            command: '/flow-code-review',
+            output: [
+              {
+                tone: 'plain',
+                text: 'Standards · 1 finding · src/routes/books.ts:18 · parameter name breaks the README convention',
+              },
+              {
+                tone: 'plain',
+                text: 'Spec · 0 findings · AC1 and AC2 covered, the ledger decision honoured',
+              },
+              { tone: 'green', text: 'finding accepted and fixed · ✓ 6 passed' },
+            ],
+          },
+          {
+            command: '/flow-create-commit',
+            output: [{ tone: 'plain', text: 'feat(books): filter the list by author' }],
+          },
+          {
+            command: '/flow-create-pull-request',
+            output: [
+              {
+                tone: 'plain',
+                text: 'draft PR #7 · body: scope, test results, ticket link',
+              },
+            ],
+          },
+          {
+            command: '/flow-confidence-check SHELF-12',
+            output: [
+              { tone: 'muted', text: 'a new session; the ticket is its only input' },
+              { tone: 'plain', text: 'CI at the head SHA: green' },
+              { tone: 'plain', text: 'AC1 covered · AC2 covered · 0 blocker / high / medium' },
+              { tone: 'green', text: 'verdict: high-confidence' },
+              {
+                tone: 'muted',
+                text: 'merging follows the profile’s merge authority: here, a human signature',
+              },
+            ],
+          },
+        ],
+        note: 'This is not a recording of a real project. The steps and their order follow the skill descriptions in the tiller repository; nothing here calls an API.',
+      },
+      results: {
+        title: 'Results and lessons',
+        intro:
+          'Numbers from the public repository, with no claims about deployments. Each one can be checked at the path given.',
+        facts: [
+          { value: '23', label: 'flow-* skills', source: 'skills/flow-*/SKILL.md' },
+          {
+            value: '1011',
+            label: 'tests declared across 104 Node test files',
+            source: 'test( in *.test.mjs files',
+          },
+          {
+            value: '168',
+            label: 'commits on main since the first one, 12 October 2026',
+            source: 'git log main',
+          },
+          {
+            value: '14',
+            label: 'phases of an unattended run, each with a checkpoint',
+            source: 'lib/driver/phases.mjs',
+          },
+          {
+            value: '6',
+            label: 'mandates within which the owner-proxy role may act for the owner',
+            source: 'docs/escalation.md',
+          },
+          { value: 'MIT', label: 'licence', source: 'LICENSE' },
+        ],
+        asOf: 'As of 22 October 2026, the main branch of the tiller repository (commit d536250).',
+        lessonsTitle: 'Lessons',
+        lessons: [
+          {
+            title: 'Procedure and facts apart',
+            text: 'A skill with no project facts moves to the next repository by writing a profile, not by copying instructions. A skill that resolves no profile stops instead of guessing.',
+          },
+          {
+            title: 'Two review axes, not one score',
+            text: 'Code can follow every convention and do the wrong thing, or the reverse. In a merged report one axis hides the other, so Standards and Spec run in separate subagents.',
+          },
+          {
+            title: 'Decisions written down at once',
+            text: 'A deviation missing from the ledger is reported by review as a defect or scope creep. Recorded the moment it is taken, it becomes something the review grades rather than rediscovers.',
+          },
+          {
+            title: 'Green is a measurement',
+            text: 'A test is green when the gates pass at a specific SHA; without that the verdict cannot be high-confidence. The session that wrote the code does not give it a verdict.',
+          },
+          {
+            title: 'Boundaries as code',
+            text: 'Merge rules, gates and the inviolables list live in the profile, and a script checks them. A decision that touches a boundary stops the run and waits for a person. No agent role takes over a signature.',
+          },
+        ],
       },
       stack: ['Claude Code', 'Codex', 'Bash', 'Node.js', 'GitHub CLI'],
     },
