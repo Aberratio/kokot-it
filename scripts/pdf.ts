@@ -5,7 +5,7 @@
 //   npm run pdf -- --final               what goes out; warns about {{FIELDS}}, TODO_OWNER, draft pricing
 //   npm run pdf -- --quote <file.json>   also a filled-in price quote kept outside the repo
 //
-// CV content is read from $CV_CONTENT_DIR (default: the private brain); missing → CV skipped.
+// CV content is read from $CV_CONTENT_DIR (it never lives in this repo); not set or missing → CV skipped.
 // First run: npm run pdf:install (downloads Chromium).
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,7 +34,7 @@ const cvDir = cvContentDir();
 const plan = planDocuments({
   mode,
   cv: loadCvSources(cvDir),
-  cvDir,
+  cvDir: cvDir ?? '(CV_CONTENT_DIR not set)',
   ...(values.quote ? { quoteFile: resolve(values.quote) } : {}),
 });
 

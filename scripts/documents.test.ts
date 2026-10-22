@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CvContent } from '../docs-templates/cv/cv.ts';
-import { cvContentDir, DEFAULT_CV_DIR, loadCvSources } from './cv-source.ts';
+import { cvContentDir, loadCvSources } from './cv-source.ts';
 import { planDocuments } from './documents.ts';
 
 const sample = JSON.parse(
@@ -58,7 +58,7 @@ describe('npm run pdf — document plan', () => {
     const file = join(dir, 'firma-x.json');
     const example = JSON.parse(
       readFileSync(
-        new URL('../docs-templates/oferta-cenowa/data.example.json', import.meta.url),
+        new URL('../docs-templates/price-quote/data.example.json', import.meta.url),
         'utf8',
       ),
     ) as Record<string, unknown>;
@@ -80,12 +80,14 @@ describe('npm run pdf — document plan', () => {
 });
 
 describe('CV content location', () => {
-  it('comes from CV_CONTENT_DIR, defaulting to the private brain', () => {
-    expect(cvContentDir({})).toBe(DEFAULT_CV_DIR);
+  it('comes from CV_CONTENT_DIR, with no default', () => {
+    expect(cvContentDir({})).toBeNull();
+    expect(cvContentDir({ CV_CONTENT_DIR: '  ' })).toBeNull();
     expect(cvContentDir({ CV_CONTENT_DIR: ' /x ' })).toBe('/x');
   });
 
-  it('is null when the folder has no CV files', () => {
+  it('is null without a folder or when the folder has no CV files', () => {
+    expect(loadCvSources(null)).toBeNull();
     expect(loadCvSources(mkdtempSync(join(tmpdir(), 'cv-')))).toBeNull();
   });
 

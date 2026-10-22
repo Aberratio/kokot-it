@@ -5,14 +5,14 @@ import type { CvContent } from '../docs-templates/cv/cv.ts';
 import { cvContentDir } from '../scripts/cv-source.ts';
 import { normalize, repoTextFiles } from './repo-files.ts';
 
-// The repo will be public; the CV content stays in the private brain (T-06). When the brain
-// is reachable, no distinctive CV text may appear in any file git would commit.
+// The repository is public; the CV content is not. When CV_CONTENT_DIR points at it, no
+// distinctive CV text may appear in any file git would commit.
 // Not checked: the name and the contact e-mail — they are the brand's public contact data
-// (D-028) and the site shows them.
+// and the site shows them.
 
 const dir = cvContentDir();
-const files = ['cv.pl.json', 'cv.en.json'].map((f) => join(dir, f));
-const available = files.every((f) => existsSync(f));
+const files = dir ? ['cv.pl.json', 'cv.en.json'].map((f) => join(dir, f)) : [];
+const available = files.length > 0 && files.every((f) => existsSync(f));
 
 /** Distinctive strings from the CV: long sentences, employers, owner notes. */
 function cvPhrases(cv: CvContent & Record<string, unknown>): string[] {
@@ -42,7 +42,7 @@ function cvPhrases(cv: CvContent & Record<string, unknown>): string[] {
   return [...phrases];
 }
 
-describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir})`, () => {
+describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir ?? ''})`, () => {
   it('no distinctive CV phrase appears in any committable file', () => {
     const phrases = [
       ...new Set(
@@ -62,6 +62,6 @@ describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir})`,
   });
 });
 
-it.runIf(!available)('CV content guard skipped: brain not available (CI)', () => {
+it.runIf(!available)('CV content guard skipped: CV_CONTENT_DIR not set', () => {
   expect(available).toBe(false);
 });
