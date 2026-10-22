@@ -36,9 +36,76 @@ export interface CaseStudy {
   problem: string[];
   solution: { text: string[]; points: string[] };
   /** Optional ordered walkthrough (used by the tiller case study). */
-  flow?: { title: string; steps: Step[] };
+  flow?: { title: string; steps: Step[]; diagram?: FlowDiagram };
   demo: { title: string; text: string };
+  /**
+   * A static, illustrative session log shown in place of the recorded demo slot. It is text in
+   * the page, so it needs no JavaScript and no published demo file.
+   */
+  transcript?: Transcript;
+  /** Facts with their source in the public repository, and lessons drawn from them. */
+  results?: Results;
   stack: string[];
+}
+
+/** One box of the flow diagram: a stage, the skill that runs it and a short note. */
+export interface DiagramNode {
+  label: string;
+  skill: string;
+  note: string;
+  /** Whether the step writes the branch's decision ledger or reads it (drawn on the side rail). */
+  ledger?: 'write' | 'read';
+}
+
+/**
+ * Inline SVG flow diagram. Rows are drawn top to bottom; a row of two nodes runs side by side.
+ * Every label is SVG text, so it stays selectable, translatable and readable by assistive tech.
+ */
+export interface FlowDiagram {
+  /** SVG `<title>`: the accessible name. */
+  title: string;
+  /** SVG `<desc>`: the whole flow in one paragraph, for readers who cannot see the drawing. */
+  desc: string;
+  caption: string;
+  rows: DiagramNode[][];
+  /** Label of the side rail: the branch's decision ledger, written by plan and TDD, read by reviews. */
+  rail: string;
+}
+
+export interface TranscriptLine {
+  /** `red` / `green` mark a failing / passing test run; `muted` an aside. */
+  tone: 'plain' | 'red' | 'green' | 'muted';
+  text: string;
+}
+
+export interface TranscriptEntry {
+  /** What the person types, e.g. `/flow-tdd`. */
+  command: string;
+  output: TranscriptLine[];
+}
+
+export interface Transcript {
+  /** Says plainly that the log is an illustration, not a recording of a real project. */
+  label: string;
+  intro: string;
+  entries: TranscriptEntry[];
+  note: string;
+}
+
+export interface Fact {
+  value: string;
+  label: string;
+  /** Where the number can be checked in the public repository. */
+  source: string;
+}
+
+export interface Results {
+  title: string;
+  intro: string;
+  facts: Fact[];
+  asOf: string;
+  lessonsTitle: string;
+  lessons: Step[];
 }
 
 export interface SiteContent {

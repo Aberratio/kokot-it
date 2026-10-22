@@ -7,7 +7,9 @@ import {
   projectPath,
   type Locale,
 } from '../i18n/index.ts';
+import { renderFlowDiagram } from './diagram.ts';
 import { en } from './en.ts';
+import { escapeHtml } from './html.ts';
 import { pl } from './pl.ts';
 import {
   CONTACT_EMAIL,
@@ -17,8 +19,10 @@ import {
   type CaseStudy,
   type Offer,
   type ProjectSlug,
+  type Results,
   type SiteContent,
   type Step,
+  type Transcript,
 } from './types.ts';
 
 // Renders every page of the site to static HTML at build time, so the content is
@@ -80,14 +84,7 @@ export function routeFromFile(relativePath: string): Route | undefined {
   return undefined;
 }
 
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
+export { escapeHtml };
 
 const e = escapeHtml;
 const absolute = (path: string): string => `${SITE_ORIGIN}${path}`;
@@ -191,8 +188,8 @@ function renderOffer(offer: Offer): string {
   ].join('');
 }
 
-function renderSteps(steps: readonly Step[]): string {
-  return `<ol class="steps">${list(
+function renderSteps(steps: readonly Step[], className = 'steps'): string {
+  return `<ol class="${className}">${list(
     steps,
     (s) =>
       `<li class="steps__item"><h3 class="steps__title">${e(s.title)}</h3><p>${e(s.text)}</p></li>`,
@@ -308,6 +305,73 @@ function renderRepo(locale: Locale, slug: ProjectSlug): string {
   return `<p class="repo repo--pending" data-placeholder="repo-link"><span class="repo__name">${e(label)}</span> (${e(cs.repoPending)})</p>`;
 }
 
+function renderFlow(flow: NonNullable<CaseStudy['flow']>): string {
+  const steps = flow.diagram
+    ? [
+        `<div class="flow">`,
+        `<figure class="flow__figure">`,
+        renderFlowDiagram(flow.diagram),
+        `<figcaption class="note">${e(flow.diagram.caption)}</figcaption>`,
+        `</figure>`,
+        renderSteps(flow.steps, 'steps steps--list'),
+        `</div>`,
+      ].join('')
+    : renderSteps(flow.steps);
+  return [
+    `<section class="section" aria-labelledby="flow-title">`,
+    `<h2 id="flow-title">${e(flow.title)}</h2>`,
+    steps,
+    `</section>`,
+  ].join('');
+}
+
+/**
+ * An illustrative session log, rendered as text in the page. It replaces the lazy demo slot:
+ * it needs no published demo file, no iframe and no JavaScript, and it says what it is.
+ */
+function renderTranscript(demo: CaseStudy['demo'], t: Transcript): string {
+  const entries = list(t.entries, (entry) =>
+    [
+      `<li class="transcript__entry">`,
+      `<p class="transcript__command"><span class="transcript__prompt" aria-hidden="true">›</span> <code>${e(entry.command)}</code></p>`,
+      `<ul class="transcript__output">${list(
+        entry.output,
+        (line) =>
+          `<li class="transcript__line transcript__line--${line.tone}">${e(line.text)}</li>`,
+      )}</ul>`,
+      `</li>`,
+    ].join(''),
+  );
+  return [
+    `<figure class="transcript">`,
+    `<p class="eyebrow transcript__label">${e(t.label)}</p>`,
+    `<p class="transcript__intro">${e(t.intro)}</p>`,
+    `<ol class="transcript__log">${entries}</ol>`,
+    `<figcaption><strong>${e(demo.title)}.</strong> ${e(demo.text)} <span class="demo__note">${e(t.note)}</span></figcaption>`,
+    `</figure>`,
+  ].join('');
+}
+
+function renderResults(r: Results): string {
+  return [
+    `<section class="section" aria-labelledby="results-title">`,
+    `<h2 id="results-title">${e(r.title)}</h2>`,
+    `<p class="lead">${e(r.intro)}</p>`,
+    `<ul class="facts">${list(
+      r.facts,
+      (f) =>
+        `<li class="fact"><span class="fact__value">${e(f.value)}</span> <span class="fact__label">${e(f.label)}</span> <code class="fact__source">${e(f.source)}</code></li>`,
+    )}</ul>`,
+    `<p class="note">${e(r.asOf)}</p>`,
+    `<h3>${e(r.lessonsTitle)}</h3>`,
+    `<ul class="principles lessons">${list(
+      r.lessons,
+      (l) => `<li><strong>${e(l.title)}.</strong> ${e(l.text)}</li>`,
+    )}</ul>`,
+    `</section>`,
+  ].join('');
+}
+
 function renderCaseStudy(locale: Locale, slug: ProjectSlug, study: CaseStudy): string {
   const c = content(locale);
   const cs = c.caseStudy;
@@ -333,22 +397,21 @@ function renderCaseStudy(locale: Locale, slug: ProjectSlug, study: CaseStudy): s
     `<ul>${list(study.solution.points, (p) => `<li>${e(p)}</li>`)}</ul>`,
     `</section>`,
 
-    study.flow
-      ? [
-          `<section class="section" aria-labelledby="flow-title">`,
-          `<h2 id="flow-title">${e(study.flow.title)}</h2>`,
-          renderSteps(study.flow.steps),
-          `</section>`,
-        ].join('')
-      : '',
+    study.flow ? renderFlow(study.flow) : '',
 
     `<section class="section" aria-labelledby="demo-title">`,
     `<h2 id="demo-title">${e(cs.demo)}</h2>`,
-    `<figure class="demo" data-demo-src="${e(demoSrc(slug))}" data-demo-title="${e(`${cs.demoFrameTitle}: ${study.card.title}`)}">`,
-    `<div class="demo__frame" data-demo-slot><p class="demo__fallback">${e(cs.demoFallback)}</p></div>`,
-    `<figcaption><strong>${e(study.demo.title)}.</strong> ${e(study.demo.text)} <span class="demo__note">${e(cs.demoNote)}</span></figcaption>`,
-    `</figure>`,
+    study.transcript
+      ? renderTranscript(study.demo, study.transcript)
+      : [
+          `<figure class="demo" data-demo-src="${e(demoSrc(slug))}" data-demo-title="${e(`${cs.demoFrameTitle}: ${study.card.title}`)}">`,
+          `<div class="demo__frame" data-demo-slot><p class="demo__fallback">${e(cs.demoFallback)}</p></div>`,
+          `<figcaption><strong>${e(study.demo.title)}.</strong> ${e(study.demo.text)} <span class="demo__note">${e(cs.demoNote)}</span></figcaption>`,
+          `</figure>`,
+        ].join(''),
     `</section>`,
+
+    study.results ? renderResults(study.results) : '',
 
     `<section class="section" aria-labelledby="stack-title">`,
     `<h2 id="stack-title">${e(cs.stack)}</h2>`,

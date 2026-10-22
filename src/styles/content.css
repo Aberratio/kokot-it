@@ -363,3 +363,211 @@ main {
 .site-footer p {
   margin: var(--space-1) 0;
 }
+
+/* Case study: flow diagram (inline SVG, src/content/diagram.ts) next to its steps. */
+.flow {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-5);
+}
+
+@media (min-width: 52rem) {
+  .flow {
+    grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+  }
+}
+
+.flow__figure {
+  margin: 0;
+}
+
+.flow__figure figcaption {
+  margin-top: var(--space-3);
+}
+
+.flow-diagram {
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+}
+
+.fd-box {
+  fill: var(--color-surface);
+  stroke: var(--color-line-strong);
+  stroke-width: var(--border-width);
+}
+
+.fd-label {
+  fill: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+}
+
+.fd-skill {
+  fill: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.fd-note {
+  fill: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.fd-edge {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+
+.fd-arrow {
+  fill: var(--color-accent);
+}
+
+.fd-rail-line,
+.fd-tick {
+  fill: none;
+  stroke: var(--color-accent-2);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+
+.fd-dot {
+  fill: var(--color-accent-2);
+}
+
+.fd-rail-label {
+  fill: var(--color-accent-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.steps--list {
+  grid-template-columns: minmax(0, 1fr);
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+/* Case study: illustrative session log (src/content/render.ts, renderTranscript). */
+.transcript {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-deep);
+}
+
+.transcript__intro {
+  margin-top: 0;
+  color: var(--color-text-muted);
+}
+
+.transcript__log {
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.transcript__entry {
+  max-width: none;
+}
+
+.transcript__entry + .transcript__entry {
+  margin-top: var(--space-4);
+}
+
+.transcript__command {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.transcript__command code {
+  font-family: inherit;
+}
+
+.transcript__prompt {
+  color: var(--color-accent);
+}
+
+.transcript__output {
+  margin: var(--space-1) 0 0;
+  padding: 0 0 0 var(--space-5);
+  list-style: none;
+  border-left: var(--border-width) solid var(--color-line);
+}
+
+.transcript__line {
+  max-width: none;
+  overflow-wrap: anywhere;
+  color: var(--color-text-muted);
+}
+
+.transcript__line--plain {
+  color: var(--color-text);
+}
+
+.transcript__line--muted {
+  color: var(--color-text-subtle);
+}
+
+.transcript__line--red {
+  color: var(--color-danger);
+}
+
+.transcript__line--green {
+  color: var(--color-success);
+}
+
+.transcript figcaption {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Case study: facts from the public repository. */
+.facts {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  margin: var(--space-5) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.fact__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  color: var(--color-accent);
+}
+
+.fact__source {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  color: var(--color-text-subtle);
+  overflow-wrap: anywhere;
+}
+
+.lessons li + li {
+  margin-top: var(--space-3);
+}
