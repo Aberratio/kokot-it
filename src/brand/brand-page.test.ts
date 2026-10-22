@@ -1,20 +1,25 @@
+import { sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { discoverPages } from '../build/pages.ts';
 import { contrastRatio } from '../styles/color.ts';
 import { CONTRAST_PAIRS, themeReaders } from '../styles/tokens.ts';
 
 const read = (path: string): string => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 describe('/brand/ preview page', () => {
-  it('stays out of search engines (meta and Vercel header)', () => {
+  it('is never built for production', () => {
+    const root = fileURLToPath(new URL('../../', import.meta.url));
+    const pages = Object.values(discoverPages(root)).map((p) => p.split(sep).join('/'));
+    expect(pages.some((p) => p.endsWith('brand/index.html'))).toBe(false);
+    expect(pages.some((p) => p.endsWith('en/index.html'))).toBe(true);
+  });
+
+  it('stays out of search engines if it is ever served (dev server)', () => {
     expect(read('../../brand/index.html')).toMatch(
       /<meta name="robots" content="noindex, nofollow" \/>/,
     );
-    const vercel = JSON.parse(read('../../vercel.json')) as {
-      headers?: { source: string; headers: { key: string; value: string }[] }[];
-    };
-    const rule = vercel.headers?.find((h) => h.source.startsWith('/brand/'));
-    expect(rule?.headers).toContainEqual({ key: 'X-Robots-Tag', value: 'noindex, nofollow' });
   });
 });
 

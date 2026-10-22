@@ -2,7 +2,7 @@
 
 One visual language for the site, the 3D scene, the offer, the CV and the reference projects.
 Source of every value: [`src/styles/tokens.css`](src/styles/tokens.css) (CSS custom properties).
-Review preview: `/brand/` (`npm run dev` → http://localhost:5173/brand/, a `noindex` page).
+Review preview: `/brand/` on the dev server (`npm run dev` → http://localhost:5173/brand/, a `noindex` page that is not part of the production build).
 3D scene concept: [`docs/concept.md`](docs/concept.md).
 
 ## The concept in brief
