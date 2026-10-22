@@ -110,7 +110,15 @@ export interface Results {
 }
 
 export interface SiteContent {
-  meta: { title: string; description: string; siteName: string };
+  meta: {
+    title: string;
+    description: string;
+    siteName: string;
+    /** The social preview image (public/og/, scripts/og-image.ts): its headline and alt text. */
+    ogImage: { headline: string; alt: string };
+    /** schema.org `areaServed`: where the services are offered, named in this locale. */
+    areaServed: string[];
+  };
   nav: {
     label: string;
     services: string;

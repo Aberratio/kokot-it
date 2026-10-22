@@ -7,6 +7,11 @@ export const pl: SiteContent = {
     description:
       'Agenci AI dla firm produkcyjnych (dokumenty, jakość, planowanie) i dla zespołów programistycznych. Oferta wykonawcy do projektów z dotacją, np. Dig.IT.',
     siteName: 'kokot.it',
+    ogImage: {
+      headline: 'Agenci AI dla produkcji i zespołów programistycznych',
+      alt: 'kokot.it — agenci AI dla produkcji i zespołów programistycznych; w tle sieć agentów przekazujących sobie zadania.',
+    },
+    areaServed: ['Polska', 'Unia Europejska'],
   },
   nav: {
     label: 'Nawigacja główna',
@@ -297,7 +302,7 @@ export const pl: SiteContent = {
     'grant-assistant': {
       metaTitle: 'Asystent wniosku dotacyjnego — kokot.it',
       metaDescription:
-        'Rozwiązanie referencyjne: dopasowanie firmy do naborów na podstawie jawnych reguł kwalifikowalności i szkic opisu projektu. Nie jest poradą prawną ani gwarancją dotacji.',
+        'Rozwiązanie referencyjne: dopasowanie firmy do naborów według jawnych reguł i szkic opisu projektu. Nie jest poradą prawną ani gwarancją dotacji.',
       card: {
         title: 'Asystent wniosku dotacyjnego',
         summary:
@@ -330,7 +335,7 @@ export const pl: SiteContent = {
     tiller: {
       metaTitle: 'Agentic dev workflow: case study tillera — kokot.it',
       metaDescription:
-        'Case study: tiller, otwarty zestaw procedur dla agentów AI w wytwarzaniu oprogramowania. Plan, TDD, review w dwóch osiach, werdykt na konkretnym SHA i granice, których agent nie przekracza.',
+        'Case study tillera: otwarte procedury dla agentów AI w wytwarzaniu oprogramowania. Plan, TDD, review w dwóch osiach, werdykt na konkretnym SHA i twarde granice.',
       card: {
         title: 'Agentic dev workflow: tiller',
         summary:

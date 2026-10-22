@@ -20,7 +20,8 @@
     "pdf:preview": "node scripts/pdf-preview.ts",
     "pdf:install": "playwright install chromium",
     "brand:assets": "node scripts/brand-assets.ts",
-    "tools:sync": "node scripts/sync-tools.ts"
+    "tools:sync": "node scripts/sync-tools.ts",
+    "og:image": "node scripts/og-image.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
