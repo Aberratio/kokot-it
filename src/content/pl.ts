@@ -342,7 +342,7 @@ export const pl: SiteContent = {
       ],
       solution: {
         text: [
-          'tiller oddziela procedurę od faktów. Procedura to sposób, w jaki ticket jest otwierany, planowany, testowany, przeglądany i scalany. Fakty to wszystko, czym różnią się projekty: tracker, konwencja gałęzi, komendy testów, bramki CI, kto może scalić. Każdy skill zaczyna od rozpoznania profilu projektu (krok −1) i zatrzymuje się, jeśli go nie znajdzie.',
+          'tiller oddziela procedurę od faktów. Procedura to sposób, w jaki ticket jest otwierany, planowany, testowany, przeglądany i scalany. Fakty to wszystko, czym różnią się projekty: tracker, konwencja gałęzi, komendy testów, bramki CI, kto może scalić. Każdy skill, który pracuje na tickecie, zaczyna od rozpoznania profilu projektu (krok −1) i zatrzymuje się, jeśli go nie znajdzie.',
           'Na tym szkielecie stoją kroki, które pilnują jakości. Plan sprawdza założenia ticketu w kodzie. TDD zaczyna od testu, który pada z powodu opisanego w tickecie. Review idzie w dwóch niezależnych osiach. Werdykt wydaje świeża sesja, która nie pisała kodu.',
         ],
         points: [
@@ -351,7 +351,7 @@ export const pl: SiteContent = {
           'brainy: prywatne repozytoria wiedzy o projekcie z rejestrem decyzji D-nnn i pytań Q-nnn; decyzja staje się „agreed” dopiero po potwierdzeniu przez człowieka',
           'rejestr decyzji gałęzi: świadome odstępstwo zapisane w chwili decyzji, czytane przez review i werdykt',
           'review dwuosiowe: Standards (konwencje repozytorium) i Spec (ticket plus późniejsze ustalenia), raportowane obok siebie, bez łączenia w jedną ocenę',
-          'confidence check: werdykt high-confidence albo needs-review wyliczany z warunków, w tym z zielonego CI na konkretnym SHA',
+          'confidence check: werdykt high-confidence albo needs-review wyliczany z warunków, w tym z dowodu, że testy przechodzą na konkretnym SHA (CI albo ponowne uruchomienie lokalnie)',
           'przebieg bez nadzoru: ticket w czternastu fazach z punktami kontrolnymi i limitami; decyzja, która dotyka granicy z listy inviolables, zatrzymuje przebieg i czeka na człowieka',
           'helm: prywatny przegląd wszystkich projektów (etap, terminy, obietnice); doradza, nigdy sam nie zaczyna pracy',
           'strażnik wycieku i hook dostępu: commit z nazwą projektu, osoby albo kluczem jest odrzucany, a sesja jednego projektu nie czyta profilu innego projektu ani braina, do którego nie dostała dostępu',
@@ -363,7 +363,7 @@ export const pl: SiteContent = {
           title: 'Przebieg ticketu w tillerze',
           desc: 'Schemat od góry do dołu. Skill rozpoznaje profil projektu i bez niego się zatrzymuje. Potem start ticketu, plan, TDD, review w dwóch równoległych osiach (Standards i Spec), commit i szkic PR, werdykt confidence check w świeżej sesji. Na końcu scalenie przez agenta, jeśli profil na to pozwala, albo PR czekający na podpis człowieka. Z boku rejestr decyzji gałęzi: zapisują go plan i TDD, czytają review i werdykt.',
           caption:
-            'Przebieg interaktywny, jeden skill na krok. Przebieg bez nadzoru przechodzi te same kroki w czternastu fazach sterownika.',
+            'Przebieg interaktywny, jeden skill na krok; ostatni wiersz to zasada scalania z profilu. Przebieg bez nadzoru przechodzi te same kroki w czternastu fazach sterownika.',
           rows: [
             [{ label: 'Profil projektu', skill: 'krok −1', note: 'brak profilu = stop' }],
             [{ label: 'Start', skill: 'flow-start-ticket', note: 'ticket, gałąź, krótki plan' }],
@@ -408,7 +408,7 @@ export const pl: SiteContent = {
               {
                 label: 'Werdykt',
                 skill: 'flow-confidence-check',
-                note: 'świeża sesja, CI na SHA',
+                note: 'świeża sesja, testy na SHA',
                 ledger: 'read',
               },
             ],
@@ -566,7 +566,7 @@ export const pl: SiteContent = {
           {
             value: '1011',
             label: 'testów zadeklarowanych w 104 plikach testów Node',
-            source: 'test( w plikach *.test.mjs',
+            source: 'wiersze zaczynające się od test( (także z wcięciem) w *.test.mjs',
           },
           {
             value: '168',
@@ -581,7 +581,7 @@ export const pl: SiteContent = {
           {
             value: '6',
             label: 'mandatów, w których rola owner proxy może działać za właścicielkę',
-            source: 'docs/escalation.md',
+            source: 'README.md',
           },
           { value: 'MIT', label: 'licencja', source: 'LICENSE' },
         ],
@@ -590,7 +590,7 @@ export const pl: SiteContent = {
         lessons: [
           {
             title: 'Procedura osobno, fakty osobno',
-            text: 'Skill bez faktów projektu przenosi się do kolejnego repozytorium przez napisanie profilu, a nie przez kopiowanie instrukcji. Skill, który nie rozpozna profilu, zatrzymuje się zamiast zgadywać.',
+            text: 'Skill bez faktów projektu przenosi się do kolejnego repozytorium przez napisanie profilu, a nie przez kopiowanie instrukcji. Skill ticketu, który nie rozpozna profilu, zatrzymuje się zamiast zgadywać.',
           },
           {
             title: 'Dwie osie review, nie jedna ocena',
