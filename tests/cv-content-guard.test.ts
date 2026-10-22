@@ -3,12 +3,15 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CvContent } from '../docs-templates/cv/cv.ts';
 import { cvContentDir } from '../scripts/cv-source.ts';
-import { normalize, repoTextFiles } from './repo-files.ts';
+import { decodeEntities } from '../src/content/guards.ts';
+import { normalize as collapse, repoTextFiles } from './repo-files.ts';
+const normalize = (s: string): string => collapse(decodeEntities(s)).toLowerCase();
 
 // The repository is public; the CV content is not. When CV_CONTENT_DIR points at it, no
 // distinctive CV text may appear in any file git would commit.
 // Not checked: the name and the contact e-mail — they are the brand's public contact data
-// and the site shows them.
+// and the site shows them. Matching ignores case, spacing and HTML entities, so a phrase
+// re-cased or escaped in a page or template is still caught.
 
 const dir = cvContentDir();
 const files = dir ? ['cv.pl.json', 'cv.en.json'].map((f) => join(dir, f)) : [];
