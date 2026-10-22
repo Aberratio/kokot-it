@@ -56,19 +56,27 @@ export interface MonitorOptions {
   readonly windowMs?: number;
   /** Ignored at the start and after every pause: shader compilation, first uploads. */
   readonly warmupMs?: number;
-  /** Frames longer than this are stalls (hidden tab, debugger), not render cost. */
+  /**
+   * A frame longer than this is a stall (garbage collection, a debugger, the tab coming back),
+   * not render cost — unless it is one of several in a row: a device stuck below 4 fps is slow,
+   * not stalled. A hidden tab never reaches the monitor: the loop stops while hidden.
+   */
   readonly stallMs?: number;
+  /** Long frames in a row from which long frames count as cost. */
+  readonly stallStreak?: number;
 }
 
 export class FrameMonitor {
   private warm = 0;
   private done = false;
+  private longFrames = 0;
   private total = 0;
   private frames = 0;
   private readonly budgetMs: number;
   private readonly windowMs: number;
   private readonly warmupMs: number;
   private readonly stallMs: number;
+  private readonly stallStreak: number;
 
   /** Current level index into LEVELS. */
   level: number;
@@ -79,11 +87,16 @@ export class FrameMonitor {
     this.windowMs = options.windowMs ?? 2000;
     this.warmupMs = options.warmupMs ?? 1000;
     this.stallMs = options.stallMs ?? 250;
+    this.stallStreak = options.stallStreak ?? 3;
   }
 
   /** Feeds one frame interval; returns what the scene should do about it. */
   sample(dtMs: number): QualityAction {
-    if (this.done || dtMs > this.stallMs) return 'keep';
+    if (this.done) return 'keep';
+    if (dtMs > this.stallMs) {
+      this.longFrames++;
+      if (this.longFrames < this.stallStreak) return 'keep';
+    } else this.longFrames = 0;
     if (this.warm < this.warmupMs) {
       this.warm += dtMs;
       return 'keep';
@@ -107,5 +120,6 @@ export class FrameMonitor {
     this.warm = 0;
     this.total = 0;
     this.frames = 0;
+    this.longFrames = 0;
   }
 }
