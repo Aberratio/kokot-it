@@ -175,12 +175,18 @@ describe('rendered pages', () => {
       expect(enHome?.html).toContain(`href="/en/projects/${slug}/"`);
   });
 
-  it('gives every case study a lazy recorded demo slot with a text fallback', () => {
+  it('gives every case study a lazy recorded demo slot with a text fallback, or a static transcript', () => {
     for (const { route, html } of pages) {
       if (route.page !== 'project') continue;
+      expect(html).not.toContain('<iframe');
+      if (content(route.locale).caseStudies[route.slug].transcript) {
+        // The illustrative log is text in the page: no slot to fill, nothing to fetch.
+        expect(html).toContain('<figure class="transcript">');
+        expect(html).not.toContain('data-demo-src');
+        continue;
+      }
       expect(html).toContain(`data-demo-src="/demos/${route.slug}/index.html?embed=1"`);
       expect(html).toContain('class="demo__fallback"');
-      expect(html).not.toContain('<iframe');
     }
   });
 
@@ -257,7 +263,8 @@ describe('required sections', () => {
       }
       // The note must sit inside the figcaption, so it stays when the iframe replaces the fallback.
       const caption = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(page)?.[1] ?? '';
-      expect(caption).toContain(escapeHtml(c.caseStudy.demoNote));
+      // A static transcript is not a recording, so it carries its own note instead.
+      expect(caption).toContain(escapeHtml(study.transcript?.note ?? c.caseStudy.demoNote));
     },
   );
 });
