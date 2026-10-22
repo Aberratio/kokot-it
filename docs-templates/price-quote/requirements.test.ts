@@ -90,6 +90,9 @@ describe('price quote template', () => {
   it('marks the example as fictional and keeps the preliminary-pricing badge', () => {
     expect(visibleText(exampleHtml)).toContain('PRZYKŁAD — fikcyjna firma');
     expect(exampleHtml).toContain('data-draft');
+    // The badge must be readable on the page, not only a marker in the markup.
+    expect(visibleText(exampleHtml)).toContain('Cennik wstępny — do zatwierdzenia');
+    expect(visibleText(blankHtml)).toContain('Cennik wstępny — do zatwierdzenia');
     expect(blankHtml).not.toContain('data-example');
   });
 

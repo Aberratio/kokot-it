@@ -107,9 +107,9 @@ ${packages}
 
   <div class="cols-2">
     <section>
-      <h2>${escapeHtml(c.showcase.title)}</h2>
-      ${list(c.showcase.points)}
-      <p class="fine">${text(c.showcase.note)}</p>
+      <h2>${escapeHtml(c.references.title)}</h2>
+      ${list(c.references.points)}
+      <p class="fine">${text(c.references.note)}</p>
     </section>
     <section>
       <h2>${escapeHtml(c.terms.title)}</h2>

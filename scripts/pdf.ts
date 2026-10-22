@@ -72,7 +72,9 @@ try {
   await browser.close();
 }
 
-if (mode === 'final' && plan.warnings.length > 0) {
+// A final run with open warnings must not look like success to a script or CI either.
+const notReady = mode === 'final' && plan.warnings.length > 0;
+if (notReady) {
   console.warn(`\nNOT READY TO SEND: ${String(plan.warnings.length)} warning(s) above.`);
 }
-process.exit(failed ? 1 : 0);
+process.exit(failed || notReady ? 1 : 0);

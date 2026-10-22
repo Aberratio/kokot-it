@@ -30,7 +30,7 @@ export interface OfferCopy {
   timeline: { title: string; steps: { when: string; what: string; text: string }[] };
   deliverables: { title: string; points: string[] };
   eligibility: { title: string; points: string[]; disclaimer: string };
-  showcase: { title: string; points: string[]; note: string };
+  references: { title: string; points: string[]; note: string };
   terms: { title: string; points: string[] };
   contact: { title: string; text: string; site: string };
 }
@@ -154,14 +154,14 @@ const pl: OfferCopy = {
     disclaimer:
       'O kwalifikowalności kosztów i przyznaniu grantu decyduje ARP na podstawie wniosku. kokot.it nie pisze wniosków i nie obiecuje dofinansowania. Grant: do 50% kosztów kwalifikowalnych, refundowany po projekcie. Stan informacji: 21.10.2026, regulamin konkursu Dig.IT 2/2026.',
   },
-  showcase: {
-    title: 'Projekty pokazowe',
+  references: {
+    title: 'Projekty referencyjne',
     points: [
       'Cyfrowy bliźniak hali produkcyjnej w 3D z agentem AI, który odpowiada na pytania o zlecenia, przestoje i jakość.',
       'Agent do dokumentów produkcyjnych: zamówienia i raporty jakości trafiają do arkusza lub ERP, pola niepewne do weryfikacji.',
       'Asystent wniosku dotacyjnego oraz tiller: otwarty zestaw narzędzi do pracy z agentami AI przy wytwarzaniu oprogramowania.',
     ],
-    note: 'Projekty pokazowe działają na fikcyjnych danych; opisy na kokot.it. Doświadczenie wykonawcy: CV w załączniku.',
+    note: 'Projekty referencyjne działają na danych przykładowych fikcyjnych firm; opisy na kokot.it. Doświadczenie wykonawcy: CV w załączniku.',
   },
   terms: {
     title: 'Zasady współpracy',
@@ -281,7 +281,7 @@ const en: OfferCopy = {
     points: [
       'a working agent (or agent platform) on the company’s infrastructure or in an EU cloud region',
       'source code with a transfer of the economic copyrights, no licence fees for the custom code',
-      'technical and user documentation and a trained team',
+      'technical and user documentation and trained staff',
       'a test and metrics report — input for the project indicators',
       'an AI Act compliance note: risk classification, human oversight, logs',
       'a price quote split into software development, implementation and training',
@@ -298,14 +298,14 @@ const en: OfferCopy = {
     disclaimer:
       'Eligibility and the grant are decided by ARP based on the application. kokot.it does not write applications and does not promise funding. Grant: up to 50% of eligible costs, refunded after the project. As of 21 Oct 2026, Dig.IT 2/2026 competition rules.',
   },
-  showcase: {
-    title: 'Showcase projects',
+  references: {
+    title: 'Reference projects',
     points: [
       'A 3D shop-floor digital twin with an AI agent that answers questions about orders, downtime and quality.',
       'A production documents agent: orders and quality reports go into a spreadsheet or the ERP, uncertain fields go to review.',
       'A grant application assistant, and tiller: an open toolkit for working with AI agents in software delivery.',
     ],
-    note: 'Showcase projects run on fictional company data; write-ups on kokot.it. The supplier’s experience: CV attached.',
+    note: 'Reference projects run on sample data from fictional companies; write-ups on kokot.it. The supplier’s experience: CV attached.',
   },
   terms: {
     title: 'Terms of cooperation',
