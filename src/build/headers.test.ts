@@ -64,4 +64,45 @@ describe('siteHeaders', () => {
     ).toEqual({ B: '2' });
     expect(siteHeaders('{}')).toEqual({});
   });
+
+  it('ignores conditional catch-all rules, whatever their order', () => {
+    expect(
+      siteHeaders(
+        JSON.stringify({
+          headers: [
+            {
+              source: '/(.*)',
+              has: [{ type: 'host', value: '.*' }],
+              headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
+            },
+            { source: '/(.*)', headers: [{ key: 'B', value: '2' }] },
+          ],
+        }),
+      ),
+    ).toEqual({ B: '2' });
+  });
+});
+
+describe('vercel.app hosts', () => {
+  const rules = (
+    JSON.parse(vercelJson) as {
+      headers: { source: string; has?: { type: string; value: string }[]; headers: unknown[] }[];
+    }
+  ).headers;
+  const hostRule = rules.find((r) => r.has?.some((c) => c.type === 'host'));
+  const hostPattern = new RegExp(
+    `^${(hostRule?.has?.find((c) => c.type === 'host')?.value ?? '').replace(/\(\?<\w+>/g, '(')}$`,
+  );
+
+  it('are kept out of search results', () => {
+    expect(hostRule?.source).toBe('/(.*)');
+    expect(hostRule?.headers).toContainEqual({ key: 'X-Robots-Tag', value: 'noindex' });
+  });
+
+  it('match vercel.app deployments but never the custom domain', () => {
+    expect(hostPattern.test('kokot-it.vercel.app')).toBe(true);
+    expect(hostPattern.test('kokot-bl1hzmq9u-aberratios-projects.vercel.app')).toBe(true);
+    expect(hostPattern.test('kokot.it')).toBe(false);
+    expect(hostPattern.test('www.kokot.it')).toBe(false);
+  });
 });

@@ -208,6 +208,10 @@ repository secrets; automatic deploys from GitHub Actions start as soon as `VERC
 (the Vercel CLI cannot create tokens, so it comes from the dashboard). Until then, deploy by hand
 with `npx vercel@65.0.0 deploy --prod` from a linked checkout.
 
+The repository is also connected to Vercel's Git integration, but its automatic deployments are
+turned off in `vercel.json` (`"git": { "deploymentEnabled": false }`), so GitHub Actions stays the
+only deploy path and nothing is deployed twice.
+
 ### Secrets
 
 Add them in GitHub: repository → **Settings → Secrets and variables → Actions → New repository
