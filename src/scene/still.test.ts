@@ -29,9 +29,9 @@ describe('relayStillMarkup', () => {
   it('is decorative by default and an image when given a title', () => {
     expect(markup).toContain('aria-hidden="true"');
     expect(markup).not.toContain('<title>');
-    const titled = relayStillMarkup(graph, 400, 300, { id: 'y', title: 'Sieć <agentów>' });
+    const titled = relayStillMarkup(graph, 400, 300, { id: 'y', title: 'Agent <network>' });
     expect(titled).toContain('role="img"');
-    expect(titled).toContain('<title>Sieć &lt;agentów&gt;</title>');
+    expect(titled).toContain('<title>Agent &lt;network&gt;</title>');
   });
 
   it('keeps gradient ids unique per still', () => {

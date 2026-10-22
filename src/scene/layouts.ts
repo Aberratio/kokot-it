@@ -1,5 +1,5 @@
 /**
- * Where the agents stand in each state of the page (docs/concept.md, "Scena a sekcje strony").
+ * Where the agents stand in each state of the page (docs/concept.md, "Scene and page sections").
  * The topology never changes — only positions do, so a section change reads as the same
  * organisation re-forming: free network (hero), 3 service clusters, 4 project constellations,
  * and everything converging on one node next to the e-mail address (contact).
