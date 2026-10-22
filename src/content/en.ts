@@ -343,7 +343,7 @@ export const en: SiteContent = {
       ],
       solution: {
         text: [
-          'tiller keeps the procedure apart from the facts. The procedure is how a ticket is opened, planned, tested, reviewed and merged. The facts are everything that differs between projects: the tracker, the branch convention, test commands, CI gates, who may merge. Every skill starts by resolving the project’s profile (step −1) and stops if it finds none.',
+          'tiller keeps the procedure apart from the facts. The procedure is how a ticket is opened, planned, tested, reviewed and merged. The facts are everything that differs between projects: the tracker, the branch convention, test commands, CI gates, who may merge. Every skill that works on a ticket starts by resolving the project’s profile (step −1) and stops if it finds none.',
           'The steps that hold quality stand on that frame. The plan checks the ticket’s premise against the code. TDD starts from a test that fails for the reason the ticket describes. Review runs on two independent axes. The verdict comes from a fresh session that did not write the code.',
         ],
         points: [
@@ -352,7 +352,7 @@ export const en: SiteContent = {
           'brains: private knowledge repositories for a project, with a register of decisions D-nnn and questions Q-nnn; a decision becomes “agreed” only once a person confirms it',
           'the branch’s decision ledger: a deliberate deviation recorded the moment it is taken, read by the reviews and the verdict',
           'two-axis review: Standards (the repository’s conventions) and Spec (the ticket plus later agreements), reported side by side and never merged into one score',
-          'confidence check: a high-confidence or needs-review verdict computed from conditions, including green CI at one specific SHA',
+          'confidence check: a high-confidence or needs-review verdict computed from conditions, including proof that the tests pass at one specific SHA (CI or a local re-run)',
           'unattended runs: a ticket in fourteen phases with checkpoints and caps; a decision that touches a boundary on the inviolables list stops the run and waits for a person',
           'helm: a private overview of every project (stage, deadlines, promises); it advises and never starts work by itself',
           'a leak guard and an access hook: a commit naming a project, a person or a credential is refused, and one project’s session reads neither another project’s profile nor a brain it was not granted',
@@ -364,7 +364,7 @@ export const en: SiteContent = {
           title: 'How a ticket moves through tiller',
           desc: 'A top-to-bottom diagram. The skill resolves the project profile and stops without one. Then the ticket start, the plan, TDD, review on two parallel axes (Standards and Spec), the commit and a draft PR, and a confidence-check verdict in a fresh session. At the end, either the agent merges, when the profile allows it, or the PR waits for a human signature. Alongside runs the branch’s decision ledger: the plan and TDD write it, the reviews and the verdict read it.',
           caption:
-            'The interactive path, one skill per step. An unattended run takes the same steps through the driver’s fourteen phases.',
+            'The interactive path, one skill per step; the last row is the profile’s merge rule. An unattended run takes the same steps through the driver’s fourteen phases.',
           rows: [
             [{ label: 'Project profile', skill: 'step −1', note: 'no profile = stop' }],
             [{ label: 'Start', skill: 'flow-start-ticket', note: 'ticket, branch, short plan' }],
@@ -402,7 +402,7 @@ export const en: SiteContent = {
               {
                 label: 'Verdict',
                 skill: 'flow-confidence-check',
-                note: 'fresh session, CI at the SHA',
+                note: 'fresh session, tests at the SHA',
                 ledger: 'read',
               },
             ],
@@ -563,7 +563,7 @@ export const en: SiteContent = {
           {
             value: '1011',
             label: 'tests declared across 104 Node test files',
-            source: 'test( in *.test.mjs files',
+            source: 'lines starting with test( (indented too) in *.test.mjs',
           },
           {
             value: '168',
@@ -578,7 +578,7 @@ export const en: SiteContent = {
           {
             value: '6',
             label: 'mandates within which the owner-proxy role may act for the owner',
-            source: 'docs/escalation.md',
+            source: 'README.md',
           },
           { value: 'MIT', label: 'licence', source: 'LICENSE' },
         ],
@@ -587,7 +587,7 @@ export const en: SiteContent = {
         lessons: [
           {
             title: 'Procedure and facts apart',
-            text: 'A skill with no project facts moves to the next repository by writing a profile, not by copying instructions. A skill that resolves no profile stops instead of guessing.',
+            text: 'A skill with no project facts moves to the next repository by writing a profile, not by copying instructions. A ticket skill that resolves no profile stops instead of guessing.',
           },
           {
             title: 'Two review axes, not one score',
