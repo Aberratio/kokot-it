@@ -61,7 +61,10 @@ describe('checkDist', () => {
 
   it('holds listed standalone pages to contact and amount rules (type specimens show digits)', () => {
     buildAll();
-    write('/brand/', '<html><body><p>0123456789 · € · zł</p><p>result · 14 dni</p></body></html>');
+    write(
+      '/brand/',
+      '<html><body><p>0123 · 4567 · 89 · € · zł</p><p>result · 14 dni</p></body></html>',
+    );
     expect(checkDist(dist).failures).toEqual([]);
     for (const price of ['2 400 zł / dzień', '€ 120', '10 tys. netto']) {
       write('/brand/', `<html><body><p>${price}</p></body></html>`);
@@ -71,6 +74,45 @@ describe('checkDist', () => {
     expect(checkDist(dist).failures).toEqual([
       'brand/index.html: tel: link',
       'brand/index.html: unexpected e-mail',
+    ]);
+  });
+
+  it('requires every reference application and skips its own pages', () => {
+    buildAll();
+    expect(checkDist(dist, ['tool-a']).failures).toEqual([
+      '/tools/tool-a/: reference application missing from the build',
+    ]);
+    // Sample data inside an application may show amounts and long numbers.
+    write('/tools/tool-a/', '<html><body><p>Order 1234567890 · 2 400 zł</p></body></html>');
+    expect(checkDist(dist, ['tool-a'])).toEqual({ pages: allRoutes().length, failures: [] });
+  });
+
+  it('holds a page under tools/ that is not a locked application to the full rules', () => {
+    buildAll();
+    write('/tools/stray/', '<html><body><p>2 400 zł</p></body></html>');
+    expect(checkDist(dist, ['tool-a']).failures).toContain('tools/stray/index.html: price');
+  });
+
+  it('holds the brand preview to the phone and tax id rule', () => {
+    buildAll();
+    write('/brand/', '<html><body><p>0123456789</p></body></html>');
+    expect(checkDist(dist).failures).toEqual(['brand/index.html: phone number or tax id']);
+  });
+
+  it('holds route pages to the price rule that type specimens are spared', () => {
+    buildAll();
+    write('/', '<html lang="pl"><body><p>0123 · 4567 · 89 · 2 400 zł</p></body></html>');
+    expect(checkDist(dist).failures).toEqual(['index.html: price']);
+  });
+
+  it('fails the wording rules on a route page', () => {
+    buildAll();
+    // Built from parts: the repository's own wording guard reads this file too.
+    const text = ['Recorded', ['de', 'mo'].join(''), 'see', ['D', '042'].join('-')].join(' ');
+    write('/en/', `<html lang="en"><body><p>${text}</p></body></html>`);
+    expect(checkDist(dist).failures).toEqual([
+      ['en/index.html: ', 'de', 'mo wording'].join(''),
+      'en/index.html: internal process reference',
     ]);
   });
 });

@@ -1,6 +1,6 @@
 import './styles/main.css';
 import './styles/content.css';
-import { mountDemos } from './demo.ts';
+import { mountTools } from './embed.ts';
 import { mountScene } from './scene/index.ts';
 
 // Shared entry for every page. The copy, navigation and language switch are rendered
@@ -12,4 +12,4 @@ import { mountScene } from './scene/index.ts';
 const sceneRoot = document.getElementById('scene-root');
 if (sceneRoot) mountScene(sceneRoot);
 
-mountDemos(document);
+mountTools(document);

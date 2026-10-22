@@ -3,16 +3,19 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CvContent } from '../docs-templates/cv/cv.ts';
 import { cvContentDir } from '../scripts/cv-source.ts';
-import { normalize, repoTextFiles } from './repo-files.ts';
+import { decodeEntities } from '../src/content/guards.ts';
+import { normalize as collapse, repoTextFiles } from './repo-files.ts';
+const normalize = (s: string): string => collapse(decodeEntities(s)).toLowerCase();
 
-// The repo will be public; the CV content stays in the private brain (T-06). When the brain
-// is reachable, no distinctive CV text may appear in any file git would commit.
+// The repository is public; the CV content is not. When CV_CONTENT_DIR points at it, no
+// distinctive CV text may appear in any file git would commit.
 // Not checked: the name and the contact e-mail — they are the brand's public contact data
-// (D-028) and the site shows them.
+// and the site shows them. Matching ignores case, spacing and HTML entities, so a phrase
+// re-cased or escaped in a page or template is still caught.
 
 const dir = cvContentDir();
-const files = ['cv.pl.json', 'cv.en.json'].map((f) => join(dir, f));
-const available = files.every((f) => existsSync(f));
+const files = dir ? ['cv.pl.json', 'cv.en.json'].map((f) => join(dir, f)) : [];
+const available = files.length > 0 && files.every((f) => existsSync(f));
 
 /** Distinctive strings from the CV: long sentences, employers, owner notes. */
 function cvPhrases(cv: CvContent & Record<string, unknown>): string[] {
@@ -42,7 +45,7 @@ function cvPhrases(cv: CvContent & Record<string, unknown>): string[] {
   return [...phrases];
 }
 
-describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir})`, () => {
+describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir ?? ''})`, () => {
   it('no distinctive CV phrase appears in any committable file', () => {
     const phrases = [
       ...new Set(
@@ -62,6 +65,6 @@ describe.skipIf(!available)(`CV content stays out of the repo (source: ${dir})`,
   });
 });
 
-it.runIf(!available)('CV content guard skipped: brain not available (CI)', () => {
+it.runIf(!available)('CV content guard skipped: CV_CONTENT_DIR not set', () => {
   expect(available).toBe(false);
 });

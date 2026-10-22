@@ -1,22 +1,14 @@
 import { readFileSync } from 'node:fs';
+// One HTML escape for the site and the documents.
+import { escapeHtml } from '../../src/content/html.ts';
 
-/** Document languages. The price quote for the Dig.IT application is Polish only (D-035). */
+/** Document languages. The price quote for the Dig.IT application is Polish only. */
 export type Lang = 'pl' | 'en';
 
-/** A fill-in field such as `{{NAZWA_FIRMY}}` (D-028): upper-case ASCII, digits, underscores. */
+/** A fill-in field such as `{{NAZWA_FIRMY}}`: upper-case ASCII, digits, underscores. */
 export const PLACEHOLDER = /\{\{[A-Z0-9_]+\}\}/g;
 
-const ESCAPES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c);
-}
+export { escapeHtml };
 
 /**
  * Escapes text and wraps every `{{FIELD}}` in a highlighted span, so unfilled fields stand
@@ -31,7 +23,7 @@ export function findPlaceholders(value: string): string[] {
   return [...new Set(value.match(PLACEHOLDER) ?? [])].sort();
 }
 
-/** Money in whole złoty or grosze, PL `12 345,67 zł` / EN `PLN 12,345.67`. */
+/** Money in whole zloty or grosze, PL `12 345,67 zł` / EN `PLN 12,345.67`. */
 export function formatMoney(grosze: number, lang: Lang, opts: { decimals?: boolean } = {}): string {
   if (!Number.isInteger(grosze) || grosze < 0) throw new Error(`Invalid amount: ${String(grosze)}`);
   const decimals = opts.decimals ?? grosze % 100 !== 0;
@@ -46,7 +38,7 @@ export function formatMoney(grosze: number, lang: Lang, opts: { decimals?: boole
   return lang === 'pl' ? `${n}\u00a0zł` : `PLN\u00a0${n}`;
 }
 
-/** Range of whole złoty, e.g. `70 000–130 000 zł` / `PLN 70,000–130,000`. */
+/** Range of whole zloty, e.g. `70 000–130 000 zł` / `PLN 70,000–130,000`. */
 export function formatRange(minZl: number, maxZl: number, lang: Lang): string {
   const min = formatMoney(minZl * 100, lang);
   const max = formatMoney(maxZl * 100, lang);
@@ -73,7 +65,7 @@ export function list(items: string[] | undefined): string {
     : '';
 }
 
-/** The "preliminary pricing" badge shown while pricing.json is a draft (D-021). */
+/** The "preliminary pricing" badge shown while pricing.json is a draft. */
 export function draftBadge(label: string): string {
   return `<p class="draft-badge" data-draft>${escapeHtml(label)}</p>`;
 }
@@ -81,14 +73,14 @@ export function draftBadge(label: string): string {
 export interface DocumentShell {
   lang: Lang;
   title: string;
-  /** Stylesheets relative to docs-templates/, e.g. `oferta/offer.css`. */
+  /** Stylesheets relative to docs-templates/, e.g. `offer/offer.css`. */
   styles: string[];
   body: string;
   /** Path from the written HTML file back to docs-templates/ (default: out/<dir>/file.html). */
   templatesHref?: string;
 }
 
-/** Full HTML document with the `paper` print theme (brand.md, D-040). */
+/** Full HTML document with the `paper` print theme (brand.md). */
 export function documentHtml(doc: DocumentShell): string {
   const base = doc.templatesHref ?? '../../docs-templates/';
   const links = ['shared/docs.css', ...doc.styles]

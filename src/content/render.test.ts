@@ -6,17 +6,10 @@ import { discoverPages } from '../build/pages.ts';
 import { LOCALES } from '../i18n/index.ts';
 import { en } from './en.ts';
 import { pl } from './pl.ts';
-import {
-  allRoutes,
-  content,
-  escapeHtml,
-  fillShell,
-  routeFromFile,
-  routePath,
-  type Route,
-} from './render.ts';
+import { allRoutes, content, fillShell, routeFromFile, routePath, type Route } from './render.ts';
 import { contentViolations } from './guards.ts';
-import { CONTACT_EMAIL, PROJECT_SLUGS, REPOS } from './types.ts';
+import { escapeHtml } from './html.ts';
+import { CONTACT_EMAIL, isToolSlug, PROJECT_SLUGS, REPOS } from './types.ts';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -75,7 +68,7 @@ describe('routes and page shells', () => {
     );
   });
 
-  // Pages that are not site content and keep their own HTML (T-03 brand preview, noindex).
+  // Pages that are not site content and keep their own HTML (the brand preview, noindex).
   const STANDALONE_PAGES = ['brand/index.html'];
 
   it('has a shell for every route and no unknown page', () => {
@@ -155,7 +148,7 @@ describe('rendered pages', () => {
     );
   });
 
-  it.each(LOCALES)('%s home page leaves the scene container empty for T-08', (locale) => {
+  it.each(LOCALES)('%s home page leaves the scene container empty for the scene', (locale) => {
     const home = pages.find((p) => p.route.page === 'home' && p.route.locale === locale);
     expect(home?.html).toContain(
       '<div id="scene-root" class="hero__scene" aria-hidden="true"></div>',
@@ -175,18 +168,36 @@ describe('rendered pages', () => {
       expect(enHome?.html).toContain(`href="/en/projects/${slug}/"`);
   });
 
-  it('gives every case study a lazy recorded demo slot with a text fallback, or a static transcript', () => {
+  it('gives every tool case study a lazy application slot with a text fallback, the rest a static transcript', () => {
     for (const { route, html } of pages) {
       if (route.page !== 'project') continue;
+      // The iframe is added by src/embed.ts; the static page carries only the fallback.
       expect(html).not.toContain('<iframe');
-      if (content(route.locale).caseStudies[route.slug].transcript) {
+      if (!isToolSlug(route.slug)) {
         // The illustrative log is text in the page: no slot to fill, nothing to fetch.
+        expect(content(route.locale).caseStudies[route.slug].transcript).toBeDefined();
         expect(html).toContain('<figure class="transcript">');
-        expect(html).not.toContain('data-demo-src');
+        expect(html).not.toContain('data-tool-src');
         continue;
       }
-      expect(html).toContain(`data-demo-src="/demos/${route.slug}/index.html?embed=1"`);
-      expect(html).toContain('class="demo__fallback"');
+      const c = content(route.locale).caseStudy;
+      expect(html).toContain(
+        `data-tool-src="/tools/${route.slug}/?embed=1&amp;lang=${route.locale}"`,
+      );
+      expect(html).toContain(`data-tool="${route.slug}"`);
+      expect(html).toContain(`<p class="tool__fallback">${escapeHtml(c.toolFallback)}</p>`);
+      // The application also opens on its own page, announced as a new tab.
+      expect(html).toContain(
+        `<a href="/tools/${route.slug}/?lang=${route.locale}" target="_blank" rel="noopener">${escapeHtml(c.toolOpen)}<span class="visually-hidden"> (${escapeHtml(c.newTab)})</span></a>`,
+      );
+    }
+  });
+
+  it('sets rel="noopener" only on links that open a new tab', () => {
+    for (const { html } of pages) {
+      for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
+        expect(tag.includes('rel="noopener"'), tag).toBe(tag.includes('target="_blank"'));
+      }
     }
   });
 
@@ -243,7 +254,7 @@ describe('required sections', () => {
   });
 
   it.each(LOCALES.flatMap((locale) => PROJECT_SLUGS.map((slug) => ({ locale, slug }))))(
-    '$locale $slug case study has problem, solution, demo, stack and repository',
+    '$locale $slug case study has problem, solution, preview, stack and repository',
     ({ locale, slug }) => {
       const route: Route = { locale, page: 'project', slug };
       const c = content(route.locale);
@@ -252,7 +263,7 @@ describe('required sections', () => {
       for (const heading of [
         c.caseStudy.problem,
         c.caseStudy.solution,
-        c.caseStudy.demo,
+        isToolSlug(slug) ? c.caseStudy.tryIt : study.preview.title,
         c.caseStudy.stack,
         c.caseStudy.repo,
       ]) {
@@ -264,13 +275,13 @@ describe('required sections', () => {
       // The note must sit inside the figcaption, so it stays when the iframe replaces the fallback.
       const caption = /<figcaption>([\s\S]*?)<\/figcaption>/.exec(page)?.[1] ?? '';
       // A static transcript is not a recording, so it carries its own note instead.
-      expect(caption).toContain(escapeHtml(study.transcript?.note ?? c.caseStudy.demoNote));
+      expect(caption).toContain(escapeHtml(study.transcript?.note ?? c.caseStudy.toolNote));
     },
   );
 });
 
 describe('repository labels', () => {
-  // The agreed, deliberately marked placeholder (D-024): the repos are private until reviewed.
+  // The deliberately marked placeholder for a repository that is still private.
   it('say the repositories will be made public', () => {
     expect(pl.caseStudy.repoPending).toBe('repo zostanie upublicznione po przeglądzie');
     expect(en.caseStudy.repoPending).toBe('the repository will be made public after review');
@@ -278,7 +289,7 @@ describe('repository labels', () => {
 });
 
 describe('about kokot.it', () => {
-  // D-034: no team or subcontractor promise; kokot.it runs the project directly.
+  // No team or subcontractor promise: kokot.it runs the project directly.
   it('promises neither a team nor subcontractors', () => {
     for (const text of [...pl.about.text, ...en.about.text]) {
       expect(text).not.toMatch(
@@ -415,7 +426,7 @@ describe('content guards', () => {
     expect(contentViolations(page(value))).toContain('buzzword or leftover placeholder');
   });
 
-  // The public pattern sets of tiller’s lib/leak-guard.sh and the private harness paths (T-12).
+  // The public pattern sets of tiller’s lib/leak-guard.sh and the private harness paths.
   it('catches the credential shapes and private paths of tiller’s leak guard', () => {
     for (const value of [
       'ghp_' + 'A'.repeat(24),

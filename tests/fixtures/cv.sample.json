@@ -1,5 +1,5 @@
 {
-  "$comment": "FICTIONAL person for tests and CI. The real CV content lives outside this repo (T-06).",
+  "$comment": "FICTIONAL person for tests and CI. The real CV content lives outside this repo.",
   "schemaVersion": 1,
   "lang": "pl",
   "labels": {

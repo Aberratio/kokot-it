@@ -3,3 +3,5 @@
 *.jpg binary
 *.pdf binary
 *.woff2 binary
+# Generated builds of the reference applications (scripts/sync-tools.ts)
+public/tools/*/** linguist-generated=true -diff

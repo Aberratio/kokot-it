@@ -1,11 +1,13 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { LOCALES, type Locale } from '../i18n/index.ts';
 import { diagramHeight, LAYOUT, renderFlowDiagram } from './diagram.ts';
 import { contentViolations, readableText } from './guards.ts';
-import { content, escapeHtml, renderPage } from './render.ts';
+import { escapeHtml } from './html.ts';
+import { content, renderPage } from './render.ts';
 import { REPOS, type CaseStudy, type FlowDiagram } from './types.ts';
 
-// The tiller case study (T-12): a diagram, an illustrative session log and facts from the public
+// The tiller case study: a diagram, an illustrative session log and facts from the public
 // repository. These tests pin what the page promises: an accessible diagram drawn on brand
 // tokens, a log that says it is an illustration and follows the skills' real order, and no
 // private name, path or credential anywhere on the page.
@@ -29,7 +31,7 @@ describe('tiller case study sections', () => {
     expect(s.transcript).toBeDefined();
     expect(s.results).toBeDefined();
     const html = page(locale);
-    for (const id of ['problem', 'solution', 'flow', 'demo', 'results', 'stack', 'repo']) {
+    for (const id of ['problem', 'solution', 'flow', 'preview', 'results', 'stack', 'repo']) {
       expect(html).toContain(`id="${id}-title"`);
     }
     for (const lesson of s.results?.lessons ?? []) expect(html).toContain(escapeHtml(lesson.title));
@@ -39,6 +41,26 @@ describe('tiller case study sections', () => {
   it.each(LOCALES)('%s links the public tiller repository', (locale) => {
     expect(REPOS.tiller).toEqual({ name: 'Aberratio/tiller', public: true });
     expect(page(locale)).toContain('href="https://github.com/Aberratio/tiller"');
+  });
+
+  it.each(LOCALES)('%s draws the skills top to bottom in the order they hand on', (locale) => {
+    // tiller's README ("One ticket, by hand"); the two review axes share one row.
+    const expected = [
+      ['flow-start-ticket'],
+      ['flow-plan-ticket'],
+      ['flow-tdd'],
+      ['flow-code-review', 'flow-code-review'],
+      ['flow-create-pull-request'],
+      ['flow-confidence-check'],
+    ];
+    const skills = diagramOf(locale)
+      .rows.map((row) => row.map((n) => n.skill).filter((s) => s.startsWith('flow-')))
+      .filter((row) => row.length > 0);
+    expect(skills).toEqual(expected);
+    // The rendered SVG keeps that order too.
+    const svg = svgOf(page(locale));
+    const drawn = [...svg.matchAll(/>(flow-[a-z-]+)</g)].map((m) => m[1]);
+    expect(drawn).toEqual(expected.flat());
   });
 
   it('keeps the diagram rows, ledger marks and skill names identical in PL and EN', () => {
@@ -179,7 +201,12 @@ describe('tiller sample run', () => {
   });
 
   it.each(LOCALES)('%s shows a red before a green and ends in a verdict', (locale) => {
-    const lines = study(locale).transcript?.entries.flatMap((x) => x.output) ?? [];
+    // Read from the rendered page: the order and the marks a reader actually sees.
+    const html = page(locale);
+    const lines = [
+      ...html.matchAll(/<li class="transcript__line transcript__line--(\w+)">([^<]*)<\/li>/g),
+    ].map((m) => ({ tone: m[1], text: m[2] ?? '' }));
+    expect(lines.length).toBeGreaterThan(10);
     const firstRed = lines.findIndex((l) => l.tone === 'red');
     const firstGreen = lines.findIndex((l) => l.tone === 'green');
     expect(firstRed).toBeGreaterThanOrEqual(0);
@@ -202,14 +229,19 @@ describe('tiller sample run', () => {
 });
 
 describe('tiller results', () => {
-  it.each(LOCALES)('%s gives every fact a source path and a date', (locale) => {
+  it.each(LOCALES)('%s shows every fact with its value, source and date', (locale) => {
     const r = study(locale).results;
+    const html = page(locale);
     expect(r?.facts.length).toBeGreaterThanOrEqual(4);
     for (const fact of r?.facts ?? []) {
       expect(fact.value.trim()).not.toBe('');
       expect(fact.source.trim()).not.toBe('');
+      expect(html).toContain(
+        `<li class="fact"><span class="fact__value">${escapeHtml(fact.value)}</span> <span class="fact__label">${escapeHtml(fact.label)}</span> <code class="fact__source">${escapeHtml(fact.source)}</code></li>`,
+      );
     }
     expect(r?.asOf).toMatch(/2026/);
+    expect(html).toContain(`<p class="note">${escapeHtml(r?.asOf ?? '')}</p>`);
   });
 
   it('states the same numbers in PL and EN', () => {
@@ -229,5 +261,21 @@ describe('forbidden terms on the tiller pages', () => {
     // The sample project and ticket are invented for the page and say so.
     expect(text).toContain('bookshelf-api');
     expect(text).toContain('SHELF-12');
+  });
+});
+
+describe('tiller diagram on small screens', () => {
+  const css = readFileSync(new URL('../styles/content.css', import.meta.url), 'utf8');
+
+  it('never scales the drawing below its view box, so labels keep their nominal size', () => {
+    const rule = /\.flow-diagram \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(rule).toContain(`min-width: ${String(LAYOUT.width)}px;`);
+    expect(css).toMatch(/\.flow__scroll \{\s*overflow-x: auto;/);
+  });
+
+  it.each(LOCALES)('%s wraps the diagram in a keyboard-scrollable, named region', (locale) => {
+    expect(page(locale)).toContain(
+      `<div class="flow__scroll" tabindex="0" role="region" aria-label="${escapeHtml(diagramOf(locale).title)}"><svg`,
+    );
   });
 });

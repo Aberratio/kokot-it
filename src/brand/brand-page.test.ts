@@ -26,7 +26,7 @@ describe('brand.md contrast tables', () => {
     'list every %s-theme ratio as computed from tokens.css',
     (_, t) => {
       for (const pair of CONTRAST_PAIRS) {
-        const ratio = contrastRatio(t(pair.fg), t(pair.bg)).toFixed(2).replace('.', ',');
+        const ratio = contrastRatio(t(pair.fg), t(pair.bg)).toFixed(2);
         expect(doc, `${pair.fg} on ${pair.bg} = ${ratio}`).toContain(ratio);
       }
     },

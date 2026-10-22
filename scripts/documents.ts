@@ -3,15 +3,15 @@ import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { todoOwnerNotes } from '../docs-templates/cv/cv.ts';
 import { renderCv } from '../docs-templates/cv/render.ts';
-import { offerCopy } from '../docs-templates/oferta/content.ts';
-import { isDraft, pricing, pricingProblems } from '../docs-templates/oferta/pricing.ts';
-import { renderOffer } from '../docs-templates/oferta/render.ts';
+import { offerCopy } from '../docs-templates/offer/content.ts';
+import { isDraft, pricing, pricingProblems } from '../docs-templates/offer/pricing.ts';
+import { renderOffer } from '../docs-templates/offer/render.ts';
 import {
   quoteDataProblems,
   quoteProblems,
   type QuoteData,
-} from '../docs-templates/oferta-cenowa/quote.ts';
-import { renderQuote } from '../docs-templates/oferta-cenowa/render.ts';
+} from '../docs-templates/price-quote/quote.ts';
+import { renderQuote } from '../docs-templates/price-quote/render.ts';
 import {
   findPlaceholders,
   formatRange,
@@ -51,7 +51,7 @@ export interface PlanInput {
   quoteFile?: string;
 }
 
-const templatesDir = new URL('../docs-templates/oferta-cenowa/', import.meta.url);
+const templatesDir = new URL('../docs-templates/price-quote/', import.meta.url);
 /** Reads quote data and checks its shape first: a private quote file is outside the repo. */
 function readQuote(path: string | URL): QuoteData {
   const data: unknown = JSON.parse(readFileSync(path, 'utf8'));
@@ -96,8 +96,7 @@ export function planDocuments(input: PlanInput): Plan {
 
   for (const problem of pricingProblems()) warnings.push(`pricing.json: ${problem}`);
   if (isDraft()) {
-    const msg =
-      'pricing.json status is "draft": documents carry the "preliminary pricing" badge (D-021).';
+    const msg = 'pricing.json status is "draft": documents carry the "preliminary pricing" badge.';
     if (input.mode === 'final')
       warnings.push(`${msg} Set "status": "approved" after the owner approves the price list.`);
     else notes.push(msg);

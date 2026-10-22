@@ -1,7 +1,7 @@
 import { brandSvg, documentHtml, escapeHtml, list } from '../shared/html.ts';
 import type { CvContent, CvExperience, CvProject } from './cv.ts';
 
-// CV template (T-06): one column, real text, headings in reading order — readable for ATS
+// CV template: one column, real text, headings in reading order — readable for ATS
 // parsers. TODO_OWNER fields are never rendered: the template reads only known keys.
 
 export interface CvOptions {

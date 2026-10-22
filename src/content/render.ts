@@ -13,6 +13,7 @@ import { escapeHtml } from './html.ts';
 import { pl } from './pl.ts';
 import {
   CONTACT_EMAIL,
+  isToolSlug,
   PROJECT_SLUGS,
   REPOS,
   SITE_ORIGIN,
@@ -22,6 +23,7 @@ import {
   type Results,
   type SiteContent,
   type Step,
+  type ToolSlug,
   type Transcript,
 } from './types.ts';
 
@@ -83,8 +85,6 @@ export function routeFromFile(relativePath: string): Route | undefined {
   }
   return undefined;
 }
-
-export { escapeHtml };
 
 const e = escapeHtml;
 const absolute = (path: string): string => `${SITE_ORIGIN}${path}`;
@@ -152,7 +152,7 @@ function renderHeader(route: Route): string {
   return [
     `<a class="skip-link" href="#content">${e(t.skipToContent)}</a>`,
     `<header class="site-header">`,
-    // Logo from the brand system (T-03, public/brand/); the alt text keeps the name readable.
+    // Logo from the brand system (public/brand/); the alt text keeps the name readable.
     `<a class="site-logo" href="${e(home)}"><img src="/brand/logo.svg" alt="kokot.it" width="91" height="24" /></a>`,
     `<nav class="site-nav" aria-label="${e(c.nav.label)}"><ul>`,
     anchor('services'),
@@ -171,7 +171,7 @@ function renderFooter(route: Route): string {
   return [
     `<footer class="site-footer">`,
     `<p>${e(c.footer.note)}</p>`,
-    `<p><a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>`,
+    `<p><a href="mailto:${e(CONTACT_EMAIL)}">${e(CONTACT_EMAIL)}</a></p>`,
     `<p>© 2026 kokot.it</p>`,
     `</footer>`,
   ].join('\n');
@@ -201,7 +201,7 @@ function renderContact(locale: Locale, title: string, text: string, headingId: s
   return [
     `<h2 id="${e(headingId)}">${e(title)}</h2>`,
     `<p>${e(text)}</p>`,
-    `<p class="contact__email">${e(c.contact.emailLabel)} <a class="button" href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>`,
+    `<p class="contact__email">${e(c.contact.emailLabel)} <a class="button" href="mailto:${e(CONTACT_EMAIL)}">${e(CONTACT_EMAIL)}</a></p>`,
   ].join('');
 }
 
@@ -226,13 +226,13 @@ function renderHome(locale: Locale): string {
 
   return [
     `<section class="hero" aria-labelledby="hero-title">`,
-    // Mount point for the 3D scene (T-08). The hero's text does not depend on it.
+    // Mount point for the 3D scene (src/scene/). The hero text does not depend on it.
     `<div id="scene-root" class="hero__scene" aria-hidden="true"></div>`,
     `<div class="hero__content">`,
     `<p class="eyebrow">${e(c.hero.eyebrow)}</p>`,
     `<h1 id="hero-title">${e(c.hero.title)}</h1>`,
     `<p class="lead">${e(c.hero.lead)}</p>`,
-    `<p class="hero__actions"><a class="button" href="#${a.services}">${e(c.hero.primaryCta)}</a> <a class="button button--ghost" href="mailto:${CONTACT_EMAIL}">${e(c.hero.secondaryCta)}</a></p>`,
+    `<p class="hero__actions"><a class="button" href="#${a.services}">${e(c.hero.primaryCta)}</a> <a class="button button--ghost" href="mailto:${e(CONTACT_EMAIL)}">${e(c.hero.secondaryCta)}</a></p>`,
     `</div>`,
     `</section>`,
 
@@ -263,7 +263,7 @@ function renderHome(locale: Locale): string {
     `<div><h4>${e(g.does.title)}</h4><ul>${list(g.does.points, (p) => `<li>${e(p)}</li>`)}</ul></div>`,
     `<div><h4>${e(g.doesNot.title)}</h4><ul>${list(g.doesNot.points, (p) => `<li>${e(p)}</li>`)}</ul></div>`,
     `</div>`,
-    `<p class="note">${e(g.asOf)} <a href="${e(g.source.href)}" rel="noopener">${e(g.source.label)}</a></p>`,
+    `<p class="note">${e(g.asOf)} <a href="${e(g.source.href)}">${e(g.source.label)}</a></p>`,
     `</div>`,
     `</section>`,
 
@@ -289,9 +289,14 @@ function renderHome(locale: Locale): string {
   ].join('\n');
 }
 
-/** URL of a recorded demo published under `public/demos/<slug>/` (D-023). */
-export function demoSrc(slug: ProjectSlug): string {
-  return `/demos/${slug}/index.html?embed=1`;
+/** URL of a reference application on its own page, published under `public/tools/<slug>/`. */
+export function toolPath(slug: ToolSlug, locale: Locale): string {
+  return `/tools/${slug}/?lang=${locale}`;
+}
+
+/** URL of the compact embedded view of a reference application. */
+export function toolEmbedSrc(slug: ToolSlug, locale: Locale): string {
+  return `/tools/${slug}/?embed=1&lang=${locale}`;
 }
 
 function renderRepo(locale: Locale, slug: ProjectSlug): string {
@@ -299,9 +304,9 @@ function renderRepo(locale: Locale, slug: ProjectSlug): string {
   const repo = REPOS[slug];
   const label = `github.com/${repo.name}`;
   if (repo.public) {
-    return `<p><a href="https://${e(label)}" rel="noopener">${e(label)}</a> (${e(cs.repoPublic)})</p>`;
+    return `<p><a href="https://${e(label)}">${e(label)}</a> (${e(cs.repoPublic)})</p>`;
   }
-  // Deliberate, marked placeholder: the repository is private until the owner publishes it (D-024).
+  // Deliberate, marked placeholder while a repository is still private.
   return `<p class="repo repo--pending" data-placeholder="repo-link"><span class="repo__name">${e(label)}</span> (${e(cs.repoPending)})</p>`;
 }
 
@@ -310,7 +315,10 @@ function renderFlow(flow: NonNullable<CaseStudy['flow']>): string {
     ? [
         `<div class="flow">`,
         `<figure class="flow__figure">`,
+        // Scrolls sideways on the narrowest phones instead of shrinking the labels below 11px.
+        `<div class="flow__scroll" tabindex="0" role="region" aria-label="${e(flow.diagram.title)}">`,
         renderFlowDiagram(flow.diagram),
+        `</div>`,
         `<figcaption class="note">${e(flow.diagram.caption)}</figcaption>`,
         `</figure>`,
         renderSteps(flow.steps, 'steps steps--list'),
@@ -325,16 +333,55 @@ function renderFlow(flow: NonNullable<CaseStudy['flow']>): string {
   ].join('');
 }
 
-/** The demo caption: title, text and the note that says what the demo is (recorded, or not). */
-function demoCaption(demo: CaseStudy['demo'], note: string): string {
-  return `<figcaption><strong>${e(demo.title)}.</strong> ${e(demo.text)} <span class="demo__note">${e(note)}</span></figcaption>`;
+/** The caption: what the reader sees, and a note that says how it runs (recorded, or illustrative). */
+function previewCaption(text: string, note: string, title?: string): string {
+  const lead = title ? `<strong>${e(title)}.</strong> ` : '';
+  return `<figcaption>${lead}${e(text)} <span class="preview__note">${e(note)}</span></figcaption>`;
 }
 
 /**
- * An illustrative session log, rendered as text in the page. It replaces the lazy demo slot:
- * it needs no published demo file, no iframe and no JavaScript, and it says what it is.
+ * The reference application: a text fallback with a link that opens it in a new tab, swapped
+ * for a sandboxed iframe by src/embed.ts once the figure nears the viewport.
  */
-function renderTranscript(demo: CaseStudy['demo'], t: Transcript): string {
+function renderTool(locale: Locale, slug: ToolSlug, study: CaseStudy): string {
+  const cs = content(locale).caseStudy;
+  const open = `<a href="${e(toolPath(slug, locale))}" target="_blank" rel="noopener">${e(cs.toolOpen)}<span class="visually-hidden"> (${e(cs.newTab)})</span></a>`;
+  return [
+    `<figure class="tool tool--${slug}" data-tool="${slug}" data-tool-src="${e(toolEmbedSrc(slug, locale))}" data-tool-title="${e(`${cs.toolFrameTitle}: ${study.card.title}`)}">`,
+    `<div class="tool__frame" data-tool-slot><p class="tool__fallback">${e(cs.toolFallback)}</p></div>`,
+    previewCaption(study.preview.text, cs.toolNote, study.preview.title),
+    `<p class="tool__open">${open}</p>`,
+    `</figure>`,
+  ].join('');
+}
+
+/** The section that lets the reader try the solution: the application, or a sample run. */
+function renderPreview(locale: Locale, slug: ProjectSlug, study: CaseStudy): string {
+  const cs = content(locale).caseStudy;
+  let heading: string;
+  let body: string;
+  if (isToolSlug(slug)) {
+    heading = cs.tryIt;
+    body = renderTool(locale, slug, study);
+  } else if (study.transcript) {
+    heading = study.preview.title;
+    body = renderTranscript(study.preview, study.transcript);
+  } else {
+    return '';
+  }
+  return [
+    `<section class="section" aria-labelledby="preview-title">`,
+    `<h2 id="preview-title">${e(heading)}</h2>`,
+    body,
+    `</section>`,
+  ].join('');
+}
+
+/**
+ * An illustrative session log, rendered as text in the page instead of an embedded
+ * application: no iframe and no JavaScript, and it says what it is.
+ */
+function renderTranscript(preview: CaseStudy['preview'], t: Transcript): string {
   const entries = list(t.entries, (entry) =>
     [
       `<li class="transcript__entry">`,
@@ -352,7 +399,7 @@ function renderTranscript(demo: CaseStudy['demo'], t: Transcript): string {
     `<p class="eyebrow transcript__label">${e(t.label)}</p>`,
     `<p class="transcript__intro">${e(t.intro)}</p>`,
     `<ol class="transcript__log">${entries}</ol>`,
-    demoCaption(demo, t.note),
+    previewCaption(preview.text, t.note),
     `</figure>`,
   ].join('');
 }
@@ -404,17 +451,7 @@ function renderCaseStudy(locale: Locale, slug: ProjectSlug, study: CaseStudy): s
 
     study.flow ? renderFlow(study.flow) : '',
 
-    `<section class="section" aria-labelledby="demo-title">`,
-    `<h2 id="demo-title">${e(cs.demo)}</h2>`,
-    study.transcript
-      ? renderTranscript(study.demo, study.transcript)
-      : [
-          `<figure class="demo" data-demo-src="${e(demoSrc(slug))}" data-demo-title="${e(`${cs.demoFrameTitle}: ${study.card.title}`)}">`,
-          `<div class="demo__frame" data-demo-slot><p class="demo__fallback">${e(cs.demoFallback)}</p></div>`,
-          demoCaption(study.demo, cs.demoNote),
-          `</figure>`,
-        ].join(''),
-    `</section>`,
+    renderPreview(locale, slug, study),
 
     study.results ? renderResults(study.results) : '',
 

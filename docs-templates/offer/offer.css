@@ -1,0 +1,160 @@
+/* Presentation offer (form a): two A4 pages, paper theme. */
+
+.offer h1 {
+  font-size: 21pt;
+  text-wrap: balance;
+}
+
+.offer .lead {
+  margin-bottom: 6mm;
+}
+
+.offer .cols-2 > section {
+  margin-bottom: 4mm;
+}
+
+/* Packages: three columns, price in mono, one hairline frame each. */
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3.5mm;
+  margin-bottom: 2.5mm;
+}
+
+.offer .pkg {
+  margin: 0;
+  padding: 3.5mm 3.5mm 2.5mm;
+  border: var(--border-width) solid var(--color-line);
+  border-top: 2px solid var(--color-accent);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  break-inside: avoid;
+}
+
+.pkg-code {
+  margin: 0 0 1mm !important;
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-accent);
+}
+
+.offer .pkg h3 {
+  min-height: 2.5em;
+}
+
+.pkg-price {
+  margin: 0 0 0.6mm !important;
+  font-family: var(--font-mono);
+  font-size: 9.5pt;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.pkg-net {
+  font-size: var(--doc-label);
+  color: var(--color-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+}
+
+.pkg-duration {
+  margin: 0 0 0.6mm !important;
+  font-size: var(--doc-small);
+}
+
+.pkg-duration .label {
+  margin-right: 0.4em;
+}
+
+.pkg-external {
+  margin: 0 0 1.5mm !important;
+  font-size: var(--doc-small);
+  color: var(--color-text-subtle);
+}
+
+.pkg-for {
+  padding-top: 1.8mm;
+  border-top: var(--border-width) solid var(--color-line);
+  font-weight: var(--weight-medium);
+}
+
+.offer .pkg ul > li {
+  margin-bottom: 0.2em;
+  font-size: 8.4pt;
+  line-height: 1.36;
+}
+
+.pkg-note {
+  margin: 1.5mm 0 0 !important;
+  font-size: var(--doc-small);
+  color: var(--color-text-muted);
+}
+
+/* Timeline: five steps in a row, numbered nodes on a hairline. */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3mm;
+  margin-top: 1mm !important;
+}
+
+.steps > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6mm;
+  padding-top: 2.2mm;
+  border-top: 2px solid var(--color-line);
+}
+
+.steps > li:first-child {
+  border-top-color: var(--color-accent);
+}
+
+.step-index {
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  color: var(--color-accent);
+}
+
+.step-when {
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.step-what {
+  font-weight: var(--weight-semibold);
+}
+
+.step-text {
+  font-size: var(--doc-small);
+  color: var(--color-text-muted);
+}
+
+/* Contact: e-mail as the single call to action. */
+.offer .contact {
+  margin-top: 2mm;
+  padding: 4mm 5mm;
+  background: var(--color-surface);
+  border-left: 2px solid var(--color-accent);
+}
+
+.offer .contact p {
+  max-width: 48em;
+}
+
+.contact-line {
+  display: flex;
+  gap: 6mm;
+  margin: 0 !important;
+  font-family: var(--font-mono);
+  font-size: 10.5pt;
+  font-weight: var(--weight-medium);
+}
+
+.contact-site {
+  color: var(--color-text-muted);
+}

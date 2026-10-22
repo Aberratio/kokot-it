@@ -1,0 +1,276 @@
+import {
+  findPackage,
+  pricing as defaultPricing,
+  type Category,
+  type Pricing,
+} from '../offer/pricing.ts';
+import { isString, isStringArray, stringFieldProblems } from '../shared/validate.ts';
+
+// Data of one price quote for a Dig.IT application (form b, Polish only).
+// Strings may hold `{{FIELD}}` placeholders; the blank template (data.template.json) is all
+// placeholders, the example (data.example.json) is a fictional company. A real quote is a
+// private file outside the repo, rendered with `npm run pdf -- --quote <file> --final`.
+// Contractor data (name, NIP, address) is never stored in the repo.
+
+export interface QuoteStage {
+  /** Stage id from pricing.json for the chosen package. */
+  id: string;
+  /** Person-days; `null` in the blank template. */
+  days: number | null;
+  /** When, counted from signing the contract, e.g. "1. miesiąc". */
+  schedule: string;
+}
+
+export interface ExternalCost {
+  name: string;
+  provider: string;
+  dataRegion: string;
+  sla: string;
+  /** Estimated net cost during the project, whole zloty; `null` in the blank template. */
+  projectNet: number | null;
+  /** Estimated monthly net cost paid by the company after the project. */
+  monthlyAfter: string;
+}
+
+export interface QuoteData {
+  /** When set, the document carries an "example" banner with this text. */
+  example?: string;
+  offer: { number: string; date: string; place: string; validityDays: number };
+  inquiry: { date: string; subject: string; reference: string };
+  client: { name: string; address: string };
+  contractor?: {
+    name?: string;
+    nip?: string;
+    address?: string;
+    email?: string;
+    signatory?: string;
+  };
+  package: 'P2' | 'P3';
+  /** Total delivery time from signing the contract, e.g. "5 miesięcy od podpisania umowy". */
+  duration: string;
+  scope: {
+    title: string;
+    process: string;
+    functions: string[];
+    integrations: string[];
+    deliverables: string[];
+  };
+  stages: QuoteStage[];
+  externalCosts: ExternalCost[];
+  training: { participants: string; days: string; program: string[] };
+  advantages: string[];
+  warranty: string;
+  payment: { milestone: string; share: string }[];
+}
+
+export interface PricedStage extends QuoteStage {
+  label: string;
+  category: Category;
+  range: [number, number];
+  /** Net, gross and VAT in grosze; `null` when days are not filled in. */
+  net: number | null;
+  vat: number | null;
+  gross: number | null;
+}
+
+export interface Totals {
+  net: number;
+  vat: number;
+  gross: number;
+}
+
+export interface PricedQuote {
+  stages: PricedStage[];
+  /** Per Dig.IT category, in grosze; `null` when any stage of the quote has no days yet. */
+  byCategory: Record<Category, Totals> | null;
+  services: Totals | null;
+  external: Totals | null;
+  total: Totals | null;
+  days: number | null;
+}
+
+const vatOf = (net: number, rate: number): number => Math.round(net * rate);
+const totals = (net: number, rate: number): Totals => {
+  const vat = vatOf(net, rate);
+  return { net, vat, gross: net + vat };
+};
+const add = (a: Totals, b: Totals): Totals => ({
+  net: a.net + b.net,
+  vat: a.vat + b.vat,
+  gross: a.gross + b.gross,
+});
+const ZERO: Totals = { net: 0, vat: 0, gross: 0 };
+
+/** Prices every stage from pricing.json: days × day rate, VAT per line, sums per category. */
+export function priceQuote(q: QuoteData, p: Pricing = defaultPricing): PricedQuote {
+  const pkg = findPackage(q.package, p);
+  const stages: PricedStage[] = q.stages.map((s) => {
+    const def = pkg.stages.find((d) => d.id === s.id);
+    if (!def) throw new Error(`Stage "${s.id}" is not part of ${pkg.code} in pricing.json`);
+    const net = s.days === null ? null : s.days * p.dayRateNet * 100;
+    const vat = net === null ? null : vatOf(net, p.vatRate);
+    return {
+      ...s,
+      label: def.label.pl,
+      category: def.category,
+      range: def.days,
+      net,
+      vat,
+      gross: net === null || vat === null ? null : net + vat,
+    };
+  });
+  const complete = stages.every((s) => s.net !== null);
+  const externalComplete = q.externalCosts.every((c) => c.projectNet !== null);
+  if (!complete) {
+    return { stages, byCategory: null, services: null, external: null, total: null, days: null };
+  }
+  const byCategory: Record<Category, Totals> = {
+    programming: ZERO,
+    implementation: ZERO,
+    training: ZERO,
+  };
+  for (const s of stages) {
+    byCategory[s.category] = add(byCategory[s.category], {
+      net: s.net ?? 0,
+      vat: s.vat ?? 0,
+      gross: s.gross ?? 0,
+    });
+  }
+  const services = Object.values(byCategory).reduce(add, ZERO);
+  const external = externalComplete
+    ? q.externalCosts.reduce((t, c) => add(t, totals((c.projectNet ?? 0) * 100, p.vatRate)), ZERO)
+    : null;
+  return {
+    stages,
+    byCategory,
+    services,
+    external,
+    total: external ? add(services, external) : null,
+    days: stages.reduce((d, s) => d + (s.days ?? 0), 0),
+  };
+}
+
+/**
+ * Shape problems of quote data read from a file (a trust boundary: the private quote lives
+ * outside the repo). Empty when it can be priced and rendered.
+ */
+export function quoteDataProblems(input: unknown, p: Pricing = defaultPricing): string[] {
+  if (!input || typeof input !== 'object') return ['not an object'];
+  const q = input as Record<string, unknown>;
+  const problems: string[] = [];
+  const record = (v: unknown): Record<string, unknown> | null =>
+    v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  const strings = (key: string, fields: string[]): void => {
+    const value = record(q[key]);
+    if (!value) {
+      problems.push(`${key} missing`);
+      return;
+    }
+    for (const f of fields) if (!isString(value[f])) problems.push(`${key}.${f} must be a string`);
+  };
+  strings('offer', ['number', 'date', 'place']);
+  strings('inquiry', ['date', 'subject', 'reference']);
+  strings('client', ['name', 'address']);
+  strings('scope', ['title', 'process']);
+  strings('training', ['participants', 'days']);
+  if (typeof record(q.offer)?.validityDays !== 'number') {
+    problems.push('offer.validityDays must be a number');
+  }
+  for (const f of ['duration', 'warranty']) {
+    if (!isString(q[f])) problems.push(`${f} must be a string`);
+  }
+  if (!isStringArray(q.advantages)) problems.push('advantages must be a string array');
+  if (!isStringArray(record(q.training)?.program)) {
+    problems.push('training.program must be a string array');
+  }
+  for (const f of ['functions', 'integrations', 'deliverables']) {
+    if (!isStringArray(record(q.scope)?.[f])) problems.push(`scope.${f} must be a string array`);
+  }
+  const quotable = p.packages.filter((x) => x.stages.length > 0);
+  const pkg = quotable.find((x) => x.code === q.package);
+  if (!pkg) problems.push(`package must be one of ${quotable.map((x) => x.code).join(', ')}`);
+  const stages = Array.isArray(q.stages) ? q.stages.map(record) : null;
+  if (!stages) problems.push('stages must be an array');
+  stages?.forEach((s, i) => {
+    const at = `stages[${String(i)}]`;
+    if (pkg && !pkg.stages.some((d) => d.id === s?.id)) {
+      problems.push(`${at}.id is not a ${pkg.code} stage`);
+    }
+    const days = s?.days;
+    if (days !== null && !(typeof days === 'number' && Number.isInteger(days) && days >= 0)) {
+      problems.push(`${at}.days must be a whole number or null`);
+    }
+    if (!isString(s?.schedule)) problems.push(`${at}.schedule must be a string`);
+  });
+  const costs = Array.isArray(q.externalCosts) ? q.externalCosts.map(record) : null;
+  if (!costs) problems.push('externalCosts must be an array');
+  costs?.forEach((c, i) => {
+    const net = c?.projectNet;
+    if (net !== null && !(typeof net === 'number' && Number.isInteger(net) && net >= 0)) {
+      problems.push(
+        `externalCosts[${String(i)}].projectNet must be a whole number of zloty (0 or more) or null`,
+      );
+    }
+  });
+  if (costs) {
+    problems.push(
+      ...stringFieldProblems(q.externalCosts, 'externalCosts', [
+        'name',
+        'provider',
+        'dataRegion',
+        'sla',
+        'monthlyAfter',
+      ]),
+    );
+  }
+  problems.push(...stringFieldProblems(q.payment, 'payment', ['milestone', 'share']));
+  return problems;
+}
+
+/** Problems a priced quote has against the price list; empty when it is within the ranges. */
+export function quoteProblems(q: QuoteData, p: Pricing = defaultPricing): string[] {
+  const problems: string[] = [];
+  const pkg = findPackage(q.package, p);
+  const priced = priceQuote(q, p);
+  for (const s of priced.stages) {
+    if (s.days !== null && (s.days < s.range[0] || s.days > s.range[1])) {
+      problems.push(
+        `stage ${s.id}: ${String(s.days)} days outside ${String(s.range[0])}–${String(s.range[1])}`,
+      );
+    }
+  }
+  const missing = pkg.stages.filter((d) => !q.stages.some((s) => s.id === d.id)).map((d) => d.id);
+  if (missing.length > 0) problems.push(`stages missing from the quote: ${missing.join(', ')}`);
+  if (priced.services) {
+    const net = priced.services.net / 100;
+    if (net < pkg.netMin || net > pkg.netMax) {
+      problems.push(
+        `services net ${String(net)} zł outside ${pkg.code} range ${String(pkg.netMin)}–${String(pkg.netMax)}`,
+      );
+    }
+  }
+  if (q.offer.validityDays < 90)
+    problems.push(`validity ${String(q.offer.validityDays)} days, at least 90 required`);
+  return problems;
+}
+
+/**
+ * Shares of a total in tenths of a percent that always add up to exactly 100.0%: each share is
+ * rounded down, and the tenths still missing go to the largest remainders.
+ */
+export function sharesInTenths(values: readonly number[]): number[] {
+  const total = values.reduce((sum, v) => sum + v, 0);
+  if (total <= 0) return values.map(() => 0);
+  const exact = values.map((v) => (v / total) * 1000);
+  const shares = exact.map(Math.floor);
+  let missing = 1000 - shares.reduce((sum, v) => sum + v, 0);
+  const order = exact
+    .map((v, i) => ({ i, rest: v - Math.floor(v) }))
+    .sort((a, b) => b.rest - a.rest || a.i - b.i);
+  for (const { i } of order) {
+    if (missing <= 0) break;
+    shares[i] = (shares[i] ?? 0) + 1;
+    missing -= 1;
+  }
+  return shares;
+}

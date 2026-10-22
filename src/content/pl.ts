@@ -1,6 +1,6 @@
 import type { SiteContent } from './types.ts';
 
-// Polska treść strony. Ceny pakietów celowo pominięte: cennik czeka na zatwierdzenie (D-021).
+// Polish site copy. Package prices are left out on purpose until the price list is approved.
 export const pl: SiteContent = {
   meta: {
     title: 'kokot.it — wdrożenia AI dla produkcji i zespołów programistycznych',
@@ -11,14 +11,14 @@ export const pl: SiteContent = {
   nav: {
     label: 'Nawigacja główna',
     services: 'Usługi',
-    process: 'Jak pracujemy',
+    process: 'Współpraca',
     projects: 'Projekty',
     about: 'O kokot.it',
     contact: 'Kontakt',
   },
   anchors: {
     services: 'uslugi',
-    process: 'jak-pracujemy',
+    process: 'wspolpraca',
     projects: 'projekty',
     about: 'o-kokot-it',
     contact: 'kontakt',
@@ -114,7 +114,7 @@ export const pl: SiteContent = {
     },
   },
   process: {
-    title: 'Jak pracujemy',
+    title: 'Jak wygląda współpraca',
     intro:
       'Każdy projekt zaczyna się od procesu i danych, nie od wyboru modelu. Agent jest tak dobry, jak dane, które dostaje, i reguły, które go sprawdzają.',
     steps: [
@@ -171,13 +171,13 @@ export const pl: SiteContent = {
   projects: {
     title: 'Projekty',
     intro:
-      'Cztery projekty pokazowe: trzy dema zbudowane na fikcyjnych danych firm i tiller, własne narzędzie z publicznym kodem. Pokazują sposób pracy i architekturę, nie są wdrożeniami u klientów. Dema na stronie odtwarzają nagrane przebiegi i nie wywołują żadnego API.',
+      'Cztery projekty referencyjne: trzy aplikacje działające na przykładowych danych fikcyjnych firm i tiller, własne narzędzie z publicznym kodem. Pokazują sposób pracy i architekturę; nie są wdrożeniami u klientów. Aplikacje na stronie odtwarzają zapisane przebiegi i nie wywołują żadnego API.',
     cardCta: 'Case study',
   },
   about: {
     title: 'O kokot.it',
     text: [
-      'kokot.it to marka usług inżynierskich w obszarze AI i agentic engineering: od analizy procesu, przez agentów i integracje, po interfejs, z którego korzystają ludzie. Ta strona i projekty pokazowe są przykładem tej pracy.',
+      'kokot.it to marka usług inżynierskich w obszarze AI i agentic engineering: od analizy procesu, przez agentów i integracje, po interfejs, z którego korzystają ludzie. Ta strona i projekty referencyjne są przykładem tej pracy.',
       'Projekt prowadzi bezpośrednio kokot.it, od pierwszej rozmowy po wdrożenie. Zakres i sposób realizacji określa oferta, zgodnie z zasadami danego programu finansowania.',
     ],
     principlesTitle: 'Zasady',
@@ -188,7 +188,7 @@ export const pl: SiteContent = {
       },
       {
         title: 'Mierzalny cel',
-        text: 'Przed startem ustalamy, co mierzymy: czas obsługi, odsetek błędów, przestoje.',
+        text: 'Przed startem projekt dostaje miernik sukcesu: czas obsługi, odsetek błędów albo przestoje.',
       },
       {
         title: 'Dane pod kontrolą',
@@ -206,16 +206,20 @@ export const pl: SiteContent = {
     emailLabel: 'Napisz na',
   },
   footer: {
-    note: 'Firmy, dokumenty i dane produkcyjne w demach na tej stronie są fikcyjne.',
+    note: 'Aplikacje referencyjne na tej stronie działają na danych przykładowych: firmy, dokumenty i dane produkcyjne są fikcyjne.',
   },
   caseStudy: {
     back: 'Wszystkie projekty',
     problem: 'Problem',
     solution: 'Rozwiązanie',
-    demo: 'Demo',
-    demoFallback: 'Jeśli demo się tu nie wyświetla, opis działania znajduje się powyżej.',
-    demoNote: 'Demo nagrane: odtwarza zapisany przebieg, bez wywołań API.',
-    demoFrameTitle: 'Nagrane demo projektu',
+    tryIt: 'Wypróbuj',
+    toolFallback:
+      'Aplikacja wczytuje się w tym miejscu po przewinięciu strony i wymaga JavaScriptu. Można ją też otworzyć w osobnej karcie.',
+    toolNote:
+      'Zapisany przebieg: aplikacja odtwarza nagrane odpowiedzi na danych przykładowych i nie wywołuje API.',
+    toolFrameTitle: 'Aplikacja referencyjna',
+    toolOpen: 'Otwórz aplikację w nowej karcie',
+    newTab: 'otwiera się w nowej karcie',
     stack: 'Stack',
     repo: 'Repozytorium',
     repoPending: 'repo zostanie upublicznione po przeglądzie',
@@ -227,7 +231,7 @@ export const pl: SiteContent = {
     'factory-twin': {
       metaTitle: 'Cyfrowy bliźniak hali z agentem AI — kokot.it',
       metaDescription:
-        'Projekt pokazowy: hala produkcyjna w 3D ze statusem maszyn i agent AI, który odpowiada na pytania o zlecenia, przestoje i jakość.',
+        'Rozwiązanie referencyjne: hala produkcyjna w 3D ze statusem maszyn i agent AI, który odpowiada na pytania o zlecenia, przestoje i jakość.',
       card: {
         title: 'Cyfrowy bliźniak hali z agentem AI',
         summary:
@@ -235,7 +239,7 @@ export const pl: SiteContent = {
         tags: ['produkcja', 'Three.js', 'agent AI'],
       },
       lead: 'Hala produkcyjna w 3D, w której agent AI odpowiada na pytania o stan produkcji i pokazuje odpowiedź na modelu: podświetla maszynę, przesuwa kamerę.',
-      kind: 'Projekt pokazowy, fikcyjna firma i dane',
+      kind: 'Rozwiązanie referencyjne, dane przykładowe',
       problem: [
         'Informacja o stanie produkcji jest rozproszona: zlecenia w ERP, przestoje w rejestrze utrzymania ruchu, wyniki kontroli jakości w osobnych arkuszach. Odpowiedź na pytanie „dlaczego linia 2 stoi i które zlecenia są zagrożone” wymaga zajrzenia w kilka miejsc.',
         'Raporty i dashboardy pokazują liczby, ale rzadko pokazują, gdzie na hali leży problem.',
@@ -247,12 +251,12 @@ export const pl: SiteContent = {
         points: [
           'agent korzysta wyłącznie z danych udostępnionych przez narzędzia, a nie z wiedzy ogólnej',
           'odpowiedź tekstowa i akcja w scenie: podświetlenie maszyny, ruch kamery',
-          'dane demo: fikcyjna firma, zlecenia, przestoje i wyniki kontroli jakości',
+          'dane przykładowe: fikcyjna firma, zlecenia, przestoje i wyniki kontroli jakości',
           'tryb nagrany bez kosztów i tryb na żywo z kluczem API uruchamiany lokalnie',
         ],
       },
-      demo: {
-        title: 'Demo: pytania o stan hali',
+      preview: {
+        title: 'Pytania o stan hali',
         text: 'Kilka nagranych scenariuszy, np. pytanie o przestoje na linii i o zlecenia zagrożone opóźnieniem.',
       },
       stack: ['TypeScript', 'Three.js', 'Vite', 'Claude API (tool use)', 'Vitest'],
@@ -260,7 +264,7 @@ export const pl: SiteContent = {
     'production-docs-agent': {
       metaTitle: 'Agent do dokumentów produkcyjnych — kokot.it',
       metaDescription:
-        'Projekt pokazowy: agent AI czyta zamówienia i raporty jakości, uzupełnia arkusz lub rekordy ERP i oznacza pola niepewne do weryfikacji.',
+        'Rozwiązanie referencyjne: agent AI czyta zamówienia i raporty jakości, uzupełnia arkusz lub rekordy ERP i oznacza pola niepewne do weryfikacji.',
       card: {
         title: 'Agent do dokumentów produkcyjnych',
         summary:
@@ -268,7 +272,7 @@ export const pl: SiteContent = {
         tags: ['dokumenty', 'jakość', 'ERP'],
       },
       lead: 'Agent czyta zamówienia i raporty jakości w różnych formatach, wyciąga z nich dane do ustalonego schematu, a pola, których nie jest pewien, oddaje człowiekowi.',
-      kind: 'Projekt pokazowy, fikcyjne dokumenty',
+      kind: 'Rozwiązanie referencyjne, dokumenty przykładowe',
       problem: [
         'Zamówienia przychodzą jako PDF, skan albo treść e-maila, każde w innym układzie. Raporty jakości mają własne formularze. Ktoś przepisuje je ręcznie do arkusza albo ERP, co zajmuje czas i rodzi pomyłki, które wychodzą dopiero na produkcji albo w reklamacji.',
         'Pełna automatyzacja bez kontroli jest ryzykowna: brakujące pole albo niejednoznaczna ilość nie mogą zostać „zgadnięte”.',
@@ -280,12 +284,12 @@ export const pl: SiteContent = {
         points: [
           'ekstrakcja do schematu (structured output) i walidacja reguł',
           'trudne przypadki, np. brak pola albo niejednoznaczność, są oznaczane, nie zgadywane',
-          'eksport do CSV i XLSX jako zastępstwo integracji z ERP w demo',
+          'eksport do CSV i XLSX, który w wersji referencyjnej zastępuje integrację z ERP',
           'tryb nagrany bez kosztów i tryb na żywo z kluczem API uruchamiany lokalnie',
         ],
       },
-      demo: {
-        title: 'Demo: od dokumentu do rekordu',
+      preview: {
+        title: 'Od dokumentu do rekordu',
         text: 'Nagrane przebiegi na kilku fikcyjnych zamówieniach i raportach jakości, w tym na dokumentach z brakującymi danymi.',
       },
       stack: ['TypeScript', 'Vite', 'Claude API (structured output)', 'SheetJS', 'Vitest'],
@@ -293,21 +297,21 @@ export const pl: SiteContent = {
     'grant-assistant': {
       metaTitle: 'Asystent wniosku dotacyjnego — kokot.it',
       metaDescription:
-        'Projekt pokazowy: dopasowanie firmy do naborów na podstawie jawnych reguł kwalifikowalności i szkic opisu projektu. Nie jest poradą prawną ani gwarancją dotacji.',
+        'Rozwiązanie referencyjne: dopasowanie firmy do naborów na podstawie jawnych reguł kwalifikowalności i szkic opisu projektu. Nie jest poradą prawną ani gwarancją dotacji.',
       card: {
         title: 'Asystent wniosku dotacyjnego',
         summary:
           'Dopasowanie firmy do naborów według jawnych reguł i szkic opisu projektu dla najlepszego dopasowania.',
         tags: ['dotacje', 'reguły', 'agent AI'],
       },
-      lead: 'Na podstawie krótkiego opisu firmy asystent sprawdza warunki kilku naborów, wskazuje te niespełnione i szkicuje opis projektu dla najlepszego dopasowania.',
-      kind: 'Projekt pokazowy, dane naborów z datą stanu',
+      lead: 'Na podstawie krótkiego opisu firmy asystent sprawdza warunki kilku naborów, wskazuje te niespełnione i przygotowuje roboczy szkic opisu projektu dla najlepszego dopasowania, od którego firma albo jej doradca mogą zacząć pracę nad wnioskiem.',
+      kind: 'Rozwiązanie referencyjne, dane naborów z datą stanu',
       problem: [
         'Firma, która myśli o dotacji, musi najpierw ustalić, do których naborów w ogóle się kwalifikuje: wiek firmy, wynik finansowy, branża, region. Te warunki są rozrzucone po regulaminach, a wstępna ocena zajmuje czas jej i doradcy.',
       ],
       solution: {
         text: [
-          'Warunki kwalifikowalności są zapisane jako jawne, testowane reguły, a nie zostawione ocenie modelu. Model językowy szkicuje tylko opis projektu dla najlepszego dopasowania. Wynik pokazuje też listę dokumentów do przygotowania.',
+          'Warunki kwalifikowalności są zapisane jako jawne, testowane reguły, a nie zostawione ocenie modelu. Model językowy przygotowuje tylko roboczy szkic opisu projektu; wniosek pisze i składa firma. Wynik pokazuje też listę dokumentów do przygotowania.',
           'Asystent pomaga we wstępnej ocenie; nie zastępuje wniosku ani doradcy, nie jest poradą prawną i nie gwarantuje dotacji. Dane naborów mają datę stanu i linki do źródeł.',
         ],
         points: [
@@ -317,8 +321,8 @@ export const pl: SiteContent = {
           'zastrzeżenie widoczne w interfejsie',
         ],
       },
-      demo: {
-        title: 'Demo: dopasowanie do naborów',
+      preview: {
+        title: 'Dopasowanie do naborów',
         text: 'Nagrane przebiegi dla kilku fikcyjnych profili firm.',
       },
       stack: ['TypeScript', 'Vite', 'Zod', 'Claude API', 'Vitest'],
@@ -430,7 +434,7 @@ export const pl: SiteContent = {
           },
           {
             title: 'Plan',
-            text: 'Założenia ticketu sprawdzone w repozytorium, tabela seamów z poziomem testów i tym, czego celowo nie testujemy. Decyzje trafiają do rejestru.',
+            text: 'Założenia ticketu sprawdzone w repozytorium, tabela seamów z poziomem testów i tym, co celowo zostaje bez testów. Decyzje trafiają do rejestru.',
           },
           {
             title: 'TDD',
@@ -450,7 +454,7 @@ export const pl: SiteContent = {
           },
         ],
       },
-      demo: {
+      preview: {
         title: 'Przykładowy przebieg',
         text: 'Sesja na fikcyjnym projekcie bookshelf-api, od otwarcia ticketu po werdykt.',
       },
@@ -565,13 +569,13 @@ export const pl: SiteContent = {
           { value: '23', label: 'skille flow-*', source: 'skills/flow-*/SKILL.md' },
           {
             value: '1011',
-            label: 'testów zadeklarowanych w 104 plikach testów Node',
+            label: 'testów zadeklarowanych w 89 plikach testów Node',
             source: 'wiersze zaczynające się od test( (także z wcięciem) w *.test.mjs',
           },
           {
             value: '168',
             label: 'commitów na main od pierwszego, 12 października 2026',
-            source: 'git log main',
+            source: 'git rev-list --count d536250',
           },
           {
             value: '14',

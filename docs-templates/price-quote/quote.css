@@ -1,0 +1,197 @@
+/* Price quote for a Dig.IT application (form b): A4, paper theme, tables in mono figures. */
+
+.quote h1 {
+  font-size: 18pt;
+}
+
+.quote .lead {
+  margin-bottom: 4mm;
+}
+
+.example-banner {
+  margin: -3mm 0 5mm;
+  padding: 2mm 3mm;
+  border: 1px dashed var(--color-accent);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--doc-small);
+  color: var(--color-accent);
+}
+
+.quote h3 {
+  margin-top: 3mm;
+  font-size: 9.5pt;
+}
+
+.quote section {
+  margin-bottom: 5mm;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 2mm 8mm;
+  margin: 0 0 5mm;
+  padding: 2.5mm 0;
+  border-top: var(--border-width) solid var(--color-line);
+  border-bottom: var(--border-width) solid var(--color-line);
+}
+
+.meta dt,
+.compare dt {
+  font-family: var(--font-mono);
+  font-size: var(--doc-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.meta dd,
+.compare dd {
+  margin: 0;
+}
+
+.parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+}
+
+.parties section {
+  margin-bottom: 4mm;
+  padding: 3mm 4mm;
+  background: var(--color-surface);
+}
+
+.parties p {
+  margin: 0;
+}
+
+.intro {
+  margin-bottom: 5mm !important;
+}
+
+.cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5mm;
+}
+
+.cols-3 h3 {
+  margin-top: 1mm;
+}
+
+/* Tables: hairlines, right-aligned mono figures, no fills except the grand total. */
+.quote table {
+  width: 100%;
+  margin: 1mm 0 2mm;
+  border-collapse: collapse;
+  font-size: 8.4pt;
+  break-inside: auto;
+}
+
+.quote tr {
+  break-inside: avoid;
+}
+
+.quote th,
+.quote td {
+  padding: 1.3mm 1.6mm;
+  border-bottom: var(--border-width) solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.quote thead th {
+  border-bottom: 1px solid var(--color-line-strong);
+  font-family: var(--font-mono);
+  font-size: 6.5pt;
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.quote .num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 8pt;
+}
+
+.quote thead .num {
+  font-size: 6.5pt;
+}
+
+.quote .cat {
+  color: var(--color-text-muted);
+}
+
+.quote tfoot td {
+  border-top: 1px solid var(--color-line-strong);
+  font-weight: var(--weight-semibold);
+}
+
+.form-cat {
+  font-size: var(--doc-small);
+  color: var(--color-text-subtle);
+}
+
+.grand {
+  width: auto !important;
+  min-width: 95mm;
+  margin-left: auto !important;
+}
+
+.grand th {
+  font-weight: var(--weight-regular);
+}
+
+.grand-total th,
+.grand-total td {
+  background: var(--color-surface);
+  font-weight: var(--weight-semibold);
+}
+
+.compare {
+  margin: 0;
+}
+
+.compare > div {
+  display: grid;
+  grid-template-columns: 45mm 1fr;
+  gap: 4mm;
+  padding: 1.3mm 0;
+  border-bottom: var(--border-width) solid var(--color-line);
+}
+
+.payment {
+  width: auto !important;
+  min-width: 110mm;
+}
+
+.signature {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 12mm;
+  break-inside: avoid;
+}
+
+.sign-line {
+  width: 75mm;
+  margin-bottom: 1.5mm;
+  border-bottom: 1px solid var(--color-line-strong);
+}
+
+.signature p {
+  width: 75mm;
+  margin: 0;
+}
+
+/* Keep tables and short sections whole; only the long price section may span pages. */
+.quote table,
+.quote section:not(.price-section),
+.cols-3 {
+  break-inside: avoid;
+}

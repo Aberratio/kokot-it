@@ -3,3 +3,5 @@ out/
 coverage/
 .vercel/
 package-lock.json
+public/tools/*/
+tmp/
