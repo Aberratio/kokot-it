@@ -364,7 +364,13 @@ main {
   margin: var(--space-1) 0;
 }
 
-/* Case study: flow diagram (inline SVG, src/content/diagram.ts) next to its steps. */
+/*
+ * Case study: flow diagram (inline SVG, src/content/diagram.ts) next to its steps.
+ * Inside the SVG, sizes are viewBox user units, not CSS px: they scale with the drawing, so the
+ * rem-based type, border and spacing tokens do not apply. Font sizes, stroke widths and dash
+ * lengths below are therefore plain numbers, matched to LAYOUT in diagram.ts; colours and font
+ * families still come from the tokens.
+ */
 .flow {
   display: grid;
   gap: var(--space-6);
@@ -396,7 +402,7 @@ main {
 .fd-box {
   fill: var(--color-surface);
   stroke: var(--color-line-strong);
-  stroke-width: var(--border-width);
+  stroke-width: 1;
 }
 
 .fd-label {
@@ -446,14 +452,11 @@ main {
   font-size: 11px;
 }
 
+/* The steps beside the diagram: one column, on top of .steps. */
 .steps--list {
   grid-template-columns: minmax(0, 1fr);
-  display: grid;
   gap: var(--space-4);
   margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
 }
 
 /* Case study: illustrative session log (src/content/render.ts, renderTranscript). */
