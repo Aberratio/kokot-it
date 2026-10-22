@@ -315,7 +315,10 @@ function renderFlow(flow: NonNullable<CaseStudy['flow']>): string {
     ? [
         `<div class="flow">`,
         `<figure class="flow__figure">`,
+        // Scrolls sideways on the narrowest phones instead of shrinking the labels below 11px.
+        `<div class="flow__scroll" tabindex="0" role="region" aria-label="${e(flow.diagram.title)}">`,
         renderFlowDiagram(flow.diagram),
+        `</div>`,
         `<figcaption class="note">${e(flow.diagram.caption)}</figcaption>`,
         `</figure>`,
         renderSteps(flow.steps, 'steps steps--list'),
