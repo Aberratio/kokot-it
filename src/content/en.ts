@@ -642,7 +642,7 @@ export const en: SiteContent = {
         points: [
           'seven agents and seven kinds of faults, each with one clear answer: armour, cloaking, splitting, repairs, and a boss that shields its escort',
           'open floor where every agent is part of the maze, with a preview of the new route before you build',
-          'each level ships at 50–90% of the strength the solver can still beat; from the third level on a careless player wins 0–6% of the time',
+          'each level ships at 50–90% of the strength the solver can still beat; from the third level on a careless player wins at most one game in ten',
           'Canvas 2D graphics in the kokot.it colours, full keyboard play, reduced motion, English and Polish',
         ],
       },

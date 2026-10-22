@@ -645,7 +645,7 @@ export const pl: SiteContent = {
         points: [
           'siedmiu agentów i siedem rodzajów usterek, każda z jedną wyraźną odpowiedzią: pancerz, niewidzialność, rozpad, naprawy i boss osłaniający eskortę',
           'otwarta posadzka, na której każdy agent jest częścią labiryntu, z podglądem nowej trasy przed budową',
-          'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa w 0–6% prób',
+          'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa najwyżej raz na dziesięć prób',
           'grafika Canvas 2D w barwach kokot.it, pełna obsługa klawiaturą, ograniczony ruch, polski i angielski',
         ],
       },
