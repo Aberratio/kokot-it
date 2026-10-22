@@ -1,0 +1,82 @@
+{
+  "$comment": "FICTIONAL person for tests and CI. The real CV content lives outside this repo (T-06).",
+  "schemaVersion": 1,
+  "lang": "pl",
+  "labels": {
+    "summary": "Profil",
+    "skills": "Kompetencje",
+    "experience": "Doświadczenie",
+    "projects": "Projekty",
+    "education": "Wykształcenie",
+    "certifications": "Certyfikaty",
+    "languages": "Języki",
+    "additional": "Poza pracą",
+    "present": "obecnie",
+    "inProgress": "w przygotowaniu",
+    "stack": "Technologie"
+  },
+  "basics": {
+    "name": "Ada Przykładowa",
+    "title": "Inżynierka testowa · postać fikcyjna",
+    "email": "ada@example.com",
+    "location": "Przykładowo, Polska",
+    "links": [{ "label": "example.com", "url": "https://example.com" }]
+  },
+  "summary": [
+    "Fikcyjna inżynierka, której CV służy wyłącznie do testów szablonu.",
+    "Zajmuje się przykładowymi systemami, zażółć gęślą jaźń."
+  ],
+  "skills": [
+    { "group": "Narzędzia", "items": ["Narzędzie A", "Narzędzie B"] },
+    {
+      "group": "Programowanie",
+      "items": ["TypeScript"],
+      "TODO_OWNER": "Fikcyjne pytanie do właścicielki — nie może pojawić się w PDF."
+    }
+  ],
+  "experience": [
+    {
+      "role": "Główna inżynierka przykładów",
+      "org": "Firma Testowa sp. z o.o.",
+      "orgNote": "branża fikcyjna",
+      "start": "2022-01",
+      "end": null,
+      "summary": "Jedno zdanie nad listą osiągnięć.",
+      "highlights": ["Zbudowała przykładowy system.", "Napisała przykładowe testy."],
+      "stack": ["TypeScript", "Node.js"]
+    },
+    {
+      "role": "Młodsza inżynierka",
+      "org": "Inna Firma Testowa",
+      "start": "2019-03",
+      "end": "2021-12",
+      "highlights": ["Utrzymywała przykładową aplikację."]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Projekt publiczny",
+      "status": "public",
+      "url": "https://example.com/projekt",
+      "description": "Przykładowy projekt z linkiem."
+    },
+    {
+      "name": "Projekt w toku",
+      "status": "in_progress",
+      "url": null,
+      "description": "Przykładowy projekt bez linku."
+    }
+  ],
+  "education": [
+    {
+      "degree": "magister",
+      "field": "Informatyka przykładowa",
+      "institution": "Uczelnia Przykładowa",
+      "start": "2014",
+      "end": "2019"
+    }
+  ],
+  "certifications": [{ "name": "Certyfikat przykładowy", "issuer": null }],
+  "languages": [{ "language": "polski", "level": "ojczysty" }],
+  "additional": ["Fikcyjne zainteresowania: sekcja opcjonalna."]
+}
