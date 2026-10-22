@@ -222,7 +222,7 @@ export const pl: SiteContent = {
       'Aplikacja wczytuje się w tym miejscu po przewinięciu strony i wymaga JavaScriptu. Można ją też otworzyć w osobnej karcie.',
     toolNote:
       'Zapisany przebieg: aplikacja odtwarza nagrane odpowiedzi na danych przykładowych i nie wywołuje API.',
-    toolFrameTitle: 'Aplikacja referencyjna',
+    toolFrameTitle: 'Aplikacja',
     toolOpen: 'Otwórz aplikację w nowej karcie',
     newTab: 'otwiera się w nowej karcie',
     stack: 'Stack',
@@ -632,7 +632,7 @@ export const pl: SiteContent = {
         tags: ['gra', 'symulacja', 'open source'],
       },
       lead: 'Gra tower defense w przeglądarce, zaprojektowana jak łamigłówka: każda fala jest widoczna z wyprzedzeniem, symulacja jest deterministyczna, a między falami gra czeka na gracza. Dziesięć poziomów, każdy zbudowany wokół jednego pomysłu.',
-      kind: 'Własny projekt, publiczne repozytorium (MIT)',
+      kind: 'Własny projekt, repozytorium publiczne (MIT)',
       problem: [
         'Grę tower defense łatwo zrobić trudną, a trudno uczciwą. Liczby ustawiane na wyczucie dają poziomy albo banalne, albo wygrywane szczęściem, a każda zmiana jednej wieży przesuwa balans wszystkich.',
         'Projekty z agentami i automatyzacją mają ten sam problem: zachowanie trzeba sprawdzać powtarzalnymi przebiegami i mierzalnym kryterium, a nie wrażeniem.',
@@ -643,10 +643,10 @@ export const pl: SiteContent = {
           'Solver z przewidywaniem sprawdza każdy dostępny ruch, symuluje nadchodzące fale i zostawia najlepszy. To on zapisał rozwiązanie referencyjne każdego poziomu; testy je odtwarzają i oczekują wygranej. Sonda z nieuważnym graczem, który stawia losowych agentów przy trasie, pokazuje, że od trzeciego poziomu szczęście nie wystarcza.',
         ],
         points: [
-          'siedmiu agentów i siedem rodzajów usterek, każda z jedną wyraźną odpowiedzią: pancerz, niewidzialność, rozpad, naprawy i boss osłaniający eskortę',
+          'siedmiu agentów i siedem rodzajów usterek; każda szczególna wymaga jednej wyraźnej odpowiedzi: pancerz, niewidzialność, rozpad, naprawy i boss osłaniający eskortę',
           'otwarta posadzka, na której każdy agent jest częścią labiryntu, z podglądem nowej trasy przed budową',
           'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa najwyżej raz na dziesięć prób',
-          'grafika Canvas 2D w barwach kokot.it, pełna obsługa klawiaturą, ograniczony ruch, polski i angielski',
+          'grafika Canvas 2D w barwach kokot.it, pełna obsługa klawiaturą, tryb ograniczonego ruchu, polski i angielski',
         ],
       },
       preview: {

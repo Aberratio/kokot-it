@@ -223,7 +223,7 @@ export const en: SiteContent = {
       'The application loads here as you scroll and needs JavaScript. You can also open it in a separate tab.',
     toolNote:
       'Recorded run: the application replays saved answers on sample data and makes no API calls.',
-    toolFrameTitle: 'Reference application',
+    toolFrameTitle: 'Application',
     toolOpen: 'Open the application in a new tab',
     newTab: 'opens in a new tab',
     stack: 'Stack',
@@ -640,7 +640,7 @@ export const en: SiteContent = {
           'A look-ahead solver tries every affordable move, simulates the coming waves and keeps the best one. It wrote the reference solution of each level; the tests replay them and expect a win. A probe with a careless player, who builds random agents near the route, shows that from the third level on luck is not enough.',
         ],
         points: [
-          'seven agents and seven kinds of faults, each with one clear answer: armour, cloaking, splitting, repairs, and a boss that shields its escort',
+          'seven agents and seven kinds of faults; the special ones each call for one clear answer: armour, cloaking, splitting, repairs, and a boss that shields its escort',
           'open floor where every agent is part of the maze, with a preview of the new route before you build',
           'each level ships at 50–90% of the strength the solver can still beat; from the third level on a careless player wins at most one game in ten',
           'Canvas 2D graphics in the kokot.it colours, full keyboard play, reduced motion, English and Polish',
