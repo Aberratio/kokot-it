@@ -325,6 +325,11 @@ function renderFlow(flow: NonNullable<CaseStudy['flow']>): string {
   ].join('');
 }
 
+/** The demo caption: title, text and the note that says what the demo is (recorded, or not). */
+function demoCaption(demo: CaseStudy['demo'], note: string): string {
+  return `<figcaption><strong>${e(demo.title)}.</strong> ${e(demo.text)} <span class="demo__note">${e(note)}</span></figcaption>`;
+}
+
 /**
  * An illustrative session log, rendered as text in the page. It replaces the lazy demo slot:
  * it needs no published demo file, no iframe and no JavaScript, and it says what it is.
@@ -347,7 +352,7 @@ function renderTranscript(demo: CaseStudy['demo'], t: Transcript): string {
     `<p class="eyebrow transcript__label">${e(t.label)}</p>`,
     `<p class="transcript__intro">${e(t.intro)}</p>`,
     `<ol class="transcript__log">${entries}</ol>`,
-    `<figcaption><strong>${e(demo.title)}.</strong> ${e(demo.text)} <span class="demo__note">${e(t.note)}</span></figcaption>`,
+    demoCaption(demo, t.note),
     `</figure>`,
   ].join('');
 }
@@ -406,7 +411,7 @@ function renderCaseStudy(locale: Locale, slug: ProjectSlug, study: CaseStudy): s
       : [
           `<figure class="demo" data-demo-src="${e(demoSrc(slug))}" data-demo-title="${e(`${cs.demoFrameTitle}: ${study.card.title}`)}">`,
           `<div class="demo__frame" data-demo-slot><p class="demo__fallback">${e(cs.demoFallback)}</p></div>`,
-          `<figcaption><strong>${e(study.demo.title)}.</strong> ${e(study.demo.text)} <span class="demo__note">${e(cs.demoNote)}</span></figcaption>`,
+          demoCaption(study.demo, cs.demoNote),
           `</figure>`,
         ].join(''),
     `</section>`,

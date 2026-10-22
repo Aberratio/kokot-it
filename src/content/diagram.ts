@@ -17,6 +17,12 @@ export const LAYOUT = {
   rowGap: 28,
   railX: 352,
   railLabelX: 362,
+  /** Text inset and baselines inside a box, tied to the .fd-* font sizes in content.css. */
+  textInset: 14,
+  labelBaseline: 24,
+  skillBaseline: 42,
+  noteBaseline: 58,
+  radius: 8,
 } as const;
 
 interface Box {
@@ -41,7 +47,8 @@ export function diagramHeight(rowCount: number): number {
 }
 
 const center = (b: Box): number => b.x + b.w / 2;
-const n = (value: number): string => String(Math.round(value * 10) / 10);
+/** A coordinate rounded to one decimal, as SVG attribute text. */
+const coord = (value: number): string => String(Math.round(value * 10) / 10);
 
 /** Edges between consecutive rows: side-by-side rows pair up, otherwise every node meets every node. */
 function edges(rows: Box[][], id: string): string[] {
@@ -61,22 +68,23 @@ function edges(rows: Box[][], id: string): string[] {
       const mid = (y1 + y2) / 2;
       const d =
         x1 === x2
-          ? `M${n(x1)} ${n(y1)}V${n(y2)}`
-          : `M${n(x1)} ${n(y1)}C${n(x1)} ${n(mid)} ${n(x2)} ${n(mid)} ${n(x2)} ${n(y2)}`;
+          ? `M${coord(x1)} ${coord(y1)}V${coord(y2)}`
+          : `M${coord(x1)} ${coord(y1)}C${coord(x1)} ${coord(mid)} ${coord(x2)} ${coord(mid)} ${coord(x2)} ${coord(y2)}`;
       out.push(`<path class="fd-edge" d="${d}" marker-end="url(#${id}-arrow)"/>`);
     }
   }
   return out;
 }
 
-function node(b: Box): string {
-  const tx = b.x + 14;
+function renderNode(b: Box): string {
+  const { textInset, labelBaseline, skillBaseline, noteBaseline, radius, nodeHeight } = LAYOUT;
+  const tx = b.x + textInset;
   return [
     `<g class="fd-node">`,
-    `<rect class="fd-box" x="${n(b.x)}" y="${n(b.y)}" width="${n(b.w)}" height="${String(LAYOUT.nodeHeight)}" rx="8"/>`,
-    `<text class="fd-label" x="${n(tx)}" y="${n(b.y + 24)}">${e(b.node.label)}</text>`,
-    `<text class="fd-skill" x="${n(tx)}" y="${n(b.y + 42)}">${e(b.node.skill)}</text>`,
-    `<text class="fd-note" x="${n(tx)}" y="${n(b.y + 58)}">${e(b.node.note)}</text>`,
+    `<rect class="fd-box" x="${coord(b.x)}" y="${coord(b.y)}" width="${coord(b.w)}" height="${String(nodeHeight)}" rx="${String(radius)}"/>`,
+    `<text class="fd-label" x="${coord(tx)}" y="${coord(b.y + labelBaseline)}">${e(b.node.label)}</text>`,
+    `<text class="fd-skill" x="${coord(tx)}" y="${coord(b.y + skillBaseline)}">${e(b.node.skill)}</text>`,
+    `<text class="fd-note" x="${coord(tx)}" y="${coord(b.y + noteBaseline)}">${e(b.node.note)}</text>`,
     `</g>`,
   ].join('');
 }
@@ -97,15 +105,17 @@ function rail(rows: Box[][], label: string, id: string): string {
     const x = edge.x + edge.w;
     const writes = row.some((b) => b.node.ledger === 'write');
     // Writes point at the ledger, reads point back at the step.
-    const d = writes ? `M${n(x)} ${n(y)}H${n(railX - 4)}` : `M${n(railX)} ${n(y)}H${n(x + 4)}`;
+    const d = writes
+      ? `M${coord(x)} ${coord(y)}H${coord(railX - 4)}`
+      : `M${coord(railX)} ${coord(y)}H${coord(x + 4)}`;
     return `<path class="fd-tick" d="${d}" marker-end="url(#${id}-dot)"/>`;
   });
   const mid = (top + bottom) / 2;
   return [
     `<g class="fd-rail">`,
-    `<path class="fd-rail-line" d="M${n(railX)} ${n(top)}V${n(bottom)}"/>`,
+    `<path class="fd-rail-line" d="M${coord(railX)} ${coord(top)}V${coord(bottom)}"/>`,
     ...ticks,
-    `<text class="fd-rail-label" x="${n(railLabelX)}" y="${n(mid)}" text-anchor="middle" transform="rotate(90 ${n(railLabelX)} ${n(mid)})">${e(label)}</text>`,
+    `<text class="fd-rail-label" x="${coord(railLabelX)}" y="${coord(mid)}" text-anchor="middle" transform="rotate(90 ${coord(railLabelX)} ${coord(mid)})">${e(label)}</text>`,
     `</g>`,
   ].join('');
 }
@@ -127,7 +137,7 @@ export function renderFlowDiagram(diagram: FlowDiagram, id = 'flow-diagram'): st
     `</defs>`,
     ...edges(rows, id),
     rail(rows, diagram.rail, id),
-    ...rows.flat().map(node),
+    ...rows.flat().map(renderNode),
     `</svg>`,
   ].join('');
 }
