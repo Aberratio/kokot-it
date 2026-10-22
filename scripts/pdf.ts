@@ -1,23 +1,48 @@
-// Renders docs-templates/<document>/<lang>.html to out/pdf/<document>-<lang>.pdf
-// with Playwright's Chromium. Run: npm run pdf (first time: npm run pdf:install).
-import { mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { chromium } from 'playwright';
-import { pdfTargets } from './pdf-targets.ts';
+// Renders the offer, the price-quote template and the CV to out/pdf/ with Playwright's
+// Chromium, then checks every PDF: page limit, embedded brand fonts, extractable text.
+//
+//   npm run pdf                          draft: templates with visible {{FIELDS}}
+//   npm run pdf -- --final               what goes out; warns about {{FIELDS}}, TODO_OWNER, draft pricing
+//   npm run pdf -- --quote <file.json>   also a filled-in price quote kept outside the repo
+//
+// CV content is read from $CV_CONTENT_DIR (default: the private brain); missing → CV skipped.
+// First run: npm run pdf:install (downloads Chromium).
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
+import { chromium, type Browser } from 'playwright';
+import { cvContentDir, loadCvSources } from './cv-source.ts';
+import { planDocuments, type Mode } from './documents.ts';
+import { inspectPdf, pdfProblems } from './pdf-check.ts';
+import { renderPdf } from './pdf-render.ts';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
-const outDir = join(root, 'out', 'pdf');
-const targets = pdfTargets(join(root, 'docs-templates'));
+const { values } = parseArgs({
+  options: {
+    final: { type: 'boolean', default: false },
+    quote: { type: 'string' },
+    help: { type: 'boolean', short: 'h', default: false },
+  },
+});
 
-if (targets.length === 0) {
-  console.log('No templates in docs-templates/ — nothing to render.');
+if (values.help) {
+  console.log('Usage: npm run pdf [-- --final] [-- --quote <file.json>]');
   process.exit(0);
 }
 
-mkdirSync(outDir, { recursive: true });
+const root = fileURLToPath(new URL('..', import.meta.url));
+const mode: Mode = values.final ? 'final' : 'draft';
+const cvDir = cvContentDir();
+const plan = planDocuments({
+  mode,
+  cv: loadCvSources(cvDir),
+  cvDir,
+  ...(values.quote ? { quoteFile: resolve(values.quote) } : {}),
+});
 
-let browser;
+for (const note of plan.notes) console.log(`note: ${note}`);
+for (const warning of plan.warnings) console.warn(`WARNING: ${warning}`);
+
+let browser: Browser;
 try {
   browser = await chromium.launch();
 } catch (error) {
@@ -26,16 +51,37 @@ try {
   process.exit(1);
 }
 
+let failed = false;
 try {
-  const page = await browser.newPage();
-  for (const target of targets) {
-    await page.goto(pathToFileURL(target.source).href, { waitUntil: 'networkidle' });
-    // Brand fonts load per unicode-range subset (latin-ext only when Polish text needs it).
-    await page.evaluate(() => document.fonts.ready);
-    const path = join(outDir, target.output);
-    await page.pdf({ path, format: 'A4', printBackground: true, preferCSSPageSize: true });
-    console.log(`PDF: ${path}`);
+  for (const doc of plan.docs) {
+    const name = doc.output.replace(/\.pdf$/, '');
+    const pdfPath = join(root, 'out', 'pdf', doc.output);
+    const htmlPath = join(root, 'out', 'html', `${name}.html`);
+    let info = await inspectPdf(await renderPdf(browser, doc.html, htmlPath, pdfPath));
+    if (doc.fallbackHtml && doc.maxPages !== undefined && info.pages > doc.maxPages) {
+      console.log(
+        `${doc.output}: ${String(info.pages)} pages, re-rendering without the optional section`,
+      );
+      info = await inspectPdf(await renderPdf(browser, doc.fallbackHtml, htmlPath, pdfPath));
+    }
+    const problems = pdfProblems(info, {
+      ...(doc.maxPages !== undefined ? { maxPages: doc.maxPages } : {}),
+      phrases: doc.phrases,
+    });
+    const pages = `${String(info.pages)} ${info.pages === 1 ? 'page' : 'pages'}`;
+    if (problems.length === 0) {
+      console.log(`PDF ok: ${pdfPath} (${pages})`);
+    } else {
+      failed = true;
+      console.error(`PDF FAILED: ${pdfPath} (${pages})`);
+      for (const p of problems) console.error(`  - ${p}`);
+    }
   }
 } finally {
   await browser.close();
 }
+
+if (mode === 'final' && plan.warnings.length > 0) {
+  console.warn(`\nNOT READY TO SEND: ${String(plan.warnings.length)} warning(s) above.`);
+}
+process.exit(failed ? 1 : 0);
