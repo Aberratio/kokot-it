@@ -86,6 +86,9 @@ export class RelayRenderer {
   private readonly nodeGeometry = new InstancedBufferGeometry();
   private readonly edgeGeometry = new BufferGeometry();
   private readonly pulseGeometry = new InstancedBufferGeometry();
+  /** Shared unit quad (agents and pulses) and the cursor-glow quad. */
+  private readonly quad = new PlaneGeometry(2, 2);
+  private readonly cursorQuad = new PlaneGeometry(2, 2);
   private readonly materials: ShaderMaterial[] = [];
   private readonly nodeHeat: InstancedBufferAttribute;
   private readonly edgeHeat: BufferAttribute;
@@ -162,7 +165,7 @@ export class RelayRenderer {
     };
 
     // Agents: one quad per node, instanced; the instance id is the node index.
-    const quad = new PlaneGeometry(2, 2);
+    const quad = this.quad;
     this.nodeGeometry.index = quad.index;
     this.nodeGeometry.setAttribute('position', quad.getAttribute('position'));
     this.nodeHeat = new InstancedBufferAttribute(new Float32Array(n), 1).setUsage(DynamicDrawUsage);
@@ -209,7 +212,7 @@ export class RelayRenderer {
     this.pulseGeometry.instanceCount = maxPulses;
     this.add(new Mesh(this.pulseGeometry, this.material(PULSE_VERTEX, PULSE_FRAGMENT)), 2);
 
-    this.add(new Mesh(new PlaneGeometry(2, 2), this.material(CURSOR_VERTEX, CURSOR_FRAGMENT)), 3);
+    this.add(new Mesh(this.cursorQuad, this.material(CURSOR_VERTEX, CURSOR_FRAGMENT)), 3);
     this.setLevel(level);
   }
 
@@ -329,6 +332,8 @@ export class RelayRenderer {
     this.nodeGeometry.dispose();
     this.edgeGeometry.dispose();
     this.pulseGeometry.dispose();
+    this.quad.dispose();
+    this.cursorQuad.dispose();
     for (const m of this.materials) m.dispose();
     this.renderer.dispose();
   }
