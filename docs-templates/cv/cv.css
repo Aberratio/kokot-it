@@ -1,0 +1,202 @@
+/* CV (T-06): A4, paper theme, one reading column; section labels above their content. */
+
+/* No page counter: margin boxes come first in the PDF text, and an ATS should read the name first. */
+@page {
+  margin: 12mm 14mm 13mm;
+
+  @bottom-right {
+    content: none;
+  }
+}
+
+.cv {
+  font-size: 8.8pt;
+  line-height: 1.36;
+}
+
+.cv-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: 5mm;
+  padding-bottom: 4mm;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.cv h1 {
+  margin: 0 0 1mm;
+  font-size: 22pt;
+}
+
+.cv-title {
+  margin: 0 0 2.5mm !important;
+  font-size: 11pt;
+  color: var(--color-text-muted);
+}
+
+.cv-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1mm 5mm;
+  margin: 0 !important;
+  font-family: var(--font-mono);
+  font-size: 8pt;
+}
+
+.cv-contact a {
+  color: var(--color-text);
+}
+
+.cv .cv-contact > li {
+  margin: 0;
+  padding: 0;
+}
+
+.cv .cv-contact > li::before {
+  content: none;
+}
+
+.cv-mark {
+  flex: none;
+  width: 11mm;
+  height: 11mm;
+}
+
+.cv-section {
+  margin-bottom: 3mm !important;
+  padding-top: 2mm;
+  border-top: var(--border-width) solid var(--color-line);
+}
+
+.cv-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.cv-section > h2 {
+  margin: 0 0 1.6mm;
+}
+
+.cv-body > p {
+  margin-bottom: 0.45em;
+}
+
+.cv-item {
+  margin-bottom: 3mm;
+  break-inside: avoid;
+}
+
+.cv-item:last-child {
+  margin-bottom: 0;
+}
+
+.cv-item-compact {
+  margin-bottom: 1.5mm;
+}
+
+.cv-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4mm;
+  margin-bottom: 0.6mm;
+}
+
+.cv h3 {
+  margin: 0;
+  font-size: 10pt;
+}
+
+.cv-org {
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+}
+
+.cv-note {
+  font-weight: var(--weight-regular);
+  color: var(--color-text-subtle);
+}
+
+.cv-dates {
+  flex: none;
+  margin: 0 !important;
+  font-family: var(--font-mono);
+  font-size: 7.5pt;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+.cv-dates a {
+  color: var(--color-accent-2);
+}
+
+.cv-summary {
+  color: var(--color-text-muted);
+}
+
+.cv .cv-item ul > li {
+  margin-bottom: 0.18em;
+  line-height: 1.38;
+}
+
+.cv-stack {
+  margin: 0.4em 0 0 !important;
+  font-size: 7.8pt;
+  color: var(--color-text-subtle);
+}
+
+.cv-stack .label {
+  margin-right: 0.5em;
+  font-size: 6.5pt;
+}
+
+.cv-skills {
+  margin: 0;
+}
+
+.cv-skills > div {
+  display: flex;
+  gap: 3mm;
+  margin-bottom: 0.8mm;
+}
+
+.cv-skills dt {
+  flex: none;
+  width: 42mm;
+}
+
+.cv-skills dt {
+  font-weight: var(--weight-semibold);
+}
+
+.cv-skills dd {
+  flex: 1;
+  margin: 0;
+}
+
+.cv-languages {
+  margin: 0 !important;
+}
+
+/* Last row: education beside certifications and languages (DOM order = reading order). */
+.cv-closing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  padding-top: 2mm;
+  border-top: var(--border-width) solid var(--color-line);
+  break-inside: avoid;
+}
+
+.cv-closing > .cv-section {
+  margin-bottom: 0 !important;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.cv-closing > div > .cv-section + .cv-section {
+  margin-top: 2.5mm;
+  padding-top: 0;
+  border-top: 0;
+}
