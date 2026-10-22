@@ -270,6 +270,19 @@ describe('repository labels', () => {
   });
 });
 
+describe('about kokot.it', () => {
+  // D-034: no team or subcontractor promise; kokot.it runs the project directly.
+  it('promises neither a team nor subcontractors', () => {
+    for (const text of [...pl.about.text, ...en.about.text]) {
+      expect(text).not.toMatch(
+        /specjali|zespó|podwykonaw|osoba prowadząca|specialist|team|subcontract|one lead/i,
+      );
+    }
+    expect(pl.about.text.join(' ')).toContain('Projekt prowadzi bezpośrednio kokot.it');
+    expect(en.about.text.join(' ')).toContain('kokot.it runs each project directly');
+  });
+});
+
 describe('grant wording', () => {
   // The honest framing agreed for the Dig.IT section, pinned as phrases: the copy may be
   // reworded around them, but not lose them.

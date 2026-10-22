@@ -178,7 +178,7 @@ export const pl: SiteContent = {
     title: 'O kokot.it',
     text: [
       'kokot.it to marka usług inżynierskich w obszarze AI i agentic engineering: od analizy procesu, przez agentów i integracje, po interfejs, z którego korzystają ludzie. Ta strona i projekty pokazowe są przykładem tej pracy.',
-      'Za każdy projekt odpowiada jedna osoba prowadząca, od pierwszej rozmowy po wdrożenie. Każda oferta określa, kto i w jaki sposób realizuje prace, zgodnie z zasadami danego programu finansowania.',
+      'Projekt prowadzi bezpośrednio kokot.it, od pierwszej rozmowy po wdrożenie. Zakres i sposób realizacji określa oferta, zgodnie z zasadami danego programu finansowania.',
     ],
     principlesTitle: 'Zasady',
     principles: [
