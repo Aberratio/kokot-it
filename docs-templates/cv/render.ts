@@ -1,5 +1,4 @@
-import { readFileSync } from 'node:fs';
-import { documentHtml, escapeHtml } from '../shared/html.ts';
+import { brandSvg, documentHtml, escapeHtml, list } from '../shared/html.ts';
 import type { CvContent, CvExperience, CvProject } from './cv.ts';
 
 // CV template (T-06): one column, real text, headings in reading order — readable for ATS
@@ -39,9 +38,6 @@ function period(cv: CvContent, start: string, end: string | null): string {
 
 const t = escapeHtml;
 
-const bullets = (items: string[] | undefined): string =>
-  items && items.length > 0 ? `<ul>${items.map((i) => `<li>${t(i)}</li>`).join('')}</ul>` : '';
-
 const stackLine = (cv: CvContent, stack: string[] | undefined): string =>
   stack && stack.length > 0
     ? `<p class="cv-stack"><span class="label">${t(cv.labels.stack)}</span> ${stack.map(t).join(' · ')}</p>`
@@ -61,7 +57,7 @@ function experienceItem(cv: CvContent, e: CvExperience): string {
       <p class="cv-dates">${t(period(cv, e.start, e.end))}</p>
     </div>
     ${e.summary ? `<p class="cv-summary">${t(e.summary)}</p>` : ''}
-    ${bullets(e.highlights)}
+    ${list(e.highlights)}
     ${stackLine(cv, e.stack)}
   </div>`;
 }
@@ -77,15 +73,10 @@ function projectItem(cv: CvContent, p: CvProject): string {
       <p class="cv-dates">${where}</p>
     </div>
     <p>${t(p.description)}</p>
-    ${bullets(p.highlights)}
+    ${list(p.highlights)}
     ${stackLine(cv, p.stack)}
   </div>`;
 }
-
-const markSvg = (): string =>
-  readFileSync(new URL('../../public/brand/mark-on-light.svg', import.meta.url), 'utf8')
-    .trim()
-    .replace('<svg ', '<svg class="cv-mark" aria-hidden="true" focusable="false" ');
 
 export function renderCv(cv: CvContent, opts: CvOptions = {}): string {
   const b = cv.basics;
@@ -126,7 +117,7 @@ export function renderCv(cv: CvContent, opts: CvOptions = {}): string {
 
   const additional =
     !opts.omitAdditional && cv.additional && cv.additional.length > 0
-      ? section('additional', cv.labels.additional, bullets(cv.additional))
+      ? section('additional', cv.labels.additional, list(cv.additional))
       : '';
 
   const body = `<article class="doc cv">
@@ -136,7 +127,7 @@ export function renderCv(cv: CvContent, opts: CvOptions = {}): string {
       <p class="cv-title">${t(b.title)}</p>
       <ul class="cv-contact">${contact}</ul>
     </div>
-    ${markSvg()}
+    ${brandSvg('mark-on-light', 'cv-mark')}
   </header>
   ${section('summary', cv.labels.summary, cv.summary.map((s) => `<p>${t(s)}</p>`).join(''))}
   ${section('skills', cv.labels.skills, skills)}

@@ -3,7 +3,9 @@ import {
   escapeHtml,
   formatMoney,
   formatRange,
-  logoSvg,
+  brandSvg,
+  draftBadge,
+  list,
   text,
   type Lang,
 } from '../shared/html.ts';
@@ -17,18 +19,13 @@ export interface OfferOptions {
   pricing?: Pricing;
 }
 
-const list = (items: string[]): string =>
-  `<ul>${items.map((i) => `<li>${text(i)}</li>`).join('')}</ul>`;
-
 /** The presentation offer (T-05 form a): 1–2 A4 pages, PL or EN. */
 export function renderOffer(opts: OfferOptions): string {
   const { lang } = opts;
   const p = opts.pricing ?? defaultPricing;
   const c = offerCopy[lang];
   const email = opts.email ?? '{{EMAIL}}';
-  const draft = isDraft(p)
-    ? `<p class="draft-badge" data-draft>${escapeHtml(c.draftBadge)}</p>`
-    : '';
+  const draft = isDraft(p) ? draftBadge(c.draftBadge) : '';
 
   const packages = p.packages
     .map((pkg) => {
@@ -62,7 +59,7 @@ export function renderOffer(opts: OfferOptions): string {
 
   const body = `<article class="doc offer">
   <header class="doc-header">
-    ${logoSvg('doc-logo')}
+    ${brandSvg('logo-on-light', 'doc-logo')}
     <div class="doc-header-meta">
       <p class="label">${escapeHtml(c.eyebrow)}</p>
       ${draft}
