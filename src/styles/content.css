@@ -166,6 +166,7 @@ main {
   border: var(--border-width) solid var(--color-line);
   border-radius: var(--radius-lg);
   /* Slightly translucent: the Relay scene stays legible behind the cards. */
+  background: var(--color-surface);
   background: color-mix(in srgb, var(--color-surface) 72%, transparent);
 }
 
