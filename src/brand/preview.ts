@@ -4,8 +4,8 @@ import '../styles/main.css';
 import './preview.css';
 import tokensCss from '../styles/tokens.css?raw';
 import { contrastRatio } from '../styles/color.ts';
-import { relayGraph } from '../scene/relay-graph.ts';
-import { relayStillMarkup, STILL_SEED } from '../scene/still.ts';
+import { relayGraph, SCENE_SEED } from '../scene/relay-graph.ts';
+import { relayStillMarkup } from '../scene/still.ts';
 import { CONTRAST_PAIRS, themeReaders } from '../styles/tokens.ts';
 
 const themes = themeReaders(tokensCss);
@@ -120,7 +120,7 @@ const still = document.querySelector('[data-relay-still]');
 if (still) {
   const width = 640;
   const height = 520;
-  const graph = relayGraph({ seed: STILL_SEED, count: 46, width, height, links: 3, pulses: 10 });
+  const graph = relayGraph({ seed: SCENE_SEED, count: 46, width, height, links: 3, pulses: 10 });
   still.innerHTML = relayStillMarkup(graph, width, height, {
     id: 'brand-still',
     title: 'Sieć agentów: węzły, połączenia i impulsy w drodze',

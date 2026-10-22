@@ -10,6 +10,11 @@ import { GROUP_COUNT, type GroupKind, type Network } from './network.ts';
 
 export type SceneMode = 'free' | GroupKind | 'converge';
 
+/** The group split a state uses: service clusters, project constellations, or none. */
+export function groupKind(mode: SceneMode): GroupKind | null {
+  return mode === 'clusters' || mode === 'constellations' ? mode : null;
+}
+
 export interface Frame {
   readonly halfWidth: number;
   readonly halfHeight: number;

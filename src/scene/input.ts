@@ -2,7 +2,7 @@
  * How the page talks to the scene: which mode to run, where the pointer is in the world, when
  * a resting pointer becomes an order (docs/concept.md: "the cursor is a client, not a magnet"),
  * and which network state each section of the page asks for. Pure functions only; the DOM
- * wiring lives in app.ts and boot.ts.
+ * wiring lives in app.ts and index.ts.
  */
 import type { Frame, SceneMode } from './layouts.ts';
 
@@ -11,6 +11,11 @@ export type RenderMode = 'webgl' | 'reduced' | 'fallback';
 export function chooseMode(env: { webgl: boolean; reducedMotion: boolean }): RenderMode {
   if (!env.webgl) return 'fallback';
   return env.reducedMotion ? 'reduced' : 'webgl';
+}
+
+/** CSS pixel in the viewport → normalised device coordinates, x right and y up, both in [-1, 1]. */
+export function toNdc(x: number, y: number, width: number, height: number): [number, number] {
+  return [(x / width) * 2 - 1, 1 - (y / height) * 2];
 }
 
 /** CSS pixel in the viewport → world (x, y) on the z = 0 plane. */
@@ -128,12 +133,12 @@ export interface Rect {
   readonly height: number;
 }
 
-const HUB_GAP = 36;
+const HUB_GAP = 48;
 
 /** Where the contact node stands: right of the e-mail address, or above it on narrow screens. */
 export function hubScreenPoint(rect: Rect, viewportWidth: number): Point {
   const right = rect.left + rect.width + HUB_GAP;
-  // The node needs its glow's worth of room before the screen edge.
-  if (right <= viewportWidth - 2 * HUB_GAP) return { x: right, y: rect.top + rect.height / 2 };
+  // The node keeps a gap of the same size from the screen edge.
+  if (right <= viewportWidth - HUB_GAP) return { x: right, y: rect.top + rect.height / 2 };
   return { x: rect.left + rect.width / 2, y: rect.top - HUB_GAP };
 }

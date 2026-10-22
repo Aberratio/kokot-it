@@ -131,7 +131,7 @@ out vec4 outColor;
 uniform vec3 uNodeColor;
 uniform vec3 uTaskColor;
 uniform vec3 uCursorColor;
-uniform float uLevel;   // overall brightness of the section
+uniform float uBrightness;   // overall brightness of the section
 
 in vec2 vUv;
 in float vWeight;
@@ -151,7 +151,7 @@ void main() {
   vec3 color = mix(uNodeColor, uTaskColor, clamp(vHeat * 0.85, 0.0, 1.0));
   color = mix(color, uCursorColor, vHub * 0.8);
   float lift = 1.0 + vLift + vHub * 1.4;
-  outColor = vec4(color * ink * vFog * lift * uLevel, 1.0);
+  outColor = vec4(color * ink * vFog * lift * uBrightness, 1.0);
 }
 `;
 
@@ -196,7 +196,7 @@ out vec4 outColor;
 uniform vec3 uEdgeColor;
 uniform vec3 uTaskColor;
 uniform vec3 uResultColor;
-uniform float uLevel;
+uniform float uBrightness;
 
 in float vFog;
 in float vVisible;
@@ -207,7 +207,7 @@ in float vLength;
 void main() {
   vec3 base = uEdgeColor * (0.42 + 0.58 * vFocus) * vLength;
   vec3 lit = uTaskColor * vHeat.x + uResultColor * vHeat.y;
-  outColor = vec4((base + lit) * vVisible * vFog * uLevel, 1.0);
+  outColor = vec4((base + lit) * vVisible * vFog * uBrightness, 1.0);
 }
 `;
 
@@ -268,7 +268,7 @@ precision highp float;
 out vec4 outColor;
 uniform vec3 uTaskColor;
 uniform vec3 uResultColor;
-uniform float uLevel;
+uniform float uBrightness;
 
 in float vAlong;
 in float vAcross;
@@ -287,8 +287,9 @@ void main() {
   float line = exp(-pow(vAcross / (vWidth * 0.16), 2.0));
   float trail = pow(behind, 1.8) * line * 0.85;
   vec3 color = mix(uTaskColor, uResultColor, vKind);
+  // The hot core desaturates toward white: light, not a brand colour.
   vec3 ink = color * (trail + glow * 0.55) + mix(color, vec3(1.0), 0.6) * core;
-  outColor = vec4(ink * max(vFog, 0.5) * uLevel, 1.0);
+  outColor = vec4(ink * max(vFog, 0.5) * uBrightness, 1.0);
 }
 `;
 

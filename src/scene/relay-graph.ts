@@ -40,6 +40,9 @@ export interface RelayOptions {
   readonly pulses?: number;
 }
 
+/** Seed of the site's network: the live scene, the still and the brand page draw the same organisation. */
+export const SCENE_SEED = 2026;
+
 /** mulberry32: small, fast, good enough for layout. */
 export function mulberry32(seed: number): () => number {
   let s = seed >>> 0;
