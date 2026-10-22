@@ -18,8 +18,10 @@ and language rules that came with them.
   `event.origin` is the site's own origin and `event.source` is one of the embedded frames;
   heights between 240 and 20 000 px are applied (Grant Assistant reports about 6 700 px on a
   phone)
-- 2026-10-22 — Factory Twin posts no height: its frame keeps a 16:10 proportion (at least 34 rem)
-  on wide screens and 90 % of the viewport height on phones; the section also links the
+- 2026-10-22 — Factory Twin now reports its height (`factory-twin:height`) like the other two
+  applications, so its frame follows the reported height too (about 930 px on a 420 px wide
+  phone) and the 16:10 proportion and the 90 %-of-viewport phone height were dropped; every frame
+  starts at the shared 56 rem until the first report, and the section still links the
   application in a new tab for a full-screen view
 - 2026-10-22 — The build guard skips the applications' own pages (`tools/<slug>/` for locked
   slugs only): their sample data legitimately shows amounts and long numbers, and each

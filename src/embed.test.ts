@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
   applyHeight,
@@ -8,6 +9,7 @@ import {
   reportedHeight,
   TOOL_SANDBOX,
 } from './embed.ts';
+import { TOOL_SLUGS } from './content/types.ts';
 
 // No DOM library in this repo: the figure, slot and document are minimal fakes that carry
 // only what embed.ts touches.
@@ -198,5 +200,25 @@ describe('mountTools', () => {
     const addEventListener = vi.fn();
     mountTools(rootWith([]), { messages: { addEventListener } });
     expect(addEventListener).not.toHaveBeenCalled();
+  });
+});
+
+describe('frame styles', () => {
+  const css = readFileSync(new URL('./styles/content.css', import.meta.url), 'utf8');
+
+  it('lets a sized frame follow the reported height without a cap', () => {
+    const sized = /\.tool--sized \.tool__frame \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(sized).toContain('height: auto');
+    expect(sized).toContain('max-height: none');
+  });
+
+  it('gives no application its own frame size that could clip the reported height', () => {
+    for (const slug of TOOL_SLUGS) {
+      expect(css, slug).not.toContain(`.tool--${slug} .tool__frame`);
+    }
+  });
+
+  it('accepts the height a phone-width Factory Twin reports', () => {
+    expect(reportedHeight({ type: 'factory-twin:height', height: 930 }, 'factory-twin')).toBe(930);
   });
 });

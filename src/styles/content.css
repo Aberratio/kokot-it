@@ -323,9 +323,9 @@ main {
 }
 
 /*
- * Case study: the embedded reference application (src/embed.ts). The frame holds a height
- * before the application reports its own; Factory Twin reports none, so it keeps a fixed
- * proportion on wide screens and most of the viewport on phones.
+ * Case study: the embedded reference application (src/embed.ts). The frame holds a starting
+ * height until the application reports its own; every application reports one, and the
+ * frame then follows it.
  */
 .tool {
   margin: var(--space-5) 0 0;
@@ -340,20 +340,6 @@ main {
   border: var(--border-width) solid var(--color-line);
   border-radius: var(--radius-lg);
   background: var(--color-bg-deep);
-}
-
-.tool--factory-twin .tool__frame {
-  height: auto;
-  aspect-ratio: 16 / 10;
-  min-height: 34rem;
-}
-
-@media (max-width: 40rem) {
-  .tool--factory-twin .tool__frame {
-    aspect-ratio: auto;
-    height: 90vh;
-    height: 90svh;
-  }
 }
 
 .tool--sized .tool__frame {
