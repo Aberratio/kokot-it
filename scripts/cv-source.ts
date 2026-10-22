@@ -3,6 +3,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cvProblems, type CvContent } from '../docs-templates/cv/cv.ts';
+import type { Lang } from '../docs-templates/shared/html.ts';
 
 export const DEFAULT_CV_DIR = 'C:/Repos/tiller/brains/personal-brand/cv';
 
@@ -20,7 +21,7 @@ export interface CvSources {
 export function loadCvSources(dir: string): CvSources | null {
   const files = { pl: join(dir, 'cv.pl.json'), en: join(dir, 'cv.en.json') };
   if (!existsSync(files.pl) || !existsSync(files.en)) return null;
-  const read = (lang: 'pl' | 'en'): CvContent => {
+  const read = (lang: Lang): CvContent => {
     const data: unknown = JSON.parse(readFileSync(files[lang], 'utf8'));
     const problems = cvProblems(data);
     if (problems.length > 0) throw new Error(`${files[lang]}: ${problems.join('; ')}`);

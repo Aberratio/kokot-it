@@ -28,6 +28,9 @@ mkdirSync(outDir, { recursive: true });
 for (const file of files) {
   const task = getDocument({ data: new Uint8Array(readFileSync(file)), verbosity: 0 });
   const pdf = await task.promise;
+  // pdfjs does not type its document's canvas factory; in Node it is backed by @napi-rs/canvas
+  // (an optional dependency of pdfjs-dist), whose canvas/context stand in for the DOM types
+  // page.render() declares. A dev-only preview tool, so the double casts stay local to it.
   const factory = (
     pdf as unknown as { canvasFactory: { create: (w: number, h: number) => CanvasAndContext } }
   ).canvasFactory;
