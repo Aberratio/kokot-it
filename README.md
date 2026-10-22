@@ -51,8 +51,10 @@ tekście wyciągniętym z PDF (czytelność dla ATS).
   znacznik „Cennik wstępny — do zatwierdzenia”. Po zatwierdzeniu cennika: `"status": "approved"`.
 - **Dane wykonawcy** (nazwa, NIP, adres) nigdy nie trafiają do repo: w szablonie są polami
   `{{NAZWA_FIRMY}}`, `{{NIP}}`, `{{ADRES}}`. Konkretną ofertę cenową przygotowuje się z kopii
-  `docs-templates/oferta-cenowa/data.template.json` trzymanej **poza repo** (np. w brainie):
-  `npm run pdf -- --quote <plik.json> --final`. Ceny liczą się z `pricing.json` (osobodni × stawka).
+  `docs-templates/oferta-cenowa/data.template.json` (pakiet P2) albo `data.template-p3.json` (P3)
+  trzymanej **poza repo** (np. w brainie): `npm run pdf -- --quote <plik.json> --final`. Ceny
+  liczą się z `pricing.json` (osobodni × stawka); plik o złej strukturze zatrzymuje generowanie
+  z listą błędów. Obok każdego PDF-a w `out/pdf/` leży jego HTML (podgląd w przeglądarce).
 - **Wymogi Dig.IT:** `docs-templates/oferta-cenowa/requirements.ts` to 32 wymogi z researchu;
   każdy ma w szablonie element z `data-req="<nr>"` (`requirements.test.ts`).
 - **CV:** szablon jest w repo, treść nie. Skrypt czyta `cv.pl.json` / `cv.en.json` z

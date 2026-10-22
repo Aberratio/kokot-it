@@ -30,7 +30,15 @@ function cvPhrases(cv: CvContent & Record<string, unknown>): string[] {
     }
   };
   collect(cv);
+  // Short but distinctive items: employers, institutions, certificates. Generic short strings
+  // (role titles, skills, project names such as the public "tiller") are left out on purpose:
+  // they legitimately appear in site copy and would make the guard cry wolf.
   for (const e of cv.experience) if (e.org !== 'kokot.it') phrases.add(normalize(e.org));
+  for (const e of cv.education) phrases.add(normalize(e.institution));
+  for (const c of cv.certifications) {
+    phrases.add(normalize(c.name));
+    if (c.issuer) phrases.add(normalize(c.issuer));
+  }
   return [...phrases];
 }
 
