@@ -76,8 +76,9 @@ describe('wordingViolations', () => {
     expect(wordingViolations('x.md', 'SHELF-12, AC1, P2, Q-nnn')).toEqual([]);
   });
 
-  it('exempts only the guard modules', () => {
+  it('exempts only the guard modules and their tests', () => {
     expect(wordingViolations('src/content/guards.ts', DEMO)).toEqual([]);
+    expect(wordingViolations('src/content/guards.test.ts', DEMO)).toEqual([]);
     expect(wordingViolations('scripts/repo-guards.ts', DEMO)).toEqual([]);
     expect(wordingViolations('scripts/other.ts', DEMO)).toHaveLength(1);
   });

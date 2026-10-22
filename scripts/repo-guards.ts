@@ -28,9 +28,9 @@ export const POLISH_FILES: readonly RegExp[] = [
   /^tests\/fixtures\//, // fictional sample data
 ];
 
-/** The guard modules: they name the patterns they look for. */
+/** The guard modules and their own tests: they name the patterns they look for. */
 export const WORDING_EXEMPT: readonly RegExp[] = [
-  /^src\/content\/guards\.ts$/,
+  /^src\/content\/guards(?:\.test)?\.ts$/,
   /^scripts\/repo-guards\.ts$/,
   /^tests\/repo-guards\.test\.ts$/,
 ];

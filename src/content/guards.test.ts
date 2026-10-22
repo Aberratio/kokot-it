@@ -45,9 +45,12 @@ describe('wording and process references', () => {
   // Built from parts: the repository's own wording guard reads this file.
   const word = ['de', 'mo'].join('');
 
-  it.each([word, `${word}s`, `w ${word.slice(0, 3)}ach`, word.toUpperCase()])('catches %s', (value) => {
-    expect(rules(value)).toContain('demo wording');
-  });
+  it.each([word, `${word}s`, `w ${word.slice(0, 3)}ach`, word.toUpperCase()])(
+    'catches %s',
+    (value) => {
+      expect(rules(value)).toContain('demo wording');
+    },
+  );
 
   it('lets demonstrate and similar words through', () => {
     expect(rules('demonstrates the flow, democratic, Demeter')).toEqual([]);
