@@ -72,7 +72,7 @@ export interface FrameState {
   /** Converge strength 0–1: the contact node lights up. */
   readonly hub: number;
   /** Overall brightness of the section. */
-  readonly level: number;
+  readonly brightness: number;
 }
 
 export class RelayRenderer {
@@ -145,7 +145,7 @@ export class RelayRenderer {
       uFogFar: { value: CAMERA_Z + DEPTH * 1.6 },
       uPixelRatio: { value: 1 },
       uGlow: { value: level.glow },
-      uLevel: { value: 1 },
+      uBrightness: { value: 1 },
       uViewport: { value: new Vector2(1, 1) },
       uNodeColor: { value: rgb(c.node) },
       uEdgeColor: { value: rgb(c.edge) },
@@ -271,7 +271,7 @@ export class RelayRenderer {
     this.u('uCursorStrength', state.cursorStrength);
     this.u('uFocus', state.focus);
     this.u('uHub', state.hub);
-    this.u('uLevel', state.level);
+    this.u('uBrightness', state.brightness);
     (this.shared['uCursor']?.value as Vector2).set(state.cursor[0], state.cursor[1]);
     (this.shared['uCursorWorld']?.value as Vector3).set(
       state.cursor[0] * this.frame.halfWidth,

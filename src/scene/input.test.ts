@@ -8,6 +8,7 @@ import {
   resolveSectionModes,
   screenToWorld,
   sectionMode,
+  toNdc,
 } from './input.ts';
 
 describe('chooseMode', () => {
@@ -22,6 +23,15 @@ describe('chooseMode', () => {
   it('draws the SVG still without WebGL, whatever the motion preference', () => {
     expect(chooseMode({ webgl: false, reducedMotion: false })).toBe('fallback');
     expect(chooseMode({ webgl: false, reducedMotion: true })).toBe('fallback');
+  });
+});
+
+describe('toNdc', () => {
+  it('maps the viewport corners and centre to normalised device coordinates, y up', () => {
+    expect(toNdc(0, 0, 400, 200)).toEqual([-1, 1]);
+    expect(toNdc(200, 100, 400, 200)).toEqual([0, 0]);
+    expect(toNdc(400, 200, 400, 200)).toEqual([1, -1]);
+    expect(toNdc(300, 50, 400, 200)).toEqual([0.5, 0.5]);
   });
 });
 
@@ -136,11 +146,11 @@ describe('resolveSectionModes', () => {
 describe('hubScreenPoint (the node next to the e-mail address)', () => {
   it('sits just right of the address when there is room', () => {
     const rect = { left: 100, top: 400, width: 220, height: 48 };
-    expect(hubScreenPoint(rect, 1366)).toEqual({ x: 100 + 220 + 36, y: 424 });
+    expect(hubScreenPoint(rect, 1366)).toEqual({ x: 100 + 220 + 48, y: 424 });
   });
 
   it('sits above the address on a narrow screen', () => {
     const rect = { left: 16, top: 600, width: 300, height: 48 };
-    expect(hubScreenPoint(rect, 390)).toEqual({ x: 166, y: 600 - 36 });
+    expect(hubScreenPoint(rect, 390)).toEqual({ x: 166, y: 600 - 48 });
   });
 });

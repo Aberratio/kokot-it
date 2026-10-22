@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clusterCentres, CONVERGE_NODE, layoutFor, type Frame } from './layouts.ts';
+import { clusterCentres, CONVERGE_NODE, groupKind, layoutFor, type Frame } from './layouts.ts';
 import { buildNetwork, groupOf } from './network.ts';
 
 const net = buildNetwork({ seed: 2026, count: 240 });
@@ -13,6 +13,15 @@ const at = (p: Float32Array, i: number): [number, number, number] => [
 ];
 const dist2d = (a: readonly number[], b: readonly number[]): number =>
   Math.hypot((a[0] ?? 0) - (b[0] ?? 0), (a[1] ?? 0) - (b[1] ?? 0));
+
+describe('groupKind', () => {
+  it('names the group split of the island states and none for the others', () => {
+    expect(groupKind('clusters')).toBe('clusters');
+    expect(groupKind('constellations')).toBe('constellations');
+    expect(groupKind('free')).toBeNull();
+    expect(groupKind('converge')).toBeNull();
+  });
+});
 
 describe('layoutFor', () => {
   it('returns one finite xyz per node, the same for the same input', () => {

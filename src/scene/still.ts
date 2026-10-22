@@ -3,17 +3,13 @@
  * 2D graph from relay-graph.ts drawn as SVG with the scene tokens. Shown when WebGL is missing,
  * lost, or too slow even at the lowest quality, and on the /brand/ page.
  */
-import { relayGraph, type RelayGraph } from './relay-graph.ts';
-
-export const STILL_SEED = 2026;
+import { escapeHtml } from '../content/html.ts';
+import { relayGraph, SCENE_SEED, type RelayGraph } from './relay-graph.ts';
 
 const PULSE_COLOR = {
   task: 'var(--scene-pulse-task)',
   result: 'var(--scene-pulse-result)',
 } as const;
-
-const escapeXml = (value: string): string =>
-  value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
 const r = (n: number): string => String(Math.round(n * 10) / 10);
 
@@ -32,9 +28,10 @@ export function relayStillMarkup(
   height: number,
   options: StillOptions,
 ): string {
-  const { id, title, fit } = options;
-  const a11y = title ? `role="img"><title>${escapeXml(title)}</title>` : `aria-hidden="true">`;
-  const ratio = fit ? ` preserveAspectRatio="${fit}"` : '';
+  const { title, fit } = options;
+  const id = escapeHtml(options.id);
+  const a11y = title ? `role="img"><title>${escapeHtml(title)}</title>` : `aria-hidden="true">`;
+  const ratio = fit ? ` preserveAspectRatio="${escapeHtml(fit)}"` : '';
   const out: string[] = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${String(width)} ${String(height)}"${ratio} ${a11y}`,
     '<defs>',
@@ -93,7 +90,7 @@ export function stillGraph(
   const height = wide ? 900 : 1400;
   const count = wide ? 72 : 44;
   return {
-    graph: relayGraph({ seed: STILL_SEED, count, width, height, links: 2, pulses: 9 }),
+    graph: relayGraph({ seed: SCENE_SEED, count, width, height, links: 2, pulses: 9 }),
     width,
     height,
   };

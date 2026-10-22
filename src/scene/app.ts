@@ -12,17 +12,16 @@ import {
   resolveSectionModes,
   screenToWorld,
   sectionMode,
+  toNdc,
   type RenderMode,
 } from './input.ts';
-import { CONVERGE_NODE, layoutFor, type SceneMode } from './layouts.ts';
+import { CONVERGE_NODE, groupKind, layoutFor, type SceneMode } from './layouts.ts';
 import { cubicBezier, parseCubicBezier, snapshotPositions } from './morph.ts';
-import { buildNetwork, type GroupKind } from './network.ts';
+import { buildNetwork } from './network.ts';
 import { FrameMonitor, initialLevel, LEVELS } from './quality.ts';
-import { mulberry32 } from './relay-graph.ts';
+import { mulberry32, SCENE_SEED } from './relay-graph.ts';
 import { RelayRenderer, type Split } from './renderer.ts';
 import { Pacer, planRoute, Relay } from './routing.ts';
-
-export const NETWORK_SEED = 2026;
 
 /** Autonomous jobs per second: "silence as the base state" — a few pulses, never a screensaver. */
 const JOB_RATE: Readonly<Record<SceneMode, number>> = {
@@ -48,9 +47,6 @@ const SPLIT: Readonly<Record<SceneMode, Split>> = {
 const FIRST_JOB_DELAY = 1;
 const ORDER_REACH_PX = 120;
 const CURSOR_REST_MS = 2500;
-
-const groupKind = (mode: SceneMode): GroupKind | null =>
-  mode === 'clusters' || mode === 'constellations' ? mode : null;
 
 const nextTask = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -83,7 +79,7 @@ export async function startScene(
 
   // Split the start-up into short tasks so none of them blocks input for long.
   await nextTask();
-  const net = buildNetwork({ seed: NETWORK_SEED, count: level.nodes });
+  const net = buildNetwork({ seed: SCENE_SEED, count: level.nodes });
   const seeds = net.nodes.map((n) => n.seed);
   await nextTask();
 
@@ -103,7 +99,7 @@ export async function startScene(
   canvas.dataset['level'] = String(monitor.level);
   canvas.dataset['mode'] = mode;
 
-  const rand = mulberry32(NETWORK_SEED + 1);
+  const rand = mulberry32(SCENE_SEED + 1);
   const relay = new Relay(net, { maxJobs: level.maxJobs, ease: easeSignal });
   const pacer = new Pacer(rand);
   const dwell = new DwellDetector();
@@ -189,7 +185,7 @@ export async function startScene(
       parallax,
       focus,
       hub,
-      level: BRIGHTNESS[sceneMode],
+      brightness: BRIGHTNESS[sceneMode],
     });
   };
 
@@ -213,7 +209,111 @@ export async function startScene(
     );
   };
 
-  // ---- Static frame (prefers-reduced-motion) -------------------------------------------------
+  // ---- Lifecycle shared by the live loop and the still frame ---------------------------------
+  let raf = 0;
+  let last = 0;
+  let visible = document.visibilityState === 'visible';
+  let onScreen = true;
+  let dead = false;
+  let tornDown = false;
+  const listeners: [EventTarget, string, (e: Event) => void][] = [];
+  const observers: (IntersectionObserver | ResizeObserver)[] = [];
+  const on = (
+    target: EventTarget,
+    type: string,
+    listener: (e: Event) => void,
+    passive = true,
+  ): void => {
+    target.addEventListener(type, listener, { passive });
+    listeners.push([target, type, listener]);
+  };
+
+  /** Gives way to the SVG still: stops the loop and frees the GPU. */
+  const teardown = (): void => {
+    if (tornDown) return;
+    tornDown = true;
+    dead = true;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+    for (const [target, type, listener] of listeners) target.removeEventListener(type, listener);
+    for (const o of observers) o.disconnect();
+    canvas.remove();
+    renderer.dispose();
+    fallback();
+  };
+
+  /** The section under the middle of the viewport, by layout (used when observers cannot tell). */
+  const centredMode = (): SceneMode | undefined => {
+    const middle = window.innerHeight / 2;
+    const index = sections.findIndex((s) => {
+      const r = s.getBoundingClientRect();
+      return r.top <= middle && r.bottom > middle;
+    });
+    return index >= 0 ? sectionModes[index] : undefined;
+  };
+
+  /**
+   * Reports the network state of the section crossing the middle of the viewport. A last
+   * section shorter than half the screen (contact on a tall display) never reaches the middle,
+   * so it also counts as active while it is fully in view.
+   */
+  const observeSections = (onChange: (mode: SceneMode) => void): void => {
+    // While the last section is wholly in view it wins over the section at the middle line.
+    let lastInView = false;
+    const centre = new IntersectionObserver(
+      (entries) => {
+        if (lastInView) return;
+        for (const entry of entries) {
+          const mode = sectionModes[sections.indexOf(entry.target as HTMLElement)];
+          if (entry.isIntersecting && mode) onChange(mode);
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px' },
+    );
+    for (const s of sections) centre.observe(s);
+    observers.push(centre);
+    const lastSection = sections.at(-1);
+    const lastMode = sectionModes.at(-1);
+    if (!lastSection || !lastMode) return;
+    const whole = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        const wasInView = lastInView;
+        lastInView = entry.intersectionRatio >= 0.99;
+        if (lastInView) onChange(lastMode);
+        else if (wasInView) {
+          const mode = centredMode();
+          if (mode) onChange(mode);
+        }
+      },
+      { threshold: [0.5, 0.99] },
+    );
+    whole.observe(lastSection);
+    observers.push(whole);
+  };
+
+  // A lost GPU context that does not come back within a few seconds gives way to the still.
+  let lostTimer = 0;
+  let restored = (): void => {};
+  on(
+    canvas,
+    'webglcontextlost',
+    (e) => {
+      e.preventDefault();
+      dead = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      lostTimer = window.setTimeout(teardown, 3000);
+    },
+    false,
+  );
+  on(canvas, 'webglcontextrestored', () => {
+    window.clearTimeout(lostTimer);
+    dead = false;
+    restored();
+  });
+
+  // ---- Still frame (prefers-reduced-motion) ---------------------------------------------------
   if (reduced) {
     // A held moment of work: a few jobs fast-forwarded on the CPU, then one frame, nothing moves.
     const still = (): void => {
@@ -225,39 +325,27 @@ export async function startScene(
       hub = sceneMode === 'converge' ? 1 : 0;
       draw(performance.now());
     };
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const next = sectionModes[sections.indexOf(entry.target as HTMLElement)];
-          if (entry.isIntersecting && next && next !== sceneMode) {
-            // Re-wiring becomes a cut: the new layout appears at once.
-            setMode(next, performance.now(), true);
-            still();
-          }
-        }
-      },
-      { rootMargin: '-50% 0px -50% 0px' },
-    );
-    for (const s of sections) observer.observe(s);
-    new ResizeObserver(() => {
+    restored = still;
+    observeSections((next) => {
+      if (next === sceneMode) return;
+      // Re-forming becomes a cut: the new layout appears at once.
+      setMode(next, performance.now(), true);
+      still();
+    });
+    const resizeObserver = new ResizeObserver(() => {
       renderer.resize(canvas.clientWidth, canvas.clientHeight);
       setMode(sceneMode, performance.now(), true);
-      draw(performance.now());
-    }).observe(canvas);
+      still();
+    });
+    resizeObserver.observe(canvas);
+    observers.push(resizeObserver);
     setMode(sceneMode, performance.now(), true);
     still();
     canvas.classList.add('is-ready');
     return;
   }
 
-  // ---- Live loop ----------------------------------------------------------------------------
-  let raf = 0;
-  let last = 0;
-  let visible = document.visibilityState === 'visible';
-  let onScreen = true;
-  let dead = false;
-  let tornDown = false;
-
+  // ---- Live loop ------------------------------------------------------------------------------
   const loop = (now: number): void => {
     raf = requestAnimationFrame(loop);
     const dtMs = last ? now - last : 16;
@@ -315,32 +403,11 @@ export async function startScene(
       raf = 0;
     }
   };
-
-  const listeners: [EventTarget, string, (e: Event) => void][] = [];
-  const on = (
-    target: EventTarget,
-    type: string,
-    listener: (e: Event) => void,
-    passive = true,
-  ): void => {
-    target.addEventListener(type, listener, { passive });
-    listeners.push([target, type, listener]);
-  };
-  const observers: (IntersectionObserver | ResizeObserver)[] = [];
-
-  function teardown(): void {
-    if (tornDown) return;
-    tornDown = true;
-    dead = true;
-    run();
-    for (const [target, type, listener] of listeners) target.removeEventListener(type, listener);
-    for (const o of observers) o.disconnect();
-    canvas.remove();
-    renderer.dispose();
-    fallback();
-  }
+  restored = run;
 
   // Pause in a hidden tab and when the canvas is not on screen: the loop stops, not just idles.
+  // The canvas is a fixed backdrop, so "not on screen" happens only when it is not rendered at
+  // all (print, a collapsed viewport); the hidden tab is the case that matters.
   on(document, 'visibilitychange', () => {
     visible = document.visibilityState === 'visible';
     run();
@@ -352,17 +419,9 @@ export async function startScene(
   onScreenObserver.observe(canvas);
   observers.push(onScreenObserver);
 
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        const next = sectionModes[sections.indexOf(entry.target as HTMLElement)];
-        if (entry.isIntersecting && next && next !== sceneMode) setMode(next, performance.now());
-      }
-    },
-    { rootMargin: '-50% 0px -50% 0px' },
-  );
-  for (const s of sections) sectionObserver.observe(s);
-  observers.push(sectionObserver);
+  observeSections((next) => {
+    if (next !== sceneMode) setMode(next, performance.now());
+  });
 
   let aspect = canvas.clientWidth / Math.max(canvas.clientHeight, 1);
   const resizeObserver = new ResizeObserver(() => {
@@ -381,17 +440,17 @@ export async function startScene(
   // The pointer is a client: it lights the agents near it and, when it rests, places an order.
   on(window, 'pointermove', (event) => {
     const e = event as PointerEvent;
-    cursor = [(e.clientX / canvas.clientWidth) * 2 - 1, 1 - (e.clientY / canvas.clientHeight) * 2];
+    cursor = toNdc(e.clientX, e.clientY, canvas.clientWidth, canvas.clientHeight);
     if (e.pointerType === 'mouse') {
       cursorTarget = 1;
       lastMove = performance.now();
-      dwell.move(e.clientX, e.clientY, performance.now());
+      dwell.move(e.clientX, e.clientY, lastMove);
     }
   });
   on(window, 'pointerdown', (event) => {
     const e = event as PointerEvent;
     if (e.pointerType === 'mouse') return;
-    cursor = [(e.clientX / canvas.clientWidth) * 2 - 1, 1 - (e.clientY / canvas.clientHeight) * 2];
+    cursor = toNdc(e.clientX, e.clientY, canvas.clientWidth, canvas.clientHeight);
     cursorStrength = 1;
     cursorTarget = 0;
     dwell.tap(e.clientX, e.clientY);
@@ -401,51 +460,54 @@ export async function startScene(
     dwell.leave();
   });
 
-  // Hovered offer P1–P3 lights its cluster; a hovered project runs a series in its constellation.
+  // The active offer (P1–P3) lights its cluster; the active project runs a series of hand-offs
+  // in its constellation. "Active" is hovered or focused; on touch screens, the card crossing the
+  // middle of the viewport.
+  interface ActiveCard {
+    readonly card: HTMLElement;
+    readonly mode: SceneMode;
+    readonly group: number;
+    readonly jobs: number;
+  }
+  const cards: ActiveCard[] = [];
   for (const offer of document.querySelectorAll<HTMLElement>('.offer')) {
     const code = /P(\d)/.exec(offer.querySelector('.offer__code')?.textContent ?? '');
-    if (!code?.[1]) continue;
-    const group = Number(code[1]) - 1;
-    const enter = (): void => {
-      if (sceneMode !== 'clusters') return;
-      focus = group;
-      bursts.push({ at: time, group }, { at: time + 0.35, group });
-    };
-    on(offer, 'pointerenter', enter);
-    on(offer, 'focusin', enter);
-    on(offer, 'pointerleave', () => (focus = -1));
-    on(offer, 'focusout', () => (focus = -1));
+    if (code?.[1])
+      cards.push({ card: offer, mode: 'clusters', group: Number(code[1]) - 1, jobs: 2 });
   }
   document.querySelectorAll<HTMLElement>('.cards > li').forEach((card, group) => {
+    cards.push({ card, mode: 'constellations', group, jobs: 3 });
+  });
+  const activate = (active: ActiveCard): void => {
+    if (sceneMode !== active.mode || focus === active.group) return;
+    focus = active.group;
+    for (let k = 0; k < active.jobs; k++) bursts.push({ at: time + k * 0.3, group: active.group });
+  };
+  const release = (): void => {
+    focus = -1;
+  };
+  for (const active of cards) {
     const enter = (): void => {
-      if (sceneMode !== 'constellations') return;
-      focus = group;
-      for (let k = 0; k < 3; k++) bursts.push({ at: time + k * 0.22, group });
+      activate(active);
     };
-    on(card, 'pointerenter', enter);
-    on(card, 'focusin', enter);
-    on(card, 'pointerleave', () => (focus = -1));
-    on(card, 'focusout', () => (focus = -1));
-  });
-
-  // A lost GPU context that does not come back within a few seconds gives way to the still.
-  let lostTimer = 0;
-  on(
-    canvas,
-    'webglcontextlost',
-    (e) => {
-      e.preventDefault();
-      dead = true;
-      run();
-      lostTimer = window.setTimeout(teardown, 3000);
-    },
-    false,
-  );
-  on(canvas, 'webglcontextrestored', () => {
-    window.clearTimeout(lostTimer);
-    dead = false;
-    run();
-  });
+    on(active.card, 'pointerenter', enter);
+    on(active.card, 'focusin', enter);
+    on(active.card, 'pointerleave', release);
+    on(active.card, 'focusout', release);
+  }
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    const centreCard = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const active = cards.find((c) => c.card === e.target);
+          if (active && e.isIntersecting) activate(active);
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px' },
+    );
+    for (const active of cards) centreCard.observe(active.card);
+    observers.push(centreCard);
+  }
 
   setMode(sceneMode, performance.now(), true);
   // The network wakes up with a short exchange, then settles into its quiet pace.

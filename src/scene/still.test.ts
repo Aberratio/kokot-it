@@ -34,6 +34,13 @@ describe('relayStillMarkup', () => {
     expect(titled).toContain('<title>Agent &lt;network&gt;</title>');
   });
 
+  it('escapes every value it writes into attributes', () => {
+    const odd = relayStillMarkup(graph, 400, 300, { id: 'a"b', fit: 'x"y' });
+    expect(odd).toContain('id="a&quot;b-glow-task"');
+    expect(odd).toContain('preserveAspectRatio="x&quot;y"');
+    expect(odd).not.toContain('a"b');
+  });
+
   it('keeps gradient ids unique per still', () => {
     expect(markup).toContain('id="x-glow-task"');
     expect(markup).toContain('url(#x-glow-task)');

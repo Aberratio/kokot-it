@@ -6,7 +6,7 @@
  *
  * Pure CPU logic, no three.js: the renderer only reads `pulses`, `nodeHeat` and `edgeHeat`.
  */
-import { CONVERGE_NODE, type SceneMode } from './layouts.ts';
+import { CONVERGE_NODE, groupKind, type SceneMode } from './layouts.ts';
 import type { Network } from './network.ts';
 
 export type PulseKind = 'task' | 'result';
@@ -212,7 +212,7 @@ const LONG_ROUTE = 6;
 export function planRoute(mode: SceneMode, net: Network, ctx: RouteContext): number[] | null {
   const { limit, rand } = ctx;
   const pick = <T>(items: readonly T[]): T | undefined => items[Math.floor(rand() * items.length)];
-  const kind = mode === 'clusters' || mode === 'constellations' ? mode : null;
+  const kind = groupKind(mode);
   const groupCount = kind ? Math.max(...net.groups[kind]) + 1 : 0;
   const group = kind ? (ctx.focus ?? Math.floor(rand() * groupCount)) : -1;
   const allowed = (n: number): boolean =>
