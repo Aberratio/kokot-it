@@ -6,7 +6,11 @@ import { renderCv } from '../docs-templates/cv/render.ts';
 import { offerCopy } from '../docs-templates/oferta/content.ts';
 import { isDraft, pricing, pricingProblems } from '../docs-templates/oferta/pricing.ts';
 import { renderOffer } from '../docs-templates/oferta/render.ts';
-import { quoteProblems, type QuoteData } from '../docs-templates/oferta-cenowa/quote.ts';
+import {
+  quoteDataProblems,
+  quoteProblems,
+  type QuoteData,
+} from '../docs-templates/oferta-cenowa/quote.ts';
 import { renderQuote } from '../docs-templates/oferta-cenowa/render.ts';
 import {
   findPlaceholders,
@@ -48,8 +52,13 @@ export interface PlanInput {
 }
 
 const templatesDir = new URL('../docs-templates/oferta-cenowa/', import.meta.url);
-const readQuote = (path: string | URL): QuoteData =>
-  JSON.parse(readFileSync(path, 'utf8')) as QuoteData;
+/** Reads quote data and checks its shape first: a private quote file is outside the repo. */
+function readQuote(path: string | URL): QuoteData {
+  const data: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  const problems = quoteDataProblems(data);
+  if (problems.length > 0) throw new Error(`${String(path)}: ${problems.join('; ')}`);
+  return data as QuoteData;
+}
 
 function offerSpec(lang: Lang, email: string | null): DocSpec {
   const p2 = pricing.packages.find((x) => x.code === 'P2');

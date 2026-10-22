@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { findPackage, pricing } from '../oferta/pricing.ts';
 import { findPlaceholders, visibleText } from '../shared/html.ts';
-import { priceQuote, quoteProblems, type QuoteData } from './quote.ts';
+import { priceQuote, quoteDataProblems, quoteProblems, type QuoteData } from './quote.ts';
 import { renderQuote } from './render.ts';
 import { requirements, requirementsInHtml } from './requirements.ts';
 
@@ -13,6 +13,8 @@ const blank = load('data.template.json');
 const example = load('data.example.json');
 const blankHtml = renderQuote({ data: blank, email: null });
 const exampleHtml = renderQuote({ data: example, email: 'kontakt@example.com' });
+const blankP3 = load('data.template-p3.json');
+const blankP3Html = renderQuote({ data: blankP3, email: null });
 
 describe('Dig.IT requirements (research/digit-wymogi-oferty.md)', () => {
   it('lists the 32 numbered requirements', () => {
@@ -22,6 +24,7 @@ describe('Dig.IT requirements (research/digit-wymogi-oferty.md)', () => {
   it.each([
     ['blank template', blankHtml],
     ['example', exampleHtml],
+    ['blank P3 template', blankP3Html],
   ])('every requirement has a place with content in the %s', (_, html) => {
     const placed = requirementsInHtml(html);
     const missing = requirements
@@ -138,5 +141,40 @@ describe('pricing a quote from pricing.json', () => {
     expect(() =>
       priceQuote({ ...example, stages: [{ id: 'twin', days: 1, schedule: '' }] }),
     ).toThrow('Stage "twin" is not part of P2');
+  });
+});
+
+describe('quote data read from files', () => {
+  it.each([
+    ['data.template.json', blank],
+    ['data.template-p3.json', blankP3],
+    ['data.example.json', example],
+  ])('%s has a valid shape', (_, data) => {
+    expect(quoteDataProblems(data)).toEqual([]);
+  });
+
+  it('offers a blank P3 template with every P3 stage', () => {
+    expect(blankP3.package).toBe('P3');
+    expect(blankP3.stages.map((s) => s.id)).toEqual(findPackage('P3').stages.map((s) => s.id));
+  });
+
+  it('reports a malformed private quote instead of crashing while pricing it', () => {
+    const broken = {
+      ...example,
+      package: 'P1',
+      offer: { number: 1 },
+      stages: [{ id: 'build', days: 'dużo', schedule: 'x' }],
+      externalCosts: 'none',
+    };
+    expect(quoteDataProblems(broken)).toEqual([
+      'offer.number must be a string',
+      'offer.date must be a string',
+      'offer.place must be a string',
+      'offer.validityDays must be a number',
+      'package must be one of P2, P3',
+      'stages[0].days must be a whole number or null',
+      'externalCosts must be an array',
+    ]);
+    expect(quoteDataProblems(null)).toEqual(['not an object']);
   });
 });

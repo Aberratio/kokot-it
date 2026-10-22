@@ -149,6 +149,73 @@ export function priceQuote(q: QuoteData, p: Pricing = defaultPricing): PricedQuo
   };
 }
 
+const isString = (v: unknown): v is string => typeof v === 'string';
+const isStringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every(isString);
+
+/**
+ * Shape problems of quote data read from a file (a trust boundary: the private quote lives
+ * outside the repo). Empty when it can be priced and rendered.
+ */
+export function quoteDataProblems(input: unknown, p: Pricing = defaultPricing): string[] {
+  if (!input || typeof input !== 'object') return ['not an object'];
+  const q = input as Record<string, unknown>;
+  const problems: string[] = [];
+  const record = (v: unknown): Record<string, unknown> | null =>
+    v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  const strings = (key: string, fields: string[]): void => {
+    const value = record(q[key]);
+    if (!value) {
+      problems.push(`${key} missing`);
+      return;
+    }
+    for (const f of fields) if (!isString(value[f])) problems.push(`${key}.${f} must be a string`);
+  };
+  strings('offer', ['number', 'date', 'place']);
+  strings('inquiry', ['date', 'subject', 'reference']);
+  strings('client', ['name', 'address']);
+  strings('scope', ['title', 'process']);
+  strings('training', ['participants', 'days']);
+  if (typeof record(q.offer)?.validityDays !== 'number') {
+    problems.push('offer.validityDays must be a number');
+  }
+  for (const f of ['duration', 'warranty']) {
+    if (!isString(q[f])) problems.push(`${f} must be a string`);
+  }
+  if (!isStringArray(q.advantages)) problems.push('advantages must be a string array');
+  if (!isStringArray(record(q.training)?.program)) {
+    problems.push('training.program must be a string array');
+  }
+  for (const f of ['functions', 'integrations', 'deliverables']) {
+    if (!isStringArray(record(q.scope)?.[f])) problems.push(`scope.${f} must be a string array`);
+  }
+  const quotable = p.packages.filter((x) => x.stages.length > 0);
+  const pkg = quotable.find((x) => x.code === q.package);
+  if (!pkg) problems.push(`package must be one of ${quotable.map((x) => x.code).join(', ')}`);
+  const stages = Array.isArray(q.stages) ? q.stages.map(record) : null;
+  if (!stages) problems.push('stages must be an array');
+  stages?.forEach((s, i) => {
+    const at = `stages[${String(i)}]`;
+    if (pkg && !pkg.stages.some((d) => d.id === s?.id)) {
+      problems.push(`${at}.id is not a ${pkg.code} stage`);
+    }
+    const days = s?.days;
+    if (days !== null && !(typeof days === 'number' && Number.isInteger(days) && days >= 0)) {
+      problems.push(`${at}.days must be a whole number or null`);
+    }
+    if (!isString(s?.schedule)) problems.push(`${at}.schedule must be a string`);
+  });
+  const costs = Array.isArray(q.externalCosts) ? q.externalCosts.map(record) : null;
+  if (!costs) problems.push('externalCosts must be an array');
+  costs?.forEach((c, i) => {
+    const net = c?.projectNet;
+    if (net !== null && typeof net !== 'number') {
+      problems.push(`externalCosts[${String(i)}].projectNet must be a number or null`);
+    }
+  });
+  if (!Array.isArray(q.payment)) problems.push('payment must be an array');
+  return problems;
+}
+
 /** Problems a priced quote has against the price list; empty when it is within the ranges. */
 export function quoteProblems(q: QuoteData, p: Pricing = defaultPricing): string[] {
   const problems: string[] = [];
