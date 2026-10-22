@@ -1,11 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import { contactViolations, contentViolations } from '../src/content/guards.ts';
+import { contentViolations, standaloneViolations } from '../src/content/guards.ts';
 import { allRoutes, routePath } from '../src/content/render.ts';
 
 // Checks a built dist/ directory: every route page exists and was rendered; route pages pass
 // every content guard (phone, tax id, prices, e-mails, placeholders), and so does any other
-// page except STANDALONE_PAGES (the brand preview and its type specimens): contact guards only.
+// page except STANDALONE_PAGES (the brand preview and its type specimens): contact + amount rules.
 
 function htmlFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -42,7 +42,7 @@ export function checkDist(dist: string): DistReport {
     // A shell the content plugin did not fill would ship an empty page.
     if (html.includes('<!-- kokot:')) failures.push(`${name}: unrendered page shell`);
     const standalone = STANDALONE_PAGES.includes(name) && !routeFiles.has(name);
-    const rules = standalone ? contactViolations : contentViolations;
+    const rules = standalone ? standaloneViolations : contentViolations;
     for (const violation of rules(html)) failures.push(`${name}: ${violation}`);
   }
   return { pages: files.length, failures };

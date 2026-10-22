@@ -59,10 +59,14 @@ describe('checkDist', () => {
     expect(checkDist(dist).failures).toEqual(['landing/index.html: phone number or tax id']);
   });
 
-  it('holds listed standalone pages to the contact rules only (type specimens show digits)', () => {
+  it('holds listed standalone pages to contact and amount rules (type specimens show digits)', () => {
     buildAll();
-    write('/brand/', '<html><body><p>0123456789 · zł</p></body></html>');
+    write('/brand/', '<html><body><p>0123456789 · € · zł</p><p>result · 14 dni</p></body></html>');
     expect(checkDist(dist).failures).toEqual([]);
+    for (const price of ['2 400 zł / dzień', '€ 120', '10 tys. netto']) {
+      write('/brand/', `<html><body><p>${price}</p></body></html>`);
+      expect(checkDist(dist).failures, price).toEqual(['brand/index.html: price amount']);
+    }
     write('/brand/', '<html><body><a href="tel:600123456">x</a> biuro@example.pl</body></html>');
     expect(checkDist(dist).failures).toEqual([
       'brand/index.html: tel: link',
