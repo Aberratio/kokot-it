@@ -1,7 +1,8 @@
 import { CONTACT_EMAIL } from './types.ts';
 
 // Content rules every published page must pass (D-028: no company data or phone; e-mail is
-// the only contact; no prices until the price list is approved; no empty AI buzzwords).
+// the only contact; no prices until the price list is approved; no empty AI buzzwords; and,
+// for the tiller case study, no credential shape, private agent path or private harness path).
 // Used by the unit tests on rendered pages and by scripts/check-dist.ts on the real build.
 
 const TEXT_RULES: [string, RegExp][] = [
