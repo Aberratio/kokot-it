@@ -3,12 +3,12 @@
     {
       "slug": "factory-twin",
       "repo": "https://github.com/Aberratio/factory-twin.git",
-      "commit": "4ee6070fe8fb117ed5e5f855b1cff6ddf9810ba5"
+      "commit": "34cb1130991a7a64c8e5e09e958b3c7daaa87600"
     },
     {
       "slug": "production-docs-agent",
       "repo": "https://github.com/Aberratio/production-docs-agent.git",
-      "commit": "2e090d8f8e8fd506a79817850c66bbc6d6ee2f89"
+      "commit": "e67fa6340d05969b4a79c206d8b5398ade8a7411"
     },
     {
       "slug": "grant-assistant",
