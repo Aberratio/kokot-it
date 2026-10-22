@@ -8,6 +8,11 @@ export const en: SiteContent = {
     description:
       'AI agents for manufacturers (documents, quality, planning) and for software teams. Contractor quotes for grant-funded projects such as Dig.IT.',
     siteName: 'kokot.it',
+    ogImage: {
+      headline: 'AI agents for manufacturing and software teams',
+      alt: 'kokot.it — AI agents for manufacturing and software teams; behind the text, a network of agents handing tasks to each other.',
+    },
+    areaServed: ['Poland', 'European Union'],
   },
   nav: {
     label: 'Main navigation',
@@ -298,7 +303,7 @@ export const en: SiteContent = {
     'grant-assistant': {
       metaTitle: 'Grant application assistant — kokot.it',
       metaDescription:
-        'Reference solution: matching a company to funding calls with explicit eligibility rules, plus a draft project description. Not legal advice or a grant guarantee.',
+        'Reference solution: matching a company to funding calls with explicit rules, plus a draft project description. Not legal advice or a grant guarantee.',
       card: {
         title: 'Grant application assistant',
         summary:
@@ -331,7 +336,7 @@ export const en: SiteContent = {
     tiller: {
       metaTitle: 'Agentic dev workflow: the tiller case study — kokot.it',
       metaDescription:
-        'Case study: tiller, an open set of procedures for AI agents in software delivery. Planning, TDD, two-axis review, a verdict measured at one SHA, and boundaries the agent does not cross.',
+        'Case study: tiller, open procedures for AI agents in software delivery. Planning, TDD, two-axis review, a verdict at one SHA and hard boundaries for the agent.',
       card: {
         title: 'Agentic dev workflow: tiller',
         summary:
