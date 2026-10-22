@@ -56,7 +56,7 @@ const pl: OfferCopy = {
       'Agent AI czyta dokumenty, wyciąga dane, sprawdza je regułami firmy i przenosi do ERP, MES lub arkusza.',
       'Pola niepewne trafiają do weryfikacji przez człowieka, zamiast być zgadywane; każda decyzja agenta zostawia ślad.',
       'Integracja z systemami, które firma już ma. Modele od dostawców z regionem danych w UE albo modele lokalne.',
-      'Przed startem ustalamy mierniki — czas obsługi dokumentu, odsetek błędów, przestoje — a po pilotażu raportujemy wynik.',
+      'Przed startem kokot.it ustala z firmą mierniki — czas obsługi dokumentu, odsetek błędów, przestoje — a po pilotażu raportuje wynik.',
     ],
   },
   packages: {
@@ -200,7 +200,7 @@ const en: OfferCopy = {
       'An AI agent reads documents, extracts the data, checks it against the company’s rules and moves it into the ERP, MES or a spreadsheet.',
       'Uncertain fields go to a person for review instead of being guessed; every agent decision leaves a trail.',
       'Integration with the systems the company already has. Models from providers with EU data residency, or local models.',
-      'Before the start we agree on metrics — document handling time, error rate, downtime — and report the result after the pilot.',
+      'Before the start, kokot.it agrees the metrics with the company — document handling time, error rate, downtime — and reports the result after the pilot.',
     ],
   },
   packages: {
@@ -308,7 +308,7 @@ const en: OfferCopy = {
     note: 'Showcase projects run on fictional company data; write-ups on kokot.it. The supplier’s experience: CV attached.',
   },
   terms: {
-    title: 'How we work together',
+    title: 'Terms of cooperation',
     points: [
       'The price quote for the application is not binding; the contract and the work start only after submission.',
       'Fixed fee split into stages; payment by bank transfer after each stage is accepted.',
