@@ -1,0 +1,156 @@
+{
+  "$comment": "Single source of prices for the offer and price-quote templates. Mirrors research/cennik.md in the private brain (T-04, D-032, D-033). Net PLN. Set status to \"approved\" only after the owner approves the price list (D-021); while it is \"draft\" every document shows a \"preliminary pricing\" badge.",
+  "status": "draft",
+  "currency": "PLN",
+  "vatRate": 0.23,
+  "dayRateNet": 2000,
+  "hoursPerDay": 8,
+  "packages": [
+    {
+      "code": "P1",
+      "netMin": 10000,
+      "netMax": 16000,
+      "days": [5, 8],
+      "duration": { "pl": "2–3 tygodnie", "en": "2–3 weeks" },
+      "externalNet": null,
+      "typicalSplit": null,
+      "stages": []
+    },
+    {
+      "code": "P2",
+      "netMin": 70000,
+      "netMax": 130000,
+      "days": [36, 65],
+      "duration": { "pl": "3–5 miesięcy", "en": "3–5 months" },
+      "externalNet": [2000, 8000],
+      "typicalSplit": { "programming": 0.5, "implementation": 0.45, "training": 0.05 },
+      "stages": [
+        {
+          "id": "analysis",
+          "category": "implementation",
+          "days": [3, 5],
+          "label": {
+            "pl": "Analiza przedwdrożeniowa i projekt rozwiązania",
+            "en": "Pre-implementation analysis and solution design"
+          }
+        },
+        {
+          "id": "build",
+          "category": "programming",
+          "days": [17, 30],
+          "label": {
+            "pl": "Budowa agenta (oprogramowanie na zamówienie): ekstrakcja, walidacja, reguły, ślad decyzji, panel użytkownika",
+            "en": "Building the agent (custom software): extraction, validation, rules, decision trail, user panel"
+          }
+        },
+        {
+          "id": "integration",
+          "category": "implementation",
+          "days": [8, 15],
+          "label": {
+            "pl": "Integracja z ERP / MES / arkuszami / pocztą",
+            "en": "Integration with ERP / MES / spreadsheets / e-mail"
+          }
+        },
+        {
+          "id": "pilot",
+          "category": "implementation",
+          "days": [4, 8],
+          "label": {
+            "pl": "Testy na danych firmy, pilotaż, poprawki",
+            "en": "Tests on company data, pilot, fixes"
+          }
+        },
+        {
+          "id": "training",
+          "category": "training",
+          "days": [2, 4],
+          "label": {
+            "pl": "Szkolenie użytkowników i administratora, dokumentacja",
+            "en": "User and administrator training, documentation"
+          }
+        },
+        {
+          "id": "hypercare",
+          "category": "implementation",
+          "days": [2, 3],
+          "label": {
+            "pl": "Wsparcie powdrożeniowe w okresie projektu",
+            "en": "Post-launch support within the project period"
+          }
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "netMin": 240000,
+      "netMax": 410000,
+      "days": [120, 205],
+      "duration": { "pl": "8–14 miesięcy", "en": "8–14 months" },
+      "externalNet": [8000, 25000],
+      "typicalSplit": { "programming": 0.65, "implementation": 0.3, "training": 0.05 },
+      "stages": [
+        {
+          "id": "analysis",
+          "category": "implementation",
+          "days": [8, 12],
+          "label": {
+            "pl": "Analiza przedwdrożeniowa całego programu, architektura, model danych",
+            "en": "Pre-implementation analysis of the programme, architecture, data model"
+          }
+        },
+        {
+          "id": "agents",
+          "category": "programming",
+          "days": [45, 80],
+          "label": {
+            "pl": "Agenci AI dla 2–3 procesów na wspólnej platformie",
+            "en": "AI agents for 2–3 processes on a shared platform"
+          }
+        },
+        {
+          "id": "twin",
+          "category": "programming",
+          "days": [35, 60],
+          "label": {
+            "pl": "Cyfrowy bliźniak hali: model 3D, warstwa danych, analityka i agent AI",
+            "en": "Shop-floor digital twin: 3D model, data layer, analytics and AI agent"
+          }
+        },
+        {
+          "id": "integration",
+          "category": "implementation",
+          "days": [15, 25],
+          "label": {
+            "pl": "Integracje z ERP / MES, SSO, uprawnienia",
+            "en": "ERP / MES integrations, SSO, permissions"
+          }
+        },
+        {
+          "id": "pilot",
+          "category": "implementation",
+          "days": [8, 14],
+          "label": { "pl": "Testy, pilotaż, stabilizacja", "en": "Tests, pilot, stabilisation" }
+        },
+        {
+          "id": "training",
+          "category": "training",
+          "days": [5, 8],
+          "label": {
+            "pl": "Program szkoleń (operatorzy, liderzy, administrator) z materiałami",
+            "en": "Training programme (operators, team leads, administrator) with materials"
+          }
+        },
+        {
+          "id": "hypercare",
+          "category": "implementation",
+          "days": [4, 6],
+          "label": {
+            "pl": "Wsparcie powdrożeniowe i pomiar KPI w okresie projektu",
+            "en": "Post-launch support and KPI measurement within the project period"
+          }
+        }
+      ]
+    }
+  ]
+}
