@@ -81,3 +81,15 @@ export function contactViolations(html: string): string[] {
   if (emails.some((address) => address !== CONTACT_EMAIL)) found.push('unexpected e-mail');
   return found;
 }
+
+/**
+ * Rules for standalone pages (the brand preview): the contact rules plus no amount of money.
+ * A type specimen may list digits and currency glyphs ("0123456789 · € · zł"), but a number
+ * written next to a currency ("2 400 zł") is a price and waits for the approved price list.
+ */
+export function standaloneViolations(html: string): string[] {
+  const found = contactViolations(html);
+  const amount = /\d[\d\s]*(?:zł|złotych|PLN|EUR|USD|€|tys\.)(?!\p{L})|(?:€|\$|PLN)\s?\d/u;
+  if (amount.test(readableText(html))) found.push('price amount');
+  return found;
+}
