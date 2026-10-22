@@ -72,8 +72,8 @@
   --scene-pulse-task: var(--amber-400);
   --scene-pulse-result: var(--ion-300);
   --scene-cursor: var(--amber-300);
-  /* Scrim under the text column: --scene-bg (ink-950) at partial opacity, in rgb() form for
-     browsers without color-mix(); src/scene/scrim.test.ts keeps them in step with --scene-bg. */
+  /* Scrim under the text column: --scene-bg (ink-950) at partial opacity, in plain rgb() so every
+     browser draws it (main.css); src/scene/scrim.test.ts keeps them in step with --scene-bg. */
   --scene-scrim-strong: rgb(7 8 11 / 0.72);
   --scene-scrim-soft: rgb(7 8 11 / 0.48);
   --scene-scrim-narrow: rgb(7 8 11 / 0.5);
