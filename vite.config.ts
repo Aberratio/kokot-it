@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [contentPlugin(root)],
   build: {
     target: 'es2023',
-    // three.js alone is ~500 kB; the scene task will code-split it.
+    // three.js (~500 kB) lives only in the lazily imported scene chunk (src/scene/app.ts).
     chunkSizeWarningLimit: 800,
     rolldownOptions: {
       input: discoverPages(root),
