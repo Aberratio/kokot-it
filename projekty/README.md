@@ -1,5 +1,5 @@
-# Case study (PL)
+# Case studies (PL)
 
-Każde case study to folder `projekty/<slug>/index.html`, a jego wersja angielska to
-`en/projects/<slug>/index.html` (ten sam `<slug>`). Build Vite znajduje strony sam
-(`src/build/pages.ts`), więc nowa podstrona nie wymaga zmian w konfiguracji.
+Each case study is `projekty/<slug>/index.html`, and its English version is
+`en/projects/<slug>/index.html` (same `<slug>`). Vite discovers pages on its own
+(`src/build/pages.ts`), so a new page needs no configuration change.

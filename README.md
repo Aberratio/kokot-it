@@ -1,107 +1,159 @@
 # kokot.it
 
-Strona kokot.it: Vite + vanilla Three.js + TypeScript (strict), bez frameworka UI.
-Wersje PL (`/`) i EN (`/en/`) jako wielostronicowy build Vite ze wspólnym kodem.
+The website of kokot.it — AI agents for manufacturing companies and software teams. A static,
+bilingual (Polish and English) site with a live 3D backdrop, case studies that embed working
+reference applications, and the print templates for the offer and the CV.
 
-## Uruchomienie
+![Home page with the Relay scene behind the hero](docs/screenshots/scene-desktop-hero.png)
 
-Wymagany Node 24 (`.nvmrc`).
+- **Static and readable without JavaScript.** Every page is rendered to HTML at build time;
+  scripts only add the 3D scene and the embedded applications.
+- **"Relay" 3D scene.** Vanilla Three.js with custom GLSL shaders, loaded lazily, with adaptive
+  quality, reduced-motion and no-WebGL fallbacks.
+- **Reference applications.** Three case studies embed a working application built from its own
+  public repository at a pinned commit.
+- **Guarded content.** The build fails on a phone number, a tax id, a price, a stray e-mail
+  address or wording that must not ship; the test suite keeps the repository in English.
+
+## Stack
+
+Vite 8 (multi-page build), TypeScript (strict), Three.js, Vitest, Playwright (PDF rendering and
+checks), ESLint + Prettier. No UI framework. Node 24 (`.nvmrc`).
+
+## Quick start
 
 ```bash
 npm ci
-npm run dev        # http://localhost:5173/ (PL), /en/ (EN)
+npm run dev        # http://localhost:5173/ (PL), http://localhost:5173/en/ (EN)
 ```
 
-## Skrypty
+## Scripts
 
-| Skrypt                 | Co robi                                                                                   |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `npm run dev`          | serwer deweloperski Vite                                                                  |
-| `npm run build`        | build do `dist/` + strażnik treści (`scripts/check-dist.ts`)                              |
-| `npm run preview`      | podgląd zbudowanego `dist/`                                                               |
-| `npm run typecheck`    | `tsc --noEmit`                                                                            |
-| `npm run lint`         | ESLint + `prettier --check`                                                               |
-| `npm run format`       | Prettier `--write` + `eslint --fix`                                                       |
-| `npm test`             | Vitest (jednorazowo); `npm run test:watch` w trybie watch                                 |
-| `npm run pdf`          | oferta PL/EN, oferta cenowa PL (szablon + przykład), CV PL/EN → `out/pdf/` + kontrola PDF |
-| `npm run pdf:preview`  | renderuje strony PDF-ów z `out/pdf/` do PNG w `out/preview/` (kontrola wzrokowa)          |
-| `npm run pdf:install`  | jednorazowo pobiera Chromium dla Playwright (potrzebny do `pdf` i `brand:assets`)         |
-| `npm run brand:assets` | generuje logo, sygnet i favicony (`public/brand/`, `public/favicon*`) z `tokens.css`      |
+| Script                 | What it does                                                                                  |
+| ---------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Vite dev server                                                                               |
+| `npm run build`        | production build to `dist/`, then the content guard (`scripts/check-dist.ts`)                 |
+| `npm run preview`      | serves the built `dist/`                                                                      |
+| `npm run typecheck`    | `tsc --noEmit`                                                                                |
+| `npm run lint`         | ESLint + `prettier --check`                                                                   |
+| `npm run format`       | Prettier `--write` + `eslint --fix`                                                           |
+| `npm test`             | Vitest, once; `npm run test:watch` to watch                                                   |
+| `npm run tools:sync`   | rebuilds the reference applications in `public/tools/` from `tools.lock.json`                 |
+| `npm run pdf`          | offer PL/EN, price quote PL (template + example), CV PL/EN → `out/pdf/`, then checks the PDFs |
+| `npm run pdf:preview`  | renders the pages of the PDFs in `out/pdf/` to PNG in `out/preview/` for a visual check       |
+| `npm run pdf:install`  | downloads Chromium for Playwright once (needed by `pdf` and `brand:assets`)                   |
+| `npm run brand:assets` | generates the logo, sign and favicons (`public/brand/`, `public/favicon*`) from `tokens.css`  |
 
-`out/` i `dist/` są w `.gitignore`. CI instaluje Chromium tylko dla testów PDF (na fikcyjnym CV).
+`out/`, `dist/` and `tmp/` are git-ignored. CI installs Chromium only for the PDF tests, which
+run on a fictional CV.
 
-## Dokumenty: oferta, oferta cenowa, CV
+## Project structure
 
-`npm run pdf` generuje jedną komendą (`out/pdf/`):
+```
+index.html                     Polish home page (/)
+en/index.html                  English home page (/en/)
+projekty/<slug>/index.html     Polish case study (/projekty/<slug>/)
+en/projects/<slug>/index.html  English case study (/en/projects/<slug>/)
+src/main.ts                    shared entry point of every page
+src/content/                   site copy (pl.ts, en.ts), the renderer to static HTML, content guards
+src/build/                     Vite plugin that pours the copy into the page shells; page discovery
+src/embed.ts                   lazy, sandboxed embedding of the reference applications
+src/i18n/                      UI strings and per-locale paths
+src/scene/                     Relay scene: pure logic (graph, layouts, routing, quality) + renderer
+src/styles/                    brand tokens (tokens.css), base styles, content layout
+src/assets/fonts/              brand fonts (woff2, OFL) and their licences
+public/tools/<slug>/           built reference applications (generated, see below)
+brand/index.html               brand system preview (/brand/, noindex); rules in brand.md
+docs/                          scene concept, design decisions, screenshots
+docs-templates/                document templates (TypeScript → HTML): offer/, price-quote/, cv/
+scripts/                       build guards, tool sync, PDF rendering and checks, brand assets
+tests/                         repository guards (private data, CV content, language, wording)
+```
 
-| Plik                             | Co to jest                                                               |
+Pages are thin `index.html` shells with `<!-- kokot:head -->` and `<!-- kokot:body -->` markers;
+`src/content/render.ts` renders the copy into them in dev and in the build. A new case study is a
+slug in `PROJECT_SLUGS` and `REPOS` (`src/content/types.ts`), its copy in `pl.ts` and `en.ts`
+(the types require both), and the two shells `projekty/<slug>/index.html` and
+`en/projects/<slug>/index.html` (a test checks that every route has its shell).
+
+## Reference applications
+
+The case studies of [factory-twin](https://github.com/Aberratio/factory-twin),
+[production-docs-agent](https://github.com/Aberratio/production-docs-agent) and
+[grant-assistant](https://github.com/Aberratio/grant-assistant) embed the application itself.
+Each one is a static build from its public repository at the commit pinned in
+`tools.lock.json`, committed under `public/tools/<slug>/`, so the site's build and deploy never
+fetch or build anything else.
+
+- **Embedding** (`src/embed.ts`): the static page carries a text fallback and a link that opens
+  the application in a new tab. When the figure nears the viewport, an iframe loads
+  `/tools/<slug>/?embed=1&lang=<pl|en>` with
+  `sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"` and
+  `loading="lazy"`. Applications that post `{ type: '<slug>:height', height }` get an iframe
+  sized to their content; messages count only from the site's own origin and from an embedded
+  frame. Factory Twin reports no height and keeps a fixed proportion.
+- **Updating**: put the new commit SHA in `tools.lock.json`, run `npm run tools:sync` (or
+  `npm run tools:sync -- <slug>`) and commit the lock file with the rebuilt directory. See
+  `public/tools/README.md`.
+- The applications replay recorded runs on sample data and make no API calls.
+
+## Content guards
+
+- **Build** (`scripts/check-dist.ts`, after `vite build`): every route is rendered; the site's
+  pages contain no phone number, tax or registry id, price, e-mail address other than the
+  contact one, placeholder, prototype wording, internal process reference or local path; every
+  reference application is present. The applications' own pages are checked by their
+  repositories.
+- **Repository** (`tests/repo-guards.test.ts`): code, comments and docs are in English (Polish
+  only in the Polish copy, the Polish document templates and sample data, and as quoted
+  strings), and carry no prototype wording, planning ids or absolute local paths.
+- **Private data** (`tests/no-private-data.test.ts`, `tests/cv-content-guard.test.ts`): no
+  company data or phone number in the repository, and no distinctive text of the real CV.
+
+## Documents: offer, price quote, CV
+
+`npm run pdf` generates in one command (`out/pdf/`):
+
+| File                             | What it is                                                               |
 | -------------------------------- | ------------------------------------------------------------------------ |
-| `oferta-pl.pdf`, `oferta-en.pdf` | oferta ogólna / prezentacyjna, 2 strony A4                               |
-| `oferta-cenowa-szablon-pl.pdf`   | szablon oferty cenowej do wniosku Dig.IT, z polami `{{...}}` (tylko PL)  |
-| `oferta-cenowa-przyklad-pl.pdf`  | ten sam szablon wypełniony danymi fikcyjnej firmy (oznaczony „PRZYKŁAD”) |
-| `cv-pl.pdf`, `cv-en.pdf`         | CV, 1–2 strony; pomijane z komunikatem, gdy treści CV nie ma (np. w CI)  |
+| `oferta-pl.pdf`, `oferta-en.pdf` | general presentation offer, 2 A4 pages                                   |
+| `oferta-cenowa-szablon-pl.pdf`   | price-quote template for a Dig.IT application, with `{{...}}` fields     |
+| `oferta-cenowa-przyklad-pl.pdf`  | the same template filled with a fictional company (marked as `PRZYKŁAD`) |
+| `cv-pl.pdf`, `cv-en.pdf`         | CV, 1–2 pages; skipped with a notice when the CV content is unavailable  |
 
-Po wygenerowaniu skrypt sprawdza każdy PDF: limit stron (oferta ogólna i CV ≤ 2), fonty marki
-osadzone jako prawdziwe fonty TrueType (`docs-templates/shared/print-fonts.css`: statyczne
-instancje z `@fontsource/*`, bo zmienne woff2 Chromium zapisuje jako Type 3) i obecność fraz w
-tekście wyciągniętym z PDF (czytelność dla ATS).
+The file names stay Polish: these are the documents sent to Polish companies.
 
-- **Ceny** mają jedno źródło: `docs-templates/oferta/pricing.json` (zgodne z cennikiem w
-  brainie; `pricing.test.ts` pilnuje widełek). Dopóki `"status": "draft"`, każdy dokument ma
-  znacznik „Cennik wstępny — do zatwierdzenia”. Po zatwierdzeniu cennika: `"status": "approved"`.
-- **Dane wykonawcy** (nazwa, NIP, adres) nigdy nie trafiają do repo: w szablonie są polami
-  `{{NAZWA_FIRMY}}`, `{{NIP}}`, `{{ADRES}}`. Konkretną ofertę cenową przygotowuje się z kopii
-  `docs-templates/oferta-cenowa/data.template.json` (pakiet P2) albo `data.template-p3.json` (P3)
-  trzymanej **poza repo** (np. w brainie): `npm run pdf -- --quote <plik.json> --final`. Ceny
-  liczą się z `pricing.json` (osobodni × stawka); plik o złej strukturze zatrzymuje generowanie
-  z listą błędów. Obok każdego PDF-a w `out/pdf/` leży jego HTML (podgląd w przeglądarce).
-- **Wymogi Dig.IT:** `docs-templates/oferta-cenowa/requirements.ts` to 32 wymogi z researchu;
-  każdy ma w szablonie element z `data-req="<nr>"` (`requirements.test.ts`).
-- **CV:** szablon jest w repo, treść nie. Skrypt czyta `cv.pl.json` / `cv.en.json` z
-  `$CV_CONTENT_DIR` (domyślnie `C:/Repos/tiller/brains/personal-brand/cv`). Pola `TODO_OWNER`
-  nie są renderowane, a skrypt wypisuje je jako ostrzeżenia. Testy używają fikcyjnej osoby z
-  `tests/fixtures/cv.sample.json`; `tests/cv-content-guard.test.ts` (gdy brain jest dostępny)
-  sprawdza, że żadna charakterystyczna fraza z CV nie trafiła do repo.
-- **`--final`** (wersja do wysyłki): ostrzega o niewypełnionych polach `{{...}}`, `TODO_OWNER`
-  i cenniku w statusie `draft` („NOT READY TO SEND”).
+After rendering, the script checks each PDF: the page limit (general offer and CV ≤ 2), brand
+fonts embedded as real TrueType fonts (`docs-templates/shared/print-fonts.css`: static instances
+from `@fontsource/*`, because Chromium writes variable woff2 as Type 3) and the presence of key
+phrases in the extracted text (readability for applicant tracking systems).
 
-## Struktura
-
-```
-index.html                  strona PL (/)
-en/index.html               strona EN (/en/)
-projekty/<slug>/index.html  case study PL (/projekty/<slug>/)
-en/projects/<slug>/index.html  case study EN (/en/projects/<slug>/)
-src/main.ts                 wspólny punkt wejścia wszystkich stron
-src/content/                treść strony PL/EN (słowniki) i renderer do statycznego HTML
-src/build/content-plugin.ts plugin Vite: wlewa treść do szkieletów index.html (znaczniki kokot:head/body)
-src/demo.ts                 leniwe osadzanie nagranych dem z public/demos/<slug>/ (iframe, fallback; katalog dodają T-10/11/13)
-src/i18n/                   teksty interfejsu PL/EN, ścieżki stron per język
-src/scene/                  Relay scene: pure logic (graph, layouts, routing, quality) + Three.js renderer and GLSL shaders
-src/styles/tokens.css       tokeny marki — jedyne źródło kolorów, typografii, odstępów, ruchu
-src/styles/tokens.ts        tokeny dla JS/sceny (czyta CSS vars), color.ts — kontrast WCAG
-src/styles/content.css      układ sekcji treści, wyłącznie na tokenach z tokens.css
-src/assets/fonts/           fonty marki woff2 (OFL) + licencje
-brand/index.html            podgląd systemu marki (/brand/, noindex)
-brand.md                    zasady marki; docs/concept.md — koncept sceny 3D
-src/build/pages.ts          wykrywanie stron do buildu (każdy index.html poza src/, docs-templates/ …)
-docs-templates/             szablony dokumentów (TS → HTML): oferta/, oferta-cenowa/, cv/, shared/
-scripts/pdf.ts              HTML → PDF (Playwright Chromium) i kontrola PDF (pdf-check.ts)
-tests/                      strażnicy danych prywatnych w repo i fikcyjne fixture'y
-public/                     pliki statyczne kopiowane bez zmian (logo: public/brand/)
-```
-
-Strony to cienkie szkielety `index.html` ze znacznikami `<!-- kokot:head -->` i `<!-- kokot:body -->`;
-treść renderuje `src/content/render.ts` w dev i w buildzie, więc HTML jest czytelny bez JavaScriptu.
-Nowe case study = slug w `PROJECT_SLUGS` i `REPOS` (`src/content/types.ts`), treść w `pl.ts` i `en.ts`
-oraz szkielety `projekty/<slug>/index.html` i `en/projects/<slug>/index.html` (test sprawdza, że każda trasa ma szkielet; typy pilnują kompletu treści PL/EN).
+- **Prices** have one source: `docs-templates/offer/pricing.json` (`pricing.test.ts` holds the
+  ranges). While `"status": "draft"`, every document carries a "preliminary pricing" badge. Once
+  the price list is approved, set `"status": "approved"`.
+- **Contractor data** (name, tax id, address) never enters the repository: the template has the
+  fields `{{NAZWA_FIRMY}}`, `{{NIP}}`, `{{ADRES}}`. A real price quote is prepared from a copy of
+  `docs-templates/price-quote/data.template.json` (package P2) or `data.template-p3.json` (P3)
+  kept **outside the repository**: `npm run pdf -- --quote <file.json> --final`. Prices are
+  computed from `pricing.json` (person-days × rate); a file with a broken structure stops the
+  run with a list of errors. Each PDF in `out/pdf/` has its HTML next to it for a browser preview.
+- **Dig.IT requirements:** `docs-templates/price-quote/requirements.ts` lists the 32
+  requirements; each has an element with `data-req="<n>"` in the template
+  (`requirements.test.ts`).
+- **CV:** the template is in the repository, the content is not. The script reads `cv.pl.json` /
+  `cv.en.json` from the folder in `CV_CONTENT_DIR`; without it the CV is skipped. `TODO_OWNER`
+  fields are not rendered and are listed as warnings. Tests use a fictional person from
+  `tests/fixtures/cv.sample.json`; with `CV_CONTENT_DIR` set, `tests/cv-content-guard.test.ts`
+  checks that no distinctive CV phrase made it into the repository.
+- **`--final`** (the version to send): warns about unfilled `{{...}}` fields, `TODO_OWNER` and a
+  draft price list ("NOT READY TO SEND").
 
 ## 3D scene ("Relay")
 
-Concept and rationale: `docs/concept.md`. The scene is the fixed backdrop of the home page: a sparse
-graph of agents whose links carry task pulses (warm) and result pulses (cool); the network re-forms
-between sections (hero → 3 service clusters → 4 project constellations → convergence next to the
-e-mail address).
+Concept and rationale: `docs/concept.md`; deviations: `docs/decisions/relay-scene.md`. The scene
+is the fixed backdrop of the home page: a sparse graph of agents whose links carry task pulses
+(warm) and result pulses (cool); the network re-forms between sections (hero → 3 service
+clusters → 4 project constellations → convergence next to the e-mail address).
 
 - Loading: `src/scene/index.ts` (main bundle, no three.js) waits for `load` and an idle browser,
   then dynamically imports `src/scene/app.ts` with three.js in a separate chunk.
@@ -110,60 +162,62 @@ e-mail address).
 - Adaptive quality (`src/scene/quality.ts`): the start level comes from the device, then a mean
   frame time above 20 ms for 2 s lowers the level (node count, DPR, glow); it never goes back up.
   The current level is exposed as `data-level` on `canvas.scene`.
-- The animation loop stops while the tab is hidden; colours and durations come only from the tokens
-  (`src/styles/tokens.css`).
+- The animation loop stops while the tab is hidden; colours and durations come only from the
+  tokens (`src/styles/tokens.css`).
 - The logic (graph, layouts, routing, quality, input) is pure and unit-tested with Vitest; the
   renderer and shaders (`renderer.ts`, `shaders.ts`) are checked in the browser — screenshots in
   `docs/screenshots/scene-*.png`.
 
 ## CI
 
-`.github/workflows/ci.yml` — na każdym PR i pushu do `main`: lint, typecheck, test, build.
-Zmiany trafiają na `main` przez PR.
+`.github/workflows/ci.yml` runs on every pull request and every push to `main`: lint,
+typecheck, test, build. Changes reach `main` through pull requests.
 
 ## Deploy (Vercel)
 
-`.github/workflows/deploy.yml` używa Vercel CLI: **preview** dla każdego PR, **produkcja** po
-pushu do `main`. Dopóki sekretów nie ma, job kończy się na zielono z komunikatem „Deploy skipped”.
+`.github/workflows/deploy.yml` uses the Vercel CLI: a **preview** for every pull request and
+**production** after every push to `main`. Until the secrets exist, the job ends green with a
+"Deploy skipped" notice. Project settings (Vite, `npm run build`, output `dist`, trailing
+slashes, headers) are in `vercel.json`.
 
-### Sekrety
+### Secrets
 
-Dodaj w GitHub: repo → **Settings → Secrets and variables → Actions → New repository secret**:
+Add them in GitHub: repository → **Settings → Secrets and variables → Actions → New repository
+secret**:
 
-| Sekret              | Skąd                                                                                   |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| `VERCEL_TOKEN`      | vercel.com → Account Settings → **Tokens** → Create (zakres: konto/zespół z projektem) |
-| `VERCEL_ORG_ID`     | `orgId` z `.vercel/project.json` po `vercel link`                                      |
-| `VERCEL_PROJECT_ID` | `projectId` z `.vercel/project.json` po `vercel link`                                  |
+| Secret              | Where it comes from                                                              |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | vercel.com → Account Settings → **Tokens** → Create (scope: the account or team) |
+| `VERCEL_ORG_ID`     | `orgId` in `.vercel/project.json` after `vercel link`                            |
+| `VERCEL_PROJECT_ID` | `projectId` in `.vercel/project.json` after `vercel link`                        |
 
-Jak zdobyć ID:
+To get the ids:
 
 ```bash
 npx vercel@65.0.0 login
-npx vercel@65.0.0 link      # w katalogu repo; tworzy projekt albo podpina istniejący
+npx vercel@65.0.0 link      # in the repository; creates the project or links an existing one
 cat .vercel/project.json    # {"projectId":"...","orgId":"..."}
 ```
 
-`.vercel/` jest w `.gitignore`. Ustawienia projektu (framework Vite, build `npm run build`,
-output `dist`) są też w `vercel.json`. Jeśli projekt na Vercel jest połączony z repo przez
-integrację Git, wyłącz automatyczne deploye Vercel (Project → Settings → Git), żeby nie
-dublować tych z GitHub Actions.
+`.vercel/` is git-ignored. If the Vercel project is also connected to the repository through the
+Git integration, turn off Vercel's own automatic deployments (Project → Settings → Git) so they
+do not duplicate the ones from GitHub Actions.
 
-### DNS dla kokot.it
+### DNS for kokot.it
 
-1. Vercel → projekt → **Settings → Domains → Add Domain**: `kokot.it` (Vercel zaproponuje też
-   `www.kokot.it`; dodaj oba i ustaw przekierowanie na wybraną wersję).
-2. U rejestratora / dostawcy DNS domeny ustaw:
+1. Vercel → project → **Settings → Domains → Add Domain**: `kokot.it` (Vercel also offers
+   `www.kokot.it`; add both and redirect one to the other).
+2. At the domain's registrar or DNS provider, set:
 
-| Typ     | Nazwa      | Wartość                                                                                                                                    |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `A`     | `@` (apex) | wartość z karty domeny w Vercel; ogólna wartość z dokumentacji: `76.76.21.21` (nowsze projekty mogą dostać inny adres, np. `216.198.79.1`) |
-| `CNAME` | `www`      | wartość z karty domeny w Vercel — unikalna dla projektu, np. `xxxxxxxxxxxxxxxx.vercel-dns-017.com`                                         |
+| Type    | Name       | Value                                                                                                                                         |
+| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `A`     | `@` (apex) | the value from the domain card in Vercel; the documented general value is `76.76.21.21` (newer projects may get another, e.g. `216.198.79.1`) |
+| `CNAME` | `www`      | the value from the domain card in Vercel — unique per project, e.g. `xxxxxxxxxxxxxxxx.vercel-dns-017.com`                                     |
 
-3. Usuń stare, konfliktujące rekordy `A`/`AAAA`/`CNAME` dla `@` i `www`. Rekordy `MX`/`TXT`
-   poczty zostają bez zmian. Jeśli domena ma rekordy `CAA`, muszą dopuszczać Let's Encrypt.
+3. Remove old, conflicting `A`/`AAAA`/`CNAME` records for `@` and `www`. Mail `MX`/`TXT` records
+   stay as they are. If the domain has `CAA` records, they must allow Let's Encrypt.
 
-Zawsze wpisuj wartości pokazane w karcie domeny projektu — Vercel podaje je per projekt.
-Źródła (stan: 2026-10-21):
+Always enter the values shown on the project's domain card — Vercel issues them per project.
+Sources (as of 2026-10-21):
 [Adding & Configuring a Custom Domain](https://vercel.com/docs/domains/working-with-domains/add-a-domain),
 [A record and CAA with Vercel](https://vercel.com/kb/guide/a-record-and-caa-with-vercel).
