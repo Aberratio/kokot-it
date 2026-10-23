@@ -204,8 +204,9 @@ typecheck, test, build. Changes reach `main` through pull requests.
 deploy path: the repository is also connected to Vercel's Git integration, but its automatic
 deployments are turned off in `vercel.json` (`"git": { "deploymentEnabled": false }`), so
 nothing is deployed twice. Project settings (Vite, `npm run build`, output `dist`, trailing
-slashes, headers) are in `vercel.json`. If a secret is missing, the job ends green with a
-"Deploy skipped" notice instead of failing.
+slashes, headers) are in `vercel.json`. If a secret is missing (also on pull requests from forks
+and from Dependabot, which get no secrets), the job ends green with a "Deploy skipped" notice
+instead of failing.
 
 | Host                        | Serves                                                  |
 | --------------------------- | ------------------------------------------------------- |
@@ -215,9 +216,9 @@ slashes, headers) are in `vercel.json`. If a secret is missing, the job ends gre
 
 Every `*.vercel.app` host (production and previews) answers with `X-Robots-Tag: noindex`, so
 only `kokot.it` gets indexed. Both custom domains belong to the Vercel project `kokot-it`
-(team `aberratios-projects`). Until 2026-10-23 they pointed to the older project `news-client`,
-which is kept and still answers at https://news-client-ten.vercel.app. The other `*.kokot.it`
-subdomains belong to other projects and are not affected by this site.
+(team `aberratios-projects`). The older project `news-client`, which held them until
+2026-10-23, is kept at https://news-client-ten.vercel.app. The subdomains `dom.`, `lata.`,
+`bridge.`, `vibeatlas.` and `onlinepressai.kokot.it` belong to other projects in the team.
 
 ### Secrets
 
@@ -234,11 +235,17 @@ create a new one and replace the secret. `.vercel/` is git-ignored.
 
 ### Commit authors
 
-Vercel refuses a deploy whose git commit author it does not know ("commit author doesn't have
-permission"). This applies to the GitHub Actions deploy as well, because the CLI sends the
-checked-out commit with it. The author email of the commits (`git config user.email`) must
-therefore be one of the emails on the Vercel account (Account Settings → **Emails**). A commit
-by a new author needs that email added first.
+Vercel can refuse a deploy whose git commit author it does not know ("commit author doesn't have
+permission"); the CLI sends the checked-out commit's metadata with the deploy. The author email
+of the deployed commit must therefore be one of the emails on the Vercel account (Account
+Settings → **Emails**):
+
+- a pull request preview deploys the branch head, authored with the local
+  `git config user.email`;
+- production deploys the commit GitHub creates when merging, authored with the merging
+  account's email from GitHub → Settings → **Emails**, which can differ from the local one.
+
+Both emails must be on the Vercel account.
 
 ### Manual deploy
 
@@ -246,13 +253,15 @@ Only needed if GitHub Actions is unavailable. From a clean checkout of `main`:
 
 ```bash
 npx vercel@65.0.0 login
-npx vercel@65.0.0 link      # links the existing project kokot-it
+npx vercel@65.0.0 link --yes --project kokot-it --scope aberratios-projects
 npx vercel@65.0.0 deploy --prod
 ```
 
+Unlike CI, which builds on the runner and uploads with `--prebuilt`, this builds on Vercel.
+
 ### Domains and DNS for kokot.it
 
-The domain is registered outside Vercel and its DNS is at the registrar (nameservers
+The domain is registered outside Vercel and its DNS is hosted at seohost.pl (nameservers
 `ns1.seohost.pl`, `ns2.seohost.pl`). The records pointing to Vercel:
 
 | Type    | Name       | Value                  |
@@ -264,8 +273,9 @@ These are Vercel's general values, not tied to one project, so moving the domain
 projects needs no DNS change. Mail `MX`/`TXT` records stay as they are; there are no `CAA`
 records (if any are added, they must allow Let's Encrypt).
 
-To move both domains to another project in the team (run in a linked checkout, PowerShell or
-any shell; in Git Bash prefix the `api` call with `MSYS_NO_PATHCONV=1`):
+To move both domains to another project in the team, run the commands below in a linked
+checkout. In Git Bash, prefix the `api` call with `MSYS_NO_PATHCONV=1` so the path is not
+rewritten.
 
 ```bash
 npx vercel@65.0.0 domains add kokot.it <project> --force
@@ -273,7 +283,8 @@ npx vercel@65.0.0 domains add www.kokot.it <project> --force
 npx vercel@65.0.0 api /v9/projects/<project>/domains/www.kokot.it -X PATCH -f redirect=kokot.it -F redirectStatusCode=308
 ```
 
-`--force` detaches the domain from its current project first, so the site can answer with an
-error for a few seconds in between. Sources (as of 2026-10-23):
+`--force` detaches the domain from its current project first, so the site may answer with an
+error for a few seconds in between. Until the last command runs, `www.kokot.it` serves the site
+directly instead of redirecting, so run it right away. Sources (as of 2026-10-23):
 [Adding & Configuring a Custom Domain](https://vercel.com/docs/domains/working-with-domains/add-a-domain),
 [A record and CAA with Vercel](https://vercel.com/kb/guide/a-record-and-caa-with-vercel).
