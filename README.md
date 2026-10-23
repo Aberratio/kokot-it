@@ -199,60 +199,81 @@ typecheck, test, build. Changes reach `main` through pull requests.
 
 ## Deploy (Vercel)
 
-`.github/workflows/deploy.yml` uses the Vercel CLI: a **preview** for every pull request and
-**production** after every push to `main`. Until the secrets exist, the job ends green with a
-"Deploy skipped" notice. Project settings (Vite, `npm run build`, output `dist`, trailing
-slashes, headers) are in `vercel.json`.
+`.github/workflows/deploy.yml` deploys with the Vercel CLI: a **preview** for every pull request
+(its URL is in the job summary) and **production** after every push to `main`. It is the only
+deploy path: the repository is also connected to Vercel's Git integration, but its automatic
+deployments are turned off in `vercel.json` (`"git": { "deploymentEnabled": false }`), so
+nothing is deployed twice. Project settings (Vite, `npm run build`, output `dist`, trailing
+slashes, headers) are in `vercel.json`. If a secret is missing, the job ends green with a
+"Deploy skipped" notice instead of failing.
 
-The Vercel project `kokot-it` is linked and live at https://kokot-it.vercel.app (production).
-Every `*.vercel.app` host answers with `X-Robots-Tag: noindex`, so only the custom domain gets
-indexed once DNS points to Vercel. `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are set in the
-repository secrets; automatic deploys from GitHub Actions start as soon as `VERCEL_TOKEN` is added
-(the Vercel CLI cannot create tokens, so it comes from the dashboard). Until then, deploy by hand
-with `npx vercel@65.0.0 deploy --prod` from a linked checkout.
+| Host                        | Serves                                                  |
+| --------------------------- | ------------------------------------------------------- |
+| https://kokot.it            | production, the canonical host (sitemap, canonical, OG) |
+| https://www.kokot.it        | `308` redirect to `https://kokot.it`, path kept         |
+| https://kokot-it.vercel.app | production too, with `X-Robots-Tag: noindex`            |
 
-The repository is also connected to Vercel's Git integration, but its automatic deployments are
-turned off in `vercel.json` (`"git": { "deploymentEnabled": false }`), so GitHub Actions stays the
-only deploy path and nothing is deployed twice.
+Every `*.vercel.app` host (production and previews) answers with `X-Robots-Tag: noindex`, so
+only `kokot.it` gets indexed. Both custom domains belong to the Vercel project `kokot-it`
+(team `aberratios-projects`). Until 2026-10-23 they pointed to the older project `news-client`,
+which is kept and still answers at https://news-client-ten.vercel.app. The other `*.kokot.it`
+subdomains belong to other projects and are not affected by this site.
 
 ### Secrets
 
-Add them in GitHub: repository → **Settings → Secrets and variables → Actions → New repository
-secret**:
+All three are set in GitHub: repository → **Settings → Secrets and variables → Actions**.
 
-| Secret              | Where it comes from                                                              |
-| ------------------- | -------------------------------------------------------------------------------- |
-| `VERCEL_TOKEN`      | vercel.com → Account Settings → **Tokens** → Create (scope: the account or team) |
-| `VERCEL_ORG_ID`     | `orgId` in `.vercel/project.json` after `vercel link`                            |
-| `VERCEL_PROJECT_ID` | `projectId` in `.vercel/project.json` after `vercel link`                        |
+| Secret              | Where it comes from                                                                |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | vercel.com → Account Settings → **Tokens** → Create (scope: `aberratios-projects`) |
+| `VERCEL_ORG_ID`     | `orgId` in `.vercel/project.json` after `npx vercel@65.0.0 link`                   |
+| `VERCEL_PROJECT_ID` | `projectId` in `.vercel/project.json` after `npx vercel@65.0.0 link`               |
 
-To get the ids:
+The Vercel CLI cannot create tokens; a new one comes from the dashboard. When the token expires,
+create a new one and replace the secret. `.vercel/` is git-ignored.
+
+### Commit authors
+
+Vercel refuses a deploy whose git commit author it does not know ("commit author doesn't have
+permission"). This applies to the GitHub Actions deploy as well, because the CLI sends the
+checked-out commit with it. The author email of the commits (`git config user.email`) must
+therefore be one of the emails on the Vercel account (Account Settings → **Emails**). A commit
+by a new author needs that email added first.
+
+### Manual deploy
+
+Only needed if GitHub Actions is unavailable. From a clean checkout of `main`:
 
 ```bash
 npx vercel@65.0.0 login
-npx vercel@65.0.0 link      # in the repository; creates the project or links an existing one
-cat .vercel/project.json    # {"projectId":"...","orgId":"..."}
+npx vercel@65.0.0 link      # links the existing project kokot-it
+npx vercel@65.0.0 deploy --prod
 ```
 
-`.vercel/` is git-ignored. If the Vercel project is also connected to the repository through the
-Git integration, turn off Vercel's own automatic deployments (Project → Settings → Git) so they
-do not duplicate the ones from GitHub Actions.
+### Domains and DNS for kokot.it
 
-### DNS for kokot.it
+The domain is registered outside Vercel and its DNS is at the registrar (nameservers
+`ns1.seohost.pl`, `ns2.seohost.pl`). The records pointing to Vercel:
 
-1. Vercel → project → **Settings → Domains → Add Domain**: `kokot.it` (Vercel also offers
-   `www.kokot.it`; add both and redirect one to the other).
-2. At the domain's registrar or DNS provider, set:
+| Type    | Name       | Value                  |
+| ------- | ---------- | ---------------------- |
+| `A`     | `@` (apex) | `76.76.21.21`          |
+| `CNAME` | `www`      | `cname.vercel-dns.com` |
 
-| Type    | Name       | Value                                                                                                                                         |
-| ------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `A`     | `@` (apex) | the value from the domain card in Vercel; the documented general value is `76.76.21.21` (newer projects may get another, e.g. `216.198.79.1`) |
-| `CNAME` | `www`      | the value from the domain card in Vercel — unique per project, e.g. `xxxxxxxxxxxxxxxx.vercel-dns-017.com`                                     |
+These are Vercel's general values, not tied to one project, so moving the domains between Vercel
+projects needs no DNS change. Mail `MX`/`TXT` records stay as they are; there are no `CAA`
+records (if any are added, they must allow Let's Encrypt).
 
-3. Remove old, conflicting `A`/`AAAA`/`CNAME` records for `@` and `www`. Mail `MX`/`TXT` records
-   stay as they are. If the domain has `CAA` records, they must allow Let's Encrypt.
+To move both domains to another project in the team (run in a linked checkout, PowerShell or
+any shell; in Git Bash prefix the `api` call with `MSYS_NO_PATHCONV=1`):
 
-Always enter the values shown on the project's domain card — Vercel issues them per project.
-Sources (as of 2026-10-21):
+```bash
+npx vercel@65.0.0 domains add kokot.it <project> --force
+npx vercel@65.0.0 domains add www.kokot.it <project> --force
+npx vercel@65.0.0 api /v9/projects/<project>/domains/www.kokot.it -X PATCH -f redirect=kokot.it -F redirectStatusCode=308
+```
+
+`--force` detaches the domain from its current project first, so the site can answer with an
+error for a few seconds in between. Sources (as of 2026-10-23):
 [Adding & Configuring a Custom Domain](https://vercel.com/docs/domains/working-with-domains/add-a-domain),
 [A record and CAA with Vercel](https://vercel.com/kb/guide/a-record-and-caa-with-vercel).
