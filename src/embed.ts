@@ -66,13 +66,17 @@ export interface EmbeddedTool {
   frame: HTMLIFrameElement;
   /** The last height applied to the frame; absent until the application reports one. */
   height?: number;
+  /** The frame's width when that height was applied. */
+  width?: number;
 }
 
 /**
  * Applies a height report to the iframe that sent it. Only messages from this site's own
  * origin and from one of the embedded frames count; returns whether a frame was resized.
  * After a new screen shrinks the frame, a figure whose top is now above the viewport scrolls
- * back to it. The jump is instant, so it needs no reduced-motion variant.
+ * back to it. It does so only when the figure was on screen before the shrink and the frame
+ * kept its width, so a reader further down the page is not pulled back by a rotation or a
+ * resize. The jump is instant, so it needs no reduced-motion variant.
  */
 export function applyHeight(
   message: HeightMessage,
@@ -84,12 +88,16 @@ export function applyHeight(
   if (!match) return false;
   const height = reportedHeight(message.data, match.figure.dataset['tool'] ?? '');
   if (height === null) return false;
-  const previous = match.height;
+  const { height: previous, width: previousWidth } = match;
+  const width = match.frame.clientWidth;
+  const newScreen =
+    previous !== undefined && width === previousWidth && height <= previous * NEW_SCREEN_RATIO;
+  const seenBefore = newScreen && match.figure.getBoundingClientRect().bottom > 0;
   match.height = height;
+  match.width = width;
   match.frame.style.height = `${String(height)}px`;
   match.figure.classList.add('tool--sized');
-  const newScreen = previous !== undefined && height <= previous * NEW_SCREEN_RATIO;
-  if (newScreen && match.figure.getBoundingClientRect().top < 0) {
+  if (seenBefore && match.figure.getBoundingClientRect().top < 0) {
     match.figure.scrollIntoView({ block: 'start' });
   }
   return true;
