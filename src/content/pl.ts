@@ -176,7 +176,7 @@ export const pl: SiteContent = {
   projects: {
     title: 'Projekty',
     intro:
-      'Pięć projektów: trzy aplikacje referencyjne działające na przykładowych danych fikcyjnych firm, tiller, własne narzędzie z publicznym kodem, oraz Relay Defense, gra logiczna. Pokazują sposób pracy i architekturę; nie są wdrożeniami u klientów. Aplikacje na stronie nie wywołują żadnego API: aplikacje referencyjne odtwarzają zapisane przebiegi, a gra działa w całości w przeglądarce.',
+      'Pięć projektów: trzy aplikacje referencyjne działające na przykładowych danych fikcyjnych firm, tiller, własne narzędzie z publicznym kodem, oraz Heartwood, gra logiczna. Pokazują sposób pracy i architekturę; nie są wdrożeniami u klientów. Aplikacje na stronie nie wywołują żadnego API: aplikacje referencyjne odtwarzają zapisane przebiegi, a gra działa w całości w przeglądarce.',
     cardCta: 'Case study',
   },
   about: {
@@ -622,16 +622,16 @@ export const pl: SiteContent = {
       stack: ['Claude Code', 'Codex', 'Bash', 'Node.js', 'GitHub CLI'],
     },
     'relay-defense': {
-      metaTitle: 'Relay Defense: logiczna gra tower defense — kokot.it',
+      metaTitle: 'Heartwood: logiczna gra tower defense — kokot.it',
       metaDescription:
-        'Własny projekt: przeglądarkowa gra tower defense zaprojektowana jak łamigłówka, z deterministyczną symulacją i poziomami wyważonymi przez solver.',
+        'Własny projekt: gra tower defense w świecie fantasy, zaprojektowana jak łamigłówka, z deterministyczną symulacją i poziomami wyważonymi przez solver.',
       card: {
-        title: 'Relay Defense: gra logiczna',
+        title: 'Heartwood: gra logiczna',
         summary:
           'Tower defense, w którym plan wygrywa z refleksem. Poziomy wyważone solverem z przewidywaniem i sprawdzone w CI.',
         tags: ['gra', 'symulacja', 'open source'],
       },
-      lead: 'Gra tower defense w przeglądarce, zaprojektowana jak łamigłówka: każda fala jest widoczna z wyprzedzeniem, symulacja jest deterministyczna, a między falami gra czeka na gracza. Dziesięć poziomów, każdy zbudowany wokół jednego pomysłu.',
+      lead: 'Gra tower defense w świecie fantasy, w przeglądarce, zaprojektowana jak łamigłówka: łuczniczki, druidzi, jednorożce i enty przeciw trollom, upiorom i wodzowi ogrów. Każda fala jest widoczna z wyprzedzeniem, symulacja jest deterministyczna, a między falami gra czeka na gracza. Dziesięć poziomów, każdy zbudowany wokół jednego pomysłu.',
       kind: 'Własny projekt, repozytorium publiczne (MIT)',
       problem: [
         'Grę tower defense łatwo zrobić trudną, a trudno uczciwą. Liczby ustawiane na wyczucie dają poziomy albo banalne, albo wygrywane szczęściem, a każda zmiana jednej wieży przesuwa balans wszystkich.',
@@ -640,21 +640,21 @@ export const pl: SiteContent = {
       solution: {
         text: [
           'Logika gry to czysta, deterministyczna symulacja oddzielona od rysowania: te same ruchy zawsze dają ten sam wynik. Dzięki temu rozwiązania można odtwarzać w testach i wyszukiwać automatycznie.',
-          'Solver z przewidywaniem sprawdza każdy dostępny ruch, symuluje nadchodzące fale i zostawia najlepszy. To on zapisał rozwiązanie referencyjne każdego poziomu; testy je odtwarzają i oczekują wygranej. Sonda z nieuważnym graczem, który stawia losowych agentów przy trasie, pokazuje, że od trzeciego poziomu szczęście nie wystarcza.',
+          'Solver z przewidywaniem sprawdza każdy dostępny ruch, symuluje nadchodzące fale i zostawia najlepszy. To on zapisał rozwiązanie referencyjne każdego poziomu; testy je odtwarzają i oczekują wygranej. Sonda z nieuważnym graczem, który stawia losowych obrońców przy trasie, pokazuje, że od trzeciego poziomu szczęście nie wystarcza.',
         ],
         points: [
-          'siedmiu agentów i siedem rodzajów usterek; każda szczególna wymaga jednej wyraźnej odpowiedzi: pancerz, niewidzialność, rozpad, naprawy i boss osłaniający eskortę',
-          'otwarta posadzka, na której każdy agent jest częścią labiryntu, z podglądem nowej trasy przed budową',
+          'siedmiu obrońców i siedem rodzajów potworów; każdy szczególny wymaga jednej wyraźnej odpowiedzi: pancerz, niewidzialność, rozpad, leczenie i boss osłaniający eskortę',
+          'otwarta łąka, na której każdy obrońca jest częścią labiryntu, z podglądem nowej trasy przed budową',
           'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa najwyżej raz na dziesięć prób',
-          'grafika Canvas 2D w barwach kokot.it, pełna obsługa klawiaturą, tryb ograniczonego ruchu, polski i angielski',
+          'postacie z darmowych modeli 3D (CC0), uzupełnione o rekwizyty i wyrenderowane do sprite’ów skryptem w Blenderze; pełna obsługa klawiaturą, tryb ograniczonego ruchu, polski i angielski',
         ],
       },
       preview: {
         title: 'Dziesięć poziomów',
-        text: 'Zacznij od pierwszego: każda odprawa wyjaśnia nowego agenta albo usterkę. Postęp zapisuje się tylko w tej przeglądarce.',
+        text: 'Zacznij od pierwszego: każda odprawa przedstawia nowego obrońcę albo potwora. Postęp zapisuje się tylko w tej przeglądarce.',
       },
       toolNote: 'Gra działa w całości w przeglądarce i nigdzie niczego nie wysyła.',
-      stack: ['TypeScript', 'Canvas 2D', 'Vite', 'Vitest', 'Playwright'],
+      stack: ['TypeScript', 'Canvas 2D', 'Blender', 'Vite', 'Vitest', 'Playwright'],
     },
   },
 };
