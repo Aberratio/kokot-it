@@ -646,7 +646,7 @@ export const pl: SiteContent = {
           'siedmiu obrońców i siedem rodzajów potworów; każdy szczególny wymaga jednej wyraźnej odpowiedzi: pancerz, niewidzialność, rozpad, leczenie i boss osłaniający eskortę',
           'otwarta łąka, na której każdy obrońca jest częścią labiryntu, z podglądem nowej trasy przed budową',
           'każdy poziom ma 50–90% siły, którą solver jeszcze pokonuje; od trzeciego poziomu nieuważny gracz wygrywa najwyżej raz na dziesięć prób',
-          'postacie z darmowych modeli 3D (CC0), uzupełnione o rekwizyty i wyrenderowane do sprite’ów skryptem w Blenderze; pełna obsługa klawiaturą, tryb ograniczonego ruchu, polski i angielski',
+          'postacie z darmowych modeli 3D (CC0), uzupełnione o rekwizyty i wyrenderowane do grafik 2D skryptem w Blenderze; pełna obsługa klawiaturą, tryb ograniczonego ruchu, polski i angielski',
         ],
       },
       preview: {
