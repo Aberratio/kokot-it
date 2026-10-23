@@ -235,16 +235,15 @@ create a new one and replace the secret. `.vercel/` is git-ignored.
 
 ### Commit authors
 
-Vercel refuses a deploy whose git commit author it cannot match to a member of the team ("commit
+Vercel refuses a deploy whose git commit author it cannot match to the Vercel account ("commit
 author doesn't have permission"); the CLI sends the checked-out commit's metadata with the deploy.
 The author is matched when either:
 
 - the commit's author email is one of the emails on the Vercel account (Account Settings →
   **Emails**), or
-- GitHub attributes the commit to the GitHub account connected to Vercel, which happens when the
-  author email is one of that GitHub account's verified emails (GitHub → Settings → **Emails**).
+- GitHub attributes the commit to the GitHub account connected to Vercel (GitHub does this when the author email is one of that account's verified emails, GitHub → Settings → **Emails**).
 
-This concerns both deploys: a pull request preview deploys the branch head, authored with the
+This applies to both deploys: a pull request preview deploys the branch head, authored with the
 local `git config user.email`; production deploys the commit GitHub creates when merging,
 authored with the email GitHub uses for web-based operations, which can differ from the local
 one.
