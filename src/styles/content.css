@@ -329,6 +329,8 @@ main {
  */
 .tool {
   margin: var(--space-5) 0 0;
+  /* Room above the frame when a new screen in the application scrolls it back into view. */
+  scroll-margin-top: var(--space-4);
 }
 
 .tool__frame {

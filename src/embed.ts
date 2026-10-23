@@ -2,7 +2,9 @@
 // pages. The static page carries a text fallback and a link that opens the application in a
 // new tab; once the figure scrolls near the viewport, a sandboxed <iframe> replaces the
 // fallback. Applications that report their height (`{ type: '<slug>:height', height }`
-// through postMessage) get an iframe sized to their content.
+// through postMessage) get an iframe sized to their content. When a new screen in the
+// application shrinks the iframe and leaves its top above the viewport, the figure scrolls back
+// into view, so the reader is not left below an application they can no longer see.
 
 /** What the iframe may do: run the app's scripts, load its own assets, download exports. */
 export const TOOL_SANDBOX = 'allow-scripts allow-same-origin allow-downloads allow-popups';
@@ -10,6 +12,13 @@ export const TOOL_SANDBOX = 'allow-scripts allow-same-origin allow-downloads all
 /** Heights outside this range are ignored, so a broken message cannot collapse or blow up the page. */
 export const MIN_HEIGHT = 240;
 export const MAX_HEIGHT = 20000;
+
+/**
+ * A report at most this fraction of the previous one is a new screen in the application (a
+ * menu giving way to a level: 2287 to 827 px on a phone), not a reflow within a screen (a panel
+ * growing or shrinking by about a tenth). Only a new screen may move the host page.
+ */
+export const NEW_SCREEN_RATIO = 0.75;
 
 export function createToolFrame(doc: Document, src: string, title: string): HTMLIFrameElement {
   const frame = doc.createElement('iframe');
@@ -55,11 +64,15 @@ export interface HeightMessage {
 export interface EmbeddedTool {
   figure: HTMLElement;
   frame: HTMLIFrameElement;
+  /** The last height applied to the frame; absent until the application reports one. */
+  height?: number;
 }
 
 /**
  * Applies a height report to the iframe that sent it. Only messages from this site's own
  * origin and from one of the embedded frames count; returns whether a frame was resized.
+ * After a new screen shrinks the frame, a figure whose top is now above the viewport scrolls
+ * back to it. The jump is instant, so it needs no reduced-motion variant.
  */
 export function applyHeight(
   message: HeightMessage,
@@ -71,8 +84,14 @@ export function applyHeight(
   if (!match) return false;
   const height = reportedHeight(message.data, match.figure.dataset['tool'] ?? '');
   if (height === null) return false;
+  const previous = match.height;
+  match.height = height;
   match.frame.style.height = `${String(height)}px`;
   match.figure.classList.add('tool--sized');
+  const newScreen = previous !== undefined && height <= previous * NEW_SCREEN_RATIO;
+  if (newScreen && match.figure.getBoundingClientRect().top < 0) {
+    match.figure.scrollIntoView({ block: 'start' });
+  }
   return true;
 }
 

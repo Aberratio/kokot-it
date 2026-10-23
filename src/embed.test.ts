@@ -18,6 +18,9 @@ interface FakeFigure {
   figure: HTMLElement;
   slot: { replaceChildren: ReturnType<typeof vi.fn> };
   classes: string[];
+  /** Where the figure's top sits relative to the viewport; negative is above it. */
+  layout: { top: number };
+  scrollIntoView: ReturnType<typeof vi.fn>;
 }
 
 function fakeFrame(): HTMLIFrameElement {
@@ -36,6 +39,8 @@ function fakeFrame(): HTMLIFrameElement {
 function fakeFigure(dataset: Record<string, string> = {}, withSlot = true): FakeFigure {
   const slot = { replaceChildren: vi.fn() };
   const classes: string[] = [];
+  const layout = { top: 0 };
+  const scrollIntoView = vi.fn();
   const figure = {
     dataset: {
       tool: 'x',
@@ -46,8 +51,10 @@ function fakeFigure(dataset: Record<string, string> = {}, withSlot = true): Fake
     querySelector: () => (withSlot ? slot : null),
     ownerDocument: { createElement: () => fakeFrame() },
     classList: { add: (c: string) => classes.push(c) },
+    getBoundingClientRect: () => ({ top: layout.top }),
+    scrollIntoView,
   } as unknown as HTMLElement;
-  return { figure, slot, classes };
+  return { figure, slot, classes, layout, scrollIntoView };
 }
 
 describe('embedTool', () => {
@@ -104,10 +111,15 @@ describe('reportedHeight', () => {
 
 describe('applyHeight', () => {
   const setup = () => {
-    const { figure, classes } = fakeFigure();
+    const { figure, classes, layout, scrollIntoView } = fakeFigure();
     const frame = fakeFrame();
-    return { classes, frame, tools: [{ figure, frame }] };
+    return { classes, frame, layout, scrollIntoView, tools: [{ figure, frame }] };
   };
+  const report = (frame: HTMLIFrameElement, height: number) => ({
+    origin: 'https://kokot.it',
+    source: frame.contentWindow,
+    data: { type: 'x:height', height },
+  });
 
   it('sizes the iframe that sent a same-origin height report', () => {
     const { frame, tools, classes } = setup();
@@ -129,6 +141,41 @@ describe('applyHeight', () => {
     const stranger = { origin: 'https://kokot.it', source: {}, data };
     expect(applyHeight(stranger, 'https://kokot.it', tools)).toBe(false);
     expect(frame.style.height).toBeUndefined();
+  });
+
+  it('brings the figure back into view when a new screen leaves it above the viewport', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = -1493;
+    applyHeight(report(frame, 980), 'https://kokot.it', tools);
+    expect(frame.style.height).toBe('980px');
+    expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({ block: 'start' });
+  });
+
+  it('leaves the scroll alone while the figure top is still on screen', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = 0;
+    applyHeight(report(frame, 980), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('leaves the scroll alone when the frame grows or reflows by a little', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    layout.top = -400;
+    applyHeight(report(frame, 827), 'https://kokot.it', tools);
+    applyHeight(report(frame, 954), 'https://kokot.it', tools);
+    applyHeight(report(frame, 942), 'https://kokot.it', tools);
+    applyHeight(report(frame, 827), 'https://kokot.it', tools);
+    expect(frame.style.height).toBe('827px');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('does not scroll on the first report, before the reader has seen the application', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    layout.top = -900;
+    applyHeight(report(frame, 600), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });
 
