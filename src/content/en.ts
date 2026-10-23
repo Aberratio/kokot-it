@@ -643,7 +643,7 @@ export const en: SiteContent = {
           'seven defenders and seven kinds of monsters; the special ones each call for one clear answer: armour, invisibility, splitting, healing, and a boss that shields its escort',
           'an open meadow where every defender is part of the maze, with a preview of the new route before you build',
           'each level ships at 50–90% of the strength the solver can still beat; from the third level on a careless player wins at most one game in ten',
-          'Siege: a defeat restarts the chapter, and before its first wave the carried defence sells back at full value with gold topped up to a floor, so a solution from the floor proves every checkpoint winnable',
+          'Siege: a defeat restarts the chapter, and before its first wave the carried defence sells back at full value and gold is topped up until the defence is worth the floor of the chapter, so a solution from the floor proves every checkpoint winnable',
           'characters made from free CC0 3D models, given props and rendered to sprites by a Blender script; full keyboard play, reduced motion, English and Polish',
         ],
       },
