@@ -18,6 +18,12 @@ interface FakeFigure {
   figure: HTMLElement;
   slot: { replaceChildren: ReturnType<typeof vi.fn> };
   classes: string[];
+  /**
+   * Where the figure's top sits relative to the viewport (negative is above it) and the frame
+   * whose height sets its bottom.
+   */
+  layout: { top: number; frame?: HTMLIFrameElement };
+  scrollIntoView: ReturnType<typeof vi.fn>;
 }
 
 function fakeFrame(): HTMLIFrameElement {
@@ -25,6 +31,7 @@ function fakeFrame(): HTMLIFrameElement {
   return {
     tagName: 'IFRAME',
     style: {},
+    clientWidth: 360,
     contentWindow: {},
     attributes,
     setAttribute: (name: string, value: string) => {
@@ -36,6 +43,8 @@ function fakeFrame(): HTMLIFrameElement {
 function fakeFigure(dataset: Record<string, string> = {}, withSlot = true): FakeFigure {
   const slot = { replaceChildren: vi.fn() };
   const classes: string[] = [];
+  const layout: FakeFigure['layout'] = { top: 0 };
+  const scrollIntoView = vi.fn();
   const figure = {
     dataset: {
       tool: 'x',
@@ -46,8 +55,13 @@ function fakeFigure(dataset: Record<string, string> = {}, withSlot = true): Fake
     querySelector: () => (withSlot ? slot : null),
     ownerDocument: { createElement: () => fakeFrame() },
     classList: { add: (c: string) => classes.push(c) },
+    getBoundingClientRect: () => ({
+      top: layout.top,
+      bottom: layout.top + Number.parseFloat(layout.frame?.style.height ?? '0'),
+    }),
+    scrollIntoView,
   } as unknown as HTMLElement;
-  return { figure, slot, classes };
+  return { figure, slot, classes, layout, scrollIntoView };
 }
 
 describe('embedTool', () => {
@@ -104,10 +118,16 @@ describe('reportedHeight', () => {
 
 describe('applyHeight', () => {
   const setup = () => {
-    const { figure, classes } = fakeFigure();
+    const { figure, classes, layout, scrollIntoView } = fakeFigure();
     const frame = fakeFrame();
-    return { classes, frame, tools: [{ figure, frame }] };
+    layout.frame = frame;
+    return { classes, frame, layout, scrollIntoView, tools: [{ figure, frame }] };
   };
+  const report = (frame: HTMLIFrameElement, height: number) => ({
+    origin: 'https://kokot.it',
+    source: frame.contentWindow,
+    data: { type: 'x:height', height },
+  });
 
   it('sizes the iframe that sent a same-origin height report', () => {
     const { frame, tools, classes } = setup();
@@ -129,6 +149,82 @@ describe('applyHeight', () => {
     const stranger = { origin: 'https://kokot.it', source: {}, data };
     expect(applyHeight(stranger, 'https://kokot.it', tools)).toBe(false);
     expect(frame.style.height).toBeUndefined();
+  });
+
+  it('brings the figure back into view when a new screen leaves it above the viewport', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = -1493;
+    applyHeight(report(frame, 980), 'https://kokot.it', tools);
+    expect(frame.style.height).toBe('980px');
+    expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({ block: 'start' });
+  });
+
+  it('leaves the scroll alone while the figure top is still on screen', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = 0;
+    applyHeight(report(frame, 980), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('leaves the scroll alone when the frame grows or reflows by a little', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    layout.top = -400;
+    applyHeight(report(frame, 827), 'https://kokot.it', tools);
+    applyHeight(report(frame, 954), 'https://kokot.it', tools);
+    applyHeight(report(frame, 942), 'https://kokot.it', tools);
+    applyHeight(report(frame, 827), 'https://kokot.it', tools);
+    expect(frame.style.height).toBe('827px');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('treats a shrink to at most three quarters as a new screen', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    layout.top = -300;
+    applyHeight(report(frame, 1000), 'https://kokot.it', tools);
+    applyHeight(report(frame, 751), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    applyHeight(report(frame, 1000), 'https://kokot.it', tools);
+    applyHeight(report(frame, 750), 'https://kokot.it', tools);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves a reader who has scrolled past the application where they are', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = -3000;
+    applyHeight(report(frame, 980), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('leaves the scroll alone when the frame shrank because it got wider', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    applyHeight(report(frame, 2287), 'https://kokot.it', tools);
+    layout.top = -1493;
+    Object.assign(frame, { clientWidth: 740 });
+    applyHeight(report(frame, 1285), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('keeps the last height of each application apart', () => {
+    const a = setup();
+    const b = setup();
+    const tools = [...a.tools, ...b.tools];
+    a.layout.top = -1493;
+    b.layout.top = -1493;
+    applyHeight(report(a.frame, 2287), 'https://kokot.it', tools);
+    applyHeight(report(b.frame, 980), 'https://kokot.it', tools);
+    expect(b.scrollIntoView).not.toHaveBeenCalled();
+    applyHeight(report(a.frame, 980), 'https://kokot.it', tools);
+    expect(a.scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not scroll on the first report, before the reader has seen the application', () => {
+    const { frame, layout, scrollIntoView, tools } = setup();
+    layout.top = -900;
+    applyHeight(report(frame, 600), 'https://kokot.it', tools);
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });
 
