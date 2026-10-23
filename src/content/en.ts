@@ -177,7 +177,7 @@ export const en: SiteContent = {
   projects: {
     title: 'Projects',
     intro:
-      'Five projects: three reference applications running on sample data from fictional companies, tiller, an in-house tool with public code, and Relay Defense, a logic game. They show the way of working and the architecture; they are not client deployments. The applications on this site make no API calls: the reference applications replay recorded runs, and the game runs entirely in the browser.',
+      'Five projects: three reference applications running on sample data from fictional companies, tiller, an in-house tool with public code, and Heartwood, a logic game. They show the way of working and the architecture; they are not client deployments. The applications on this site make no API calls: the reference applications replay recorded runs, and the game runs entirely in the browser.',
     cardCta: 'Case study',
   },
   about: {
@@ -619,16 +619,16 @@ export const en: SiteContent = {
       stack: ['Claude Code', 'Codex', 'Bash', 'Node.js', 'GitHub CLI'],
     },
     'relay-defense': {
-      metaTitle: 'Relay Defense: a logic tower defense game — kokot.it',
+      metaTitle: 'Heartwood: a logic tower defense game — kokot.it',
       metaDescription:
-        'Own project: a browser tower defense game designed as a logic puzzle, with a deterministic simulation and levels balanced by a search-based solver.',
+        'Own project: a fantasy tower defense in the browser, built as a logic puzzle, with a deterministic simulation and levels balanced by a search-based solver.',
       card: {
-        title: 'Relay Defense: a logic game',
+        title: 'Heartwood: a logic game',
         summary:
           'A tower defense game where a plan beats reflexes. Levels balanced by a look-ahead solver and proven winnable in CI.',
         tags: ['game', 'simulation', 'open source'],
       },
-      lead: 'A tower defense game in the browser, designed as a logic puzzle: every wave is visible in advance, the simulation is deterministic and the game waits between waves. Ten levels, each built around one idea.',
+      lead: 'A fantasy tower defense game in the browser, designed as a logic puzzle: archers, druids, unicorns and ents against trolls, wraiths and an ogre warlord. Every wave is visible in advance, the simulation is deterministic and the game waits between waves. Ten levels, each built around one idea.',
       kind: 'Own project, public repository (MIT)',
       problem: [
         'A tower defense game is easy to make hard and hard to make fair. Numbers tuned by feel give levels that are either trivial or won by luck, and every change to one tower shifts the balance of all of them.',
@@ -637,21 +637,21 @@ export const en: SiteContent = {
       solution: {
         text: [
           'The game logic is a pure, deterministic simulation kept apart from the drawing: the same moves always give the same result. That makes it possible to replay solutions in tests and to search for them automatically.',
-          'A look-ahead solver tries every affordable move, simulates the coming waves and keeps the best one. It wrote the reference solution of each level; the tests replay them and expect a win. A probe with a careless player, who builds random agents near the route, shows that from the third level on luck is not enough.',
+          'A look-ahead solver tries every affordable move, simulates the coming waves and keeps the best one. It wrote the reference solution of each level; the tests replay them and expect a win. A probe with a careless player, who places random defenders near the route, shows that from the third level on luck is not enough.',
         ],
         points: [
-          'seven agents and seven kinds of faults; the special ones each call for one clear answer: armour, cloaking, splitting, repairs, and a boss that shields its escort',
-          'open floor where every agent is part of the maze, with a preview of the new route before you build',
+          'seven defenders and seven kinds of monsters; the special ones each call for one clear answer: armour, invisibility, splitting, healing, and a boss that shields its escort',
+          'an open meadow where every defender is part of the maze, with a preview of the new route before you build',
           'each level ships at 50–90% of the strength the solver can still beat; from the third level on a careless player wins at most one game in ten',
-          'Canvas 2D graphics in the kokot.it colours, full keyboard play, reduced motion, English and Polish',
+          'characters made from free CC0 3D models, given props and rendered to sprites by a Blender script; full keyboard play, reduced motion, English and Polish',
         ],
       },
       preview: {
         title: 'Ten levels',
-        text: 'Start with the first one: each briefing explains the new agent or fault. Progress is saved only in this browser.',
+        text: 'Start with the first one: each briefing introduces the new defender or monster. Progress is saved only in this browser.',
       },
       toolNote: 'The game runs entirely in the browser and sends nothing anywhere.',
-      stack: ['TypeScript', 'Canvas 2D', 'Vite', 'Vitest', 'Playwright'],
+      stack: ['TypeScript', 'Canvas 2D', 'Blender', 'Vite', 'Vitest', 'Playwright'],
     },
   },
 };
