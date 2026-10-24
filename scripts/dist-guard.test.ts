@@ -4,9 +4,13 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { allRoutes, renderPage, routePath } from '../src/content/render.ts';
 import { checkDist } from './dist-guard.ts';
+import { readLock } from './tools-lock.ts';
 
 describe('checkDist', () => {
   let dist = '';
+  // Case studies link to their applications; the fixture ships a stub page for each.
+  const linkedTools = readLock().map((tool) => tool.slug);
+  const sitePages = allRoutes().length + linkedTools.length;
   const write = (path: string, html: string): void => {
     const file = join(dist, ...path.split('/').filter(Boolean), 'index.html');
     mkdirSync(join(file, '..'), { recursive: true });
@@ -20,7 +24,12 @@ describe('checkDist', () => {
         `<html lang="${page.lang}"><head>${page.head}</head><body>${page.body}</body></html>`,
       );
     }
+    for (const slug of linkedTools) write(`/tools/${slug}/`, '<html><body></body></html>');
   };
+
+  // Content tests replace a real page with a stub, which drops the anchors other pages link to.
+  const contentFailures = (): string[] =>
+    checkDist(dist).failures.filter((failure) => !failure.includes(': link to a missing '));
 
   beforeEach(() => {
     dist = mkdtempSync(join(tmpdir(), 'dist-'));
@@ -31,7 +40,7 @@ describe('checkDist', () => {
 
   it('passes a complete, clean build', () => {
     buildAll();
-    expect(checkDist(dist)).toEqual({ pages: allRoutes().length, failures: [] });
+    expect(checkDist(dist)).toEqual({ pages: sitePages, failures: [] });
   });
 
   it('fails a missing dist, a missing page and an unrendered shell', () => {
@@ -39,7 +48,7 @@ describe('checkDist', () => {
     buildAll();
     rmSync(join(dist, 'en', 'projects', 'tiller'), { recursive: true });
     write('/projekty/tiller/', '<html><body><!-- kokot:body --></body></html>');
-    expect(checkDist(dist).failures).toEqual([
+    expect(contentFailures()).toEqual([
       '/en/projects/tiller/: page missing from the build',
       'projekty/tiller/index.html: unrendered page shell',
     ]);
@@ -84,7 +93,7 @@ describe('checkDist', () => {
     ]);
     // Sample data inside an application may show amounts and long numbers.
     write('/tools/tool-a/', '<html><body><p>Order 1234567890 · 2 400 zł</p></body></html>');
-    expect(checkDist(dist, ['tool-a'])).toEqual({ pages: allRoutes().length, failures: [] });
+    expect(checkDist(dist, ['tool-a'])).toEqual({ pages: sitePages, failures: [] });
   });
 
   it('holds a page under tools/ that is not a locked application to the full rules', () => {
@@ -102,7 +111,7 @@ describe('checkDist', () => {
   it('holds route pages to the price rule that type specimens are spared', () => {
     buildAll();
     write('/', '<html lang="pl"><body><p>0123 · 4567 · 89 · 2 400 zł</p></body></html>');
-    expect(checkDist(dist).failures).toEqual(['index.html: price']);
+    expect(contentFailures()).toEqual(['index.html: price']);
   });
 
   it('fails the wording rules on a route page', () => {
@@ -110,9 +119,50 @@ describe('checkDist', () => {
     // Built from parts: the repository's own wording guard reads this file too.
     const text = ['Recorded', ['de', 'mo'].join(''), 'see', ['D', '042'].join('-')].join(' ');
     write('/en/', `<html lang="en"><body><p>${text}</p></body></html>`);
-    expect(checkDist(dist).failures).toEqual([
+    expect(contentFailures()).toEqual([
       ['en/index.html: ', 'de', 'mo wording'].join(''),
       'en/index.html: internal process reference',
+    ]);
+  });
+  it('fails inline scripts, styles and handlers and external resources (CSP: nothing inline, nothing external)', () => {
+    buildAll();
+    write(
+      '/en/',
+      [
+        '<html lang="en"><head><style>p{}</style>',
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter">',
+        '<script>console.log(1)</script><script src="//cdn.example.com/x.js"></script>',
+        '<script type="application/ld+json">{}</script><link rel="canonical" href="https://kokot.it/en/">',
+        '</head><body><p style="color:red">x</p><button onclick="go()">y</button>',
+        '<img src="https://example.com/a.png" alt=""><a href="https://github.com/x">ok</a></body></html>',
+      ].join(''),
+    );
+    expect(contentFailures()).toEqual([
+      'en/index.html: inline <style>',
+      'en/index.html: external resource https://fonts.googleapis.com/css2?family=Inter',
+      'en/index.html: inline <script>',
+      'en/index.html: external resource //cdn.example.com/x.js',
+      'en/index.html: inline style attribute',
+      'en/index.html: inline event handler',
+      'en/index.html: external resource https://example.com/a.png',
+    ]);
+  });
+
+  it('fails internal links to missing pages and anchors to missing ids', () => {
+    buildAll();
+    write(
+      '/landing/',
+      [
+        '<html><body><h2 id="here">x</h2><a href="#here">a</a><a href="/#nope">b</a>',
+        '<a href="/en/projects/nonexistent/">c</a><a href="/en/?lang=en#content">d</a>',
+        '<a href="#gone">e</a><a href="mailto:joanna@kokot.it">f</a><a href="x/">g</a></body></html>',
+      ].join(''),
+    );
+    expect(checkDist(dist).failures).toEqual([
+      'landing/index.html: link to a missing anchor /#nope',
+      'landing/index.html: link to a missing page /en/projects/nonexistent/',
+      'landing/index.html: link to a missing anchor #gone',
+      'landing/index.html: relative link x/',
     ]);
   });
 });
