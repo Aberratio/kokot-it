@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { contentViolations, standaloneViolations } from '../src/content/guards.ts';
 import { allRoutes, routePath } from '../src/content/render.ts';
@@ -6,7 +6,8 @@ import { allRoutes, routePath } from '../src/content/render.ts';
 // Checks a built dist/ directory: every route page exists and was rendered; route pages pass
 // every content guard (phone, tax id, prices, e-mails, placeholders, wording), and so does any
 // other page except STANDALONE_PAGES (the brand preview and its type specimens: contact, phone
-// and amount rules) and the embedded reference applications under tools/<slug>/.
+// and amount rules) and the embedded reference applications under tools/<slug>/. Those site
+// pages also keep to the CSP (nothing inline, nothing external) and their links resolve.
 
 function htmlFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -46,18 +47,118 @@ export function checkDist(dist: string, tools: readonly string[] = []): DistRepo
       failures.push(`/tools/${slug}/: reference application missing from the build`);
     }
   }
-  const files = htmlFiles(dist);
-  let checked = 0;
-  for (const file of files) {
+  const pages = new Map<string, string>();
+  for (const file of htmlFiles(dist)) {
     const name = relative(dist, file).split(sep).join('/');
     if (tools.some((slug) => name.startsWith(`tools/${slug}/`))) continue;
-    checked += 1;
-    const html = readFileSync(file, 'utf8');
+    pages.set(name, readFileSync(file, 'utf8'));
+  }
+  for (const [name, html] of pages) {
     // A shell the content plugin did not fill would ship an empty page.
     if (html.includes('<!-- kokot:')) failures.push(`${name}: unrendered page shell`);
     const standalone = STANDALONE_PAGES.includes(name) && !routeFiles.has(name);
     const rules = standalone ? standaloneViolations : contentViolations;
     for (const violation of rules(html)) failures.push(`${name}: ${violation}`);
+    for (const violation of cspViolations(html)) failures.push(`${name}: ${violation}`);
   }
-  return { pages: checked, failures };
+  const ids = new Map([...pages].map(([name, html]) => [name, idsOf(html)]));
+  for (const [name, html] of pages) {
+    for (const violation of linkViolations(dist, name, html, ids)) {
+      failures.push(`${name}: ${violation}`);
+    }
+  }
+  return { pages: pages.size, failures };
+}
+
+// A tag with its attributes; a quoted value may hold ">".
+const TAG = /<([a-zA-Z][\w-]*)\b((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
+
+const attr = (attrs: string, key: string): string | undefined => {
+  const match = new RegExp(`\\s${key}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, 'i').exec(attrs);
+  return match === null ? undefined : (match[1] ?? match[2] ?? match[3]);
+};
+
+const isExternal = (url: string): boolean => /^(?:[a-z][a-z\d+.-]*:)?\/\//i.test(url);
+
+/** Attributes that load one URL into the page (srcset, a list of candidates, is read apart). */
+const RESOURCE_ATTRS = ['src', 'poster', 'data', 'action'];
+
+/** Links that only name the page, not load anything into it. */
+const NAVIGATION_RELS = new Set(['canonical', 'alternate']);
+
+/**
+ * The site's CSP allows nothing inline and nothing external (headers.test.ts holds the header),
+ * and a violation fails only in the browser console, so the built pages are held to it here:
+ * no `<style>`, no inline `<script>` (JSON-LD data blocks are not executed), no `style=` or
+ * `on*=` attributes, and no `src`, `srcset`, `poster`, `data`, `action` or loaded `<link>` from
+ * another origin.
+ */
+export function cspViolations(html: string): string[] {
+  const found: string[] = [];
+  for (const [, tag = '', attrs = ''] of html.matchAll(TAG)) {
+    const name = tag.toLowerCase();
+    const src = attr(attrs, 'src');
+    // Attribute names only: a quoted value may mention style= or onclick= as text.
+    const names = attrs.replace(/"[^"]*"|'[^']*'/g, '""');
+    if (name === 'style') found.push('inline <style>');
+    const type = attr(attrs, 'type')?.toLowerCase();
+    if (name === 'script' && src === undefined && type !== 'application/ld+json') {
+      found.push('inline <script>');
+    }
+    if (/\sstyle\s*=/i.test(names)) found.push('inline style attribute');
+    if (/\son[a-z]+\s*=/i.test(names)) found.push('inline event handler');
+    const urls = RESOURCE_ATTRS.flatMap((key) => attr(attrs, key) ?? []);
+    for (const candidate of (attr(attrs, 'srcset') ?? '').split(',')) {
+      const url = candidate.trim().split(/\s+/)[0] ?? '';
+      if (url !== '') urls.push(url);
+    }
+    for (const url of urls) if (isExternal(url)) found.push(`external resource ${url}`);
+    const href = attr(attrs, 'href');
+    const rels = (attr(attrs, 'rel') ?? '').toLowerCase().split(/\s+/);
+    if (name === 'link' && href !== undefined && isExternal(href)) {
+      if (!rels.every((rel) => NAVIGATION_RELS.has(rel))) found.push(`external resource ${href}`);
+    }
+  }
+  return found;
+}
+
+const idsOf = (html: string): Set<string> =>
+  new Set([...html.matchAll(TAG)].flatMap(([, , attrs = '']) => attr(attrs, 'id') ?? []));
+
+/**
+ * Every `<a href>` inside the site resolves: root-relative paths to a built file (`/x/` to
+ * `x/index.html`), `#id` to an element of the target page. Other schemes are not checked.
+ */
+function linkViolations(
+  dist: string,
+  page: string,
+  html: string,
+  ids: ReadonlyMap<string, Set<string>>,
+): string[] {
+  const found: string[] = [];
+  for (const [, tag = '', attrs = ''] of html.matchAll(TAG)) {
+    const href = attr(attrs, 'href')?.replaceAll('&amp;', '&');
+    if (tag.toLowerCase() !== 'a' || href === undefined) continue;
+    if (/^\s*javascript:/i.test(href)) {
+      found.push(`javascript: link ${href}`);
+      continue;
+    }
+    if (/^[a-z][a-z\d+.-]*:/i.test(href) || href.startsWith('//')) continue;
+    const [path = '', hash = ''] = href.split('#');
+    const bare = path.split('?')[0] ?? '';
+    if (bare !== '' && !bare.startsWith('/')) {
+      found.push(`relative link ${href}`);
+      continue;
+    }
+    let target = bare === '' ? page : bare.endsWith('/') ? routeFile(bare) : bare.slice(1);
+    // A folder named without its slash is served from its index.html (trailingSlash redirect).
+    const folder = join(dist, ...target.split('/'));
+    if (existsSync(folder) && statSync(folder).isDirectory()) target = `${target}/index.html`;
+    if (!existsSync(join(dist, ...target.split('/')))) {
+      found.push(`link to a missing page ${href}`);
+    } else if (hash !== '' && ids.has(target) && !ids.get(target)?.has(hash)) {
+      found.push(`link to a missing anchor ${href}`);
+    }
+  }
+  return found;
 }
