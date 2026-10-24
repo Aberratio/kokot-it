@@ -197,8 +197,8 @@ clusters → 5 project constellations → convergence next to the e-mail address
 
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`: lint,
 typecheck, test, build, then the deploy job below, which starts only after those pass. A newer
-commit cancels a pull request run; runs on `main` queue, so a production deploy is never stopped
-halfway. Changes reach `main` through pull requests.
+commit cancels a pull request run. On `main` a newer push only replaces a waiting run, never a
+running one, so a production deploy is never stopped halfway. Changes reach `main` through pull requests.
 
 ## Deploy (Vercel)
 

@@ -34,9 +34,10 @@ describe('the deploy workflow', () => {
       deploy.indexOf('Check Vercel secrets'),
       deploy.indexOf('ready=true'),
     );
-    expect(check).toMatch(/event_name.*push/);
-    expect(check).toContain('::error');
-    expect(check).toMatch(/exit 1/);
+    // The error and exit sit directly under the push condition, so an inverted test fails here.
+    expect(check).toMatch(
+      /event_name \}\}" = "push" \]; then\n\s+echo "::error [^\n]*\n\s+exit 1\n/,
+    );
   });
 
   it('never cancels a running production deploy for a newer push', () => {
