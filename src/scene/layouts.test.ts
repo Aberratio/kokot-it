@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PROJECT_SLUGS } from '../content/types.ts';
 import { clusterCentres, CONVERGE_NODE, groupKind, layoutFor, type Frame } from './layouts.ts';
 import { buildNetwork, groupOf } from './network.ts';
 
@@ -50,7 +51,7 @@ describe('layoutFor', () => {
 
   it.each([
     ['clusters', 3],
-    ['constellations', 4],
+    ['constellations', PROJECT_SLUGS.length],
   ] as const)('%s: pulls each group into its own island, apart from the others', (mode, k) => {
     for (const frame of [wide, tall]) {
       const p = layoutFor(mode, net, frame);

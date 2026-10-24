@@ -8,6 +8,7 @@
  * That makes every prefix `[0, n)` a connected network of its own, and the edge list a prefix
  * list too — the quality levels draw the first n nodes and the first `edgesWithin(n)` edges.
  */
+import { PROJECT_SLUGS } from '../content/types.ts';
 import { mulberry32 } from './relay-graph.ts';
 
 export interface NetworkNode {
@@ -32,7 +33,7 @@ export interface Network {
   readonly adjacency: readonly (readonly number[])[];
   /** The busiest agents, where autonomous work starts. */
   readonly hubs: readonly number[];
-  /** Group index per node: 3 service clusters (P1–P3) and 4 project constellations. */
+  /** Group index per node: 3 service clusters (P1–P3) and one constellation per project card. */
   readonly groups: Readonly<Record<GroupKind, readonly number[]>>;
 }
 
@@ -43,7 +44,11 @@ export interface NetworkOptions {
   readonly links?: number;
 }
 
-export const GROUP_COUNT: Readonly<Record<GroupKind, number>> = { clusters: 3, constellations: 4 };
+/** The n-th project card on the home page lights constellation n, so there is one per project. */
+export const GROUP_COUNT: Readonly<Record<GroupKind, number>> = {
+  clusters: 3,
+  constellations: PROJECT_SLUGS.length,
+};
 
 const LAYER_Z: readonly number[] = [-0.75, 0, 0.75];
 /** Far plane holds most agents: they are smaller on screen, so the picture stays even. */

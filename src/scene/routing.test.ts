@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { PROJECT_SLUGS } from '../content/types.ts';
 import { CONVERGE_NODE } from './layouts.ts';
 import { buildNetwork, groupOf, type Network } from './network.ts';
-import { mulberry32 } from './relay-graph.ts';
+import { LEVELS } from './quality.ts';
+import { mulberry32, SCENE_SEED } from './relay-graph.ts';
 import { Pacer, planRoute, Relay, shortestPath } from './routing.ts';
 
 /** 0 — 1 — 2 — 3, plus a long way round 0 — 4 — 5 — 6 — 3. */
@@ -167,6 +169,23 @@ describe('planRoute', () => {
         expect(route.every((n) => groupOf(net, mode, n) === 1)).toBe(true);
       }
       expect(planned).toBeGreaterThan(30);
+    }
+  });
+
+  it('constellations: every project card lights its own group at every quality', () => {
+    // app.ts turns the n-th project card into focus group n; a group with no agents sends nothing.
+    for (const built of LEVELS) {
+      const scene = buildNetwork({ seed: SCENE_SEED, count: built.nodes });
+      for (const shown of LEVELS.filter((l) => l.nodes <= built.nodes)) {
+        const rand = mulberry32(7);
+        PROJECT_SLUGS.forEach((slug, card) => {
+          const routes = Array.from({ length: 20 }, () =>
+            planRoute('constellations', scene, { limit: shown.nodes, rand, focus: card }),
+          ).filter((route) => route !== null);
+          const at = `${slug} at ${String(shown.nodes)} of ${String(built.nodes)} agents`;
+          expect(routes.length, at).toBeGreaterThan(15);
+        });
+      }
     }
   });
 
