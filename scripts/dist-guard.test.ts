@@ -148,6 +148,43 @@ describe('checkDist', () => {
     ]);
   });
 
+  it('reads srcset, poster, data and action, and does not stop at a quoted ">"', () => {
+    buildAll();
+    write(
+      '/landing/',
+      [
+        '<html><body><img alt="a > b" style="color:red" src="/a.png">',
+        '<img src="/a.png" srcset="/a.png 1x, https://e.com/a.png 2x" alt="">',
+        '<video poster="https://e.com/p.jpg"></video><object data="https://e.com/o"></object>',
+        '<form action="https://e.com/f"></form><meta content="a style=b onclick=c">',
+        '<script type="application/LD+JSON">{}</script></body></html>',
+      ].join(''),
+    );
+    expect(checkDist(dist).failures).toEqual([
+      'landing/index.html: inline style attribute',
+      'landing/index.html: external resource https://e.com/a.png',
+      'landing/index.html: external resource https://e.com/p.jpg',
+      'landing/index.html: external resource https://e.com/o',
+      'landing/index.html: external resource https://e.com/f',
+    ]);
+  });
+
+  it('resolves a folder link without its slash to its index page and fails javascript: links', () => {
+    buildAll();
+    write(
+      '/landing/',
+      [
+        '<html><body><a href="/en">a</a><a href="/en#content">b</a><a href="/en#nope">c</a>',
+        '<a href="/en/projects">d</a><a href="javascript:void(0)">e</a></body></html>',
+      ].join(''),
+    );
+    expect(checkDist(dist).failures).toEqual([
+      'landing/index.html: link to a missing anchor /en#nope',
+      'landing/index.html: link to a missing page /en/projects',
+      'landing/index.html: javascript: link javascript:void(0)',
+    ]);
+  });
+
   it('fails internal links to missing pages and anchors to missing ids', () => {
     buildAll();
     write(
