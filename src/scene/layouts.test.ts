@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { PROJECT_SLUGS } from '../content/types.ts';
 import { clusterCentres, CONVERGE_NODE, groupKind, layoutFor, type Frame } from './layouts.ts';
 import { buildNetwork, groupOf } from './network.ts';
 
 const net = buildNetwork({ seed: 2026, count: 240 });
 const wide: Frame = { halfWidth: 8, halfHeight: 4.5, depth: 3 };
 const tall: Frame = { halfWidth: 2.2, halfHeight: 4.6, depth: 3 };
+/** Nearly square and 4:3 windows still count as wide; 360x740 is a phone. */
+const square: Frame = { halfWidth: 4.6, halfHeight: 4.5, depth: 3 };
+const classic: Frame = { halfWidth: 6, halfHeight: 4.5, depth: 3 };
+const phone: Frame = { halfWidth: 2.2, halfHeight: 4.52, depth: 3 };
 
 const at = (p: Float32Array, i: number): [number, number, number] => [
   p[i * 3] ?? NaN,
@@ -50,9 +55,9 @@ describe('layoutFor', () => {
 
   it.each([
     ['clusters', 3],
-    ['constellations', 4],
+    ['constellations', PROJECT_SLUGS.length],
   ] as const)('%s: pulls each group into its own island, apart from the others', (mode, k) => {
-    for (const frame of [wide, tall]) {
+    for (const frame of [wide, tall, square, classic, phone]) {
       const p = layoutFor(mode, net, frame);
       const centres = clusterCentres(mode, frame);
       expect(centres).toHaveLength(k);

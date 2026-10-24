@@ -65,8 +65,10 @@ a:hover {
   color: var(--color-text);
 }
 
+/* The ring is a box-shadow; forced colours drop shadows but paint the transparent outline. */
 :focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--focus-ring);
   border-radius: var(--radius-sm);
 }
@@ -185,6 +187,13 @@ main {
   display: block;
   height: 1.5rem;
   width: auto;
+}
+
+/* The logo is drawn for a dark page; a light forced-colours theme would hide its strokes. */
+@media (forced-colors: active) and (prefers-color-scheme: light) {
+  .site-logo img {
+    filter: invert(1);
+  }
 }
 
 @media print {

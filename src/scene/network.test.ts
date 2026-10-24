@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { PROJECT_SLUGS } from '../content/types.ts';
 import { buildNetwork, edgesWithin, groupOf, isConnected } from './network.ts';
 
 const options = { seed: 2026, count: 300 };
@@ -91,11 +92,11 @@ describe('isConnected', () => {
 });
 
 describe('groups', () => {
-  it('splits the agents into 3 service clusters and 4 project constellations, none empty', () => {
+  it('splits the agents into 3 service clusters and one constellation per project, none empty', () => {
     const net = buildNetwork(options);
     for (const [kind, k] of [
       ['clusters', 3],
-      ['constellations', 4],
+      ['constellations', PROJECT_SLUGS.length],
     ] as const) {
       const sizes = Array.from({ length: k }, (_, g) =>
         net.nodes.reduce((sum, _n, i) => sum + (groupOf(net, kind, i) === g ? 1 : 0), 0),
@@ -116,6 +117,6 @@ describe('groups', () => {
   it('keeps every group present in a small quality subset', () => {
     const net = buildNetwork(options);
     const seen = new Set(Array.from({ length: 60 }, (_, i) => groupOf(net, 'constellations', i)));
-    expect(seen.size).toBe(4);
+    expect(seen.size).toBe(PROJECT_SLUGS.length);
   });
 });

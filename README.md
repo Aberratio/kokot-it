@@ -93,7 +93,8 @@ fetch or build anything else.
   `sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"` and
   `loading="lazy"`. Applications that post `{ type: '<slug>:height', height }` get an iframe
   sized to their content; messages count only from the site's own origin and from an embedded
-  frame. Factory Twin reports no height and keeps a fixed proportion.
+  frame. All three reference applications and the game report their height; until the first
+  report a frame is 56 rem tall.
 - **Updating**: put the new commit SHA in `tools.lock.json`, run `npm run tools:sync` (or
   `npm run tools:sync -- <slug>`) and commit the lock file with the rebuilt directory. See
   `public/tools/README.md`.
@@ -177,7 +178,7 @@ phrases in the extracted text (readability for applicant tracking systems).
 Concept and rationale: `docs/concept.md`; deviations: `docs/decisions/relay-scene.md`. The scene
 is the fixed backdrop of the home page: a sparse graph of agents whose links carry task pulses
 (warm) and result pulses (cool); the network re-forms between sections (hero → 3 service
-clusters → 4 project constellations → convergence next to the e-mail address).
+clusters → 5 project constellations → convergence next to the e-mail address).
 
 - Loading: `src/scene/index.ts` (main bundle, no three.js) waits for `load` and an idle browser,
   then dynamically imports `src/scene/app.ts` with three.js in a separate chunk.

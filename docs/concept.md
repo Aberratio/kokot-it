@@ -73,7 +73,7 @@ Transitions take `--duration-scene` (1400 ms) with `--ease-in-out`; the active s
 | -------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | Hero     | Full, free network in depth; the first pulses start ~1 s after load; the cursor places work.                                 | "intelligence in motion"                  |
 | Services | The network gathers into 3 clusters (packages P1 / P2 / P3); pulses circulate inside the cluster of the active service card. | one process → several processes → program |
-| Projects | 4 constellations (the 4 showcase projects); hovering a project card fires a series of hand-offs in its constellation.        | working runs, not slides                  |
+| Projects | 5 constellations (the 5 showcase projects); hovering a project card fires a series of hand-offs in its constellation.        | working runs, not slides                  |
 | Contact  | All routes converge on one node next to the e-mail address; the network quietens to a few pulses.                            | one point of contact                      |
 
 On content pages (project case studies) the scene runs in a "background" mode: lower brightness,

@@ -1,7 +1,7 @@
 /**
  * Where the agents stand in each state of the page (docs/concept.md, "Scene and page sections").
  * The topology never changes — only positions do, so a section change reads as the same
- * organisation re-forming: free network (hero), 3 service clusters, 4 project constellations,
+ * organisation re-forming: free network (hero), 3 service clusters, 5 project constellations,
  * and everything converging on one node next to the e-mail address (contact).
  *
  * Positions are world units in front of a camera that sees `halfWidth × halfHeight` at z = 0.
@@ -51,17 +51,20 @@ export function clusterCentres(mode: GroupKind, frame: Frame): [number, number][
             [-0.24, -0.56],
           ]
       : isWide
-        ? [
-            [-0.66, -0.14],
-            [-0.22, 0.26],
-            [0.22, -0.22],
-            [0.66, 0.18],
+        ? // One per project card (GROUP_COUNT.constellations): a zigzag across the frame.
+          [
+            [-0.7, -0.16],
+            [-0.35, 0.24],
+            [0, -0.2],
+            [0.35, 0.22],
+            [0.7, -0.12],
           ]
         : [
-            [-0.38, 0.5],
-            [0.4, 0.26],
-            [-0.36, -0.22],
-            [0.38, -0.5],
+            [-0.4, 0.6],
+            [0.4, 0.3],
+            [-0.38, 0],
+            [0.4, -0.3],
+            [-0.38, -0.6],
           ];
   return unit.map(([x, y]) => [x * w, y * h]);
 }
