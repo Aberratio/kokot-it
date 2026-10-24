@@ -196,18 +196,23 @@ clusters → 5 project constellations → convergence next to the e-mail address
 ## CI
 
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`: lint,
-typecheck, test, build. Changes reach `main` through pull requests.
+typecheck, test, build, then the deploy job below, which starts only after those pass. A newer
+commit cancels a pull request run; runs on `main` queue, so a production deploy is never stopped
+halfway. Changes reach `main` through pull requests.
 
 ## Deploy (Vercel)
 
-`.github/workflows/deploy.yml` deploys with the Vercel CLI: a **preview** for every pull request
-(its URL is in the job summary) and **production** after every push to `main`. It is the only
+`.github/workflows/deploy.yml` is called by CI once the checks are green and deploys with the
+Vercel CLI: a **preview** for every pull request (its URL is in the job summary) and
+**production** after every push to `main`, so a commit with a failing check never reaches
+kokot.it. It is the only
 deploy path: the repository is also connected to Vercel's Git integration, but its automatic
 deployments are turned off in `vercel.json` (`"git": { "deploymentEnabled": false }`), so
 nothing is deployed twice. Project settings (Vite, `npm run build`, output `dist`, trailing
-slashes, headers) are in `vercel.json`. If a secret is missing (also on pull requests from forks
-and from Dependabot, which get no secrets), the job ends green with a "Deploy skipped" notice
-instead of failing.
+slashes, headers) are in `vercel.json`. If a secret is missing on a pull request (also from forks
+and from Dependabot, which get no secrets), the preview is skipped with a "Deploy skipped"
+notice and the run stays green; on a push to `main` the run fails, so an expired or deleted
+token cannot hide a release that never happened.
 
 | Host                        | Serves                                                  |
 | --------------------------- | ------------------------------------------------------- |

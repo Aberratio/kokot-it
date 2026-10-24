@@ -1,20 +1,22 @@
 name: Deploy
 
-# Preview on every pull request, production on every push to main.
-# Needs repository secrets VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID (see README).
-# Without them the job ends green with a notice instead of failing.
+# Called by CI (ci.yml) after lint, typecheck, test and build pass: a preview for a pull
+# request, production for a push to main. Needs repository secrets VERCEL_TOKEN, VERCEL_ORG_ID,
+# VERCEL_PROJECT_ID (see README). Without them a preview is skipped with a notice (forks and
+# Dependabot get no secrets) and a production deploy fails.
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_call:
+    secrets:
+      VERCEL_TOKEN:
+        required: false
+      VERCEL_ORG_ID:
+        required: false
+      VERCEL_PROJECT_ID:
+        required: false
 
 permissions:
   contents: read
-
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   VERCEL_CLI: vercel@65.0.0
@@ -36,6 +38,10 @@ jobs:
           [ -n "$VERCEL_ORG_ID" ] || missing+=(VERCEL_ORG_ID)
           [ -n "$VERCEL_PROJECT_ID" ] || missing+=(VERCEL_PROJECT_ID)
           if [ ${#missing[@]} -gt 0 ]; then
+            if [ "${{ github.event_name }}" = "push" ]; then
+              echo "::error title=Production deploy failed::Missing secrets: ${missing[*]}. Add them in Settings → Secrets and variables → Actions (see README, section Deploy)."
+              exit 1
+            fi
             echo "::notice title=Deploy skipped::Missing secrets: ${missing[*]}. Add them in Settings → Secrets and variables → Actions (see README, section Deploy)."
             echo "### Deploy skipped" >> "$GITHUB_STEP_SUMMARY"
             echo "Missing secrets: \`${missing[*]}\`. See README → Deploy." >> "$GITHUB_STEP_SUMMARY"
